@@ -6,6 +6,26 @@ SilentCue is a silent timer app for Apple Watch that notifies you with haptic fe
 
 The app offers a simple interface optimized for the compact Apple Watch screen, allowing you to easily set timers and choose vibration patterns. Built with The Composable Architecture (TCA), it ensures stable operation and maintainability. The app is optimized for Apple Watch Series 10 and watchOS 11.2.
 
+## Key Features
+
+### Intuitive Timer Setting
+Provides an interface for easily selecting hours and minutes to start a timer immediately. The simple design allows for quick operation even on a small screen.
+
+### Smooth Navigation
+Uses SwiftUI's NavigationStack for fluid, animated transitions between screens, providing a more polished user experience.
+
+### Countdown Display
+Visually displays the countdown from the set time. When the remaining time is less than 1 minute, it changes color to red for added visibility.
+
+### Haptic Feedback
+Choose from various haptic patterns for timer completion. Select from notification, success, and other vibration patterns to customize feedback based on your situation.
+
+### Customizable Settings
+Customize settings such as vibration type and auto-stop feature according to user preferences. Settings are automatically saved and reflected in subsequent uses.
+
+### Background Execution
+The timer continues to run accurately even after sending the app to the background, notifying you with vibration when the set time has elapsed.
+
 ## Architecture
 
 This project uses The Composable Architecture (TCA 1.19.0) to provide a consistent method for state management and UI updates:
@@ -177,31 +197,3 @@ SilentCue Watch App/
 - **NavigationStack** for smooth screen transitions
 - **WatchKit** for native watchOS features
 - **UserDefaults** for settings persistence
-
-## Key Features
-
-### Intuitive Timer Setting
-Provides an interface for easily selecting hours and minutes to start a timer immediately. The simple design allows for quick operation even on a small screen.
-
-### Smooth Navigation
-Uses SwiftUI's NavigationStack for fluid, animated transitions between screens, providing a more polished user experience.
-
-### Countdown Display
-Visually displays the countdown from the set time. When the remaining time is less than 1 minute, it changes color to red for added visibility.
-
-### Haptic Feedback
-Choose from various haptic patterns for timer completion. Select from notification, success, and other vibration patterns to customize feedback based on your situation.
-
-### Customizable Settings
-Customize settings such as vibration type and auto-stop feature according to user preferences. Settings are automatically saved and reflected in subsequent uses.
-
-### Background Execution
-The timer continues to run accurately even after sending the app to the background, notifying you with vibration when the set time has elapsed.
-
-## Usage
-
-1. Launch the app and set hours and minutes on the main screen
-2. Tap the "Start Timer" button to begin countdown
-3. The countdown screen shows the remaining time; stop the timer with the "Cancel" button if needed
-4. Access settings by tapping the gear icon, and customize vibration patterns and auto-stop functionality
-5. Navigate between screens using the intuitive swipe gestures or the back button in the navigation bar 
