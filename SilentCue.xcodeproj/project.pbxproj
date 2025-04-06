@@ -1,0 +1,696 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		98210ED02DA2C33400A222BB /* SilentCue Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 98210ECF2DA2C33400A222BB /* SilentCue Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		98210F552DA2CCCD00A222BB /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 98210F542DA2CCCD00A222BB /* ComposableArchitecture */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		98210ED12DA2C33400A222BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98210EC32DA2C33400A222BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 98210ECE2DA2C33400A222BB;
+			remoteInfo = "SilentCue Watch App";
+		};
+		98210EE22DA2C33900A222BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98210EC32DA2C33400A222BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 98210ECE2DA2C33400A222BB;
+			remoteInfo = "SilentCue Watch App";
+		};
+		98210EEC2DA2C33900A222BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98210EC32DA2C33400A222BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 98210ECE2DA2C33400A222BB;
+			remoteInfo = "SilentCue Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		98210EF82DA2C33900A222BB /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				98210ED02DA2C33400A222BB /* SilentCue Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		98210EC92DA2C33400A222BB /* SilentCue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SilentCue.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		98210ECF2DA2C33400A222BB /* SilentCue Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SilentCue Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		98210EE12DA2C33900A222BB /* SilentCue Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SilentCue Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		98210EEB2DA2C33900A222BB /* SilentCue Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SilentCue Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		98210ED32DA2C33400A222BB /* SilentCue Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "SilentCue Watch App";
+			sourceTree = "<group>";
+		};
+		98210EE42DA2C33900A222BB /* SilentCue Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "SilentCue Watch AppTests";
+			sourceTree = "<group>";
+		};
+		98210EEE2DA2C33900A222BB /* SilentCue Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "SilentCue Watch AppUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		98210ECC2DA2C33400A222BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				98210F552DA2CCCD00A222BB /* ComposableArchitecture in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98210EDE2DA2C33900A222BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98210EE82DA2C33900A222BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		98210EC22DA2C33400A222BB = {
+			isa = PBXGroup;
+			children = (
+				98210ED32DA2C33400A222BB /* SilentCue Watch App */,
+				98210EE42DA2C33900A222BB /* SilentCue Watch AppTests */,
+				98210EEE2DA2C33900A222BB /* SilentCue Watch AppUITests */,
+				98210ECA2DA2C33400A222BB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		98210ECA2DA2C33400A222BB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				98210EC92DA2C33400A222BB /* SilentCue.app */,
+				98210ECF2DA2C33400A222BB /* SilentCue Watch App.app */,
+				98210EE12DA2C33900A222BB /* SilentCue Watch AppTests.xctest */,
+				98210EEB2DA2C33900A222BB /* SilentCue Watch AppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		98210EC82DA2C33400A222BB /* SilentCue */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 98210EF92DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue" */;
+			buildPhases = (
+				98210EC72DA2C33400A222BB /* Resources */,
+				98210EF82DA2C33900A222BB /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				98210ED22DA2C33400A222BB /* PBXTargetDependency */,
+			);
+			name = SilentCue;
+			packageProductDependencies = (
+			);
+			productName = SilentCue;
+			productReference = 98210EC92DA2C33400A222BB /* SilentCue.app */;
+			productType = "com.apple.product-type.application.watchapp2-container";
+		};
+		98210ECE2DA2C33400A222BB /* SilentCue Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 98210EF52DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue Watch App" */;
+			buildPhases = (
+				98210ECB2DA2C33400A222BB /* Sources */,
+				98210ECC2DA2C33400A222BB /* Frameworks */,
+				98210ECD2DA2C33400A222BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				98210ED32DA2C33400A222BB /* SilentCue Watch App */,
+			);
+			name = "SilentCue Watch App";
+			packageProductDependencies = (
+				98210F542DA2CCCD00A222BB /* ComposableArchitecture */,
+			);
+			productName = "SilentCue Watch App";
+			productReference = 98210ECF2DA2C33400A222BB /* SilentCue Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		98210EE02DA2C33900A222BB /* SilentCue Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 98210EFC2DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue Watch AppTests" */;
+			buildPhases = (
+				98210EDD2DA2C33900A222BB /* Sources */,
+				98210EDE2DA2C33900A222BB /* Frameworks */,
+				98210EDF2DA2C33900A222BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				98210EE32DA2C33900A222BB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				98210EE42DA2C33900A222BB /* SilentCue Watch AppTests */,
+			);
+			name = "SilentCue Watch AppTests";
+			packageProductDependencies = (
+			);
+			productName = "SilentCue Watch AppTests";
+			productReference = 98210EE12DA2C33900A222BB /* SilentCue Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		98210EEA2DA2C33900A222BB /* SilentCue Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 98210EFF2DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue Watch AppUITests" */;
+			buildPhases = (
+				98210EE72DA2C33900A222BB /* Sources */,
+				98210EE82DA2C33900A222BB /* Frameworks */,
+				98210EE92DA2C33900A222BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				98210EED2DA2C33900A222BB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				98210EEE2DA2C33900A222BB /* SilentCue Watch AppUITests */,
+			);
+			name = "SilentCue Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "SilentCue Watch AppUITests";
+			productReference = 98210EEB2DA2C33900A222BB /* SilentCue Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98210EC32DA2C33400A222BB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					98210EC82DA2C33400A222BB = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					98210ECE2DA2C33400A222BB = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					98210EE02DA2C33900A222BB = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 98210ECE2DA2C33400A222BB;
+					};
+					98210EEA2DA2C33900A222BB = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 98210ECE2DA2C33400A222BB;
+					};
+				};
+			};
+			buildConfigurationList = 98210EC62DA2C33400A222BB /* Build configuration list for PBXProject "SilentCue" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 98210EC22DA2C33400A222BB;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				98210F532DA2CCCD00A222BB /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 98210ECA2DA2C33400A222BB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				98210EC82DA2C33400A222BB /* SilentCue */,
+				98210ECE2DA2C33400A222BB /* SilentCue Watch App */,
+				98210EE02DA2C33900A222BB /* SilentCue Watch AppTests */,
+				98210EEA2DA2C33900A222BB /* SilentCue Watch AppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		98210EC72DA2C33400A222BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98210ECD2DA2C33400A222BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98210EDF2DA2C33900A222BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98210EE92DA2C33900A222BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		98210ECB2DA2C33400A222BB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98210EDD2DA2C33900A222BB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98210EE72DA2C33900A222BB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		98210ED22DA2C33400A222BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 98210ECE2DA2C33400A222BB /* SilentCue Watch App */;
+			targetProxy = 98210ED12DA2C33400A222BB /* PBXContainerItemProxy */;
+		};
+		98210EE32DA2C33900A222BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 98210ECE2DA2C33400A222BB /* SilentCue Watch App */;
+			targetProxy = 98210EE22DA2C33900A222BB /* PBXContainerItemProxy */;
+		};
+		98210EED2DA2C33900A222BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 98210ECE2DA2C33400A222BB /* SilentCue Watch App */;
+			targetProxy = 98210EEC2DA2C33900A222BB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		98210EF32DA2C33900A222BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		98210EF42DA2C33900A222BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		98210EF62DA2C33900A222BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SilentCue Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SilentCue;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.akitorahayashi.SilentCue.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Debug;
+		};
+		98210EF72DA2C33900A222BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SilentCue Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SilentCue;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.akitorahayashi.SilentCue.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Release;
+		};
+		98210EFA2DA2C33900A222BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				INFOPLIST_KEY_CFBundleDisplayName = SilentCue;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.akitorahayashi.SilentCue;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		98210EFB2DA2C33900A222BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				INFOPLIST_KEY_CFBundleDisplayName = SilentCue;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.akitorahayashi.SilentCue;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		98210EFD2DA2C33900A222BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SilentCue Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SilentCue Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Debug;
+		};
+		98210EFE2DA2C33900A222BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SilentCue Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SilentCue Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Release;
+		};
+		98210F002DA2C33900A222BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "SilentCue Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Debug;
+		};
+		98210F012DA2C33900A222BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "SilentCue Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		98210EC62DA2C33400A222BB /* Build configuration list for PBXProject "SilentCue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98210EF32DA2C33900A222BB /* Debug */,
+				98210EF42DA2C33900A222BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		98210EF52DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98210EF62DA2C33900A222BB /* Debug */,
+				98210EF72DA2C33900A222BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		98210EF92DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98210EFA2DA2C33900A222BB /* Debug */,
+				98210EFB2DA2C33900A222BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		98210EFC2DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98210EFD2DA2C33900A222BB /* Debug */,
+				98210EFE2DA2C33900A222BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		98210EFF2DA2C33900A222BB /* Build configuration list for PBXNativeTarget "SilentCue Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98210F002DA2C33900A222BB /* Debug */,
+				98210F012DA2C33900A222BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		98210F532DA2CCCD00A222BB /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.19.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		98210F542DA2CCCD00A222BB /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 98210F532DA2CCCD00A222BB /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 98210EC32DA2C33400A222BB /* Project object */;
+}
