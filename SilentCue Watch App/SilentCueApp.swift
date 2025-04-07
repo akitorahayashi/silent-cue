@@ -27,6 +27,9 @@ struct SilentCue_Watch_AppApp: App {
     // アプリのカラースキームを管理する状態変数
     @State private var colorScheme: ColorScheme = .dark
     
+    // UserDefaultsの監視用タイマー
+    @State private var settingsMonitorTimer: Timer? = nil
+    
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navPath) {
@@ -62,13 +65,28 @@ struct SilentCue_Watch_AppApp: App {
             .preferredColorScheme(colorScheme)
             .onAppear {
                 // UserDefaultsからテーマ設定を読み込む
-                let isLightMode = UserDefaultsManager.shared.object(forKey: .appTheme) as? Bool ?? false
-                colorScheme = isLightMode ? .light : .dark
+                updateColorScheme()
+                
+                // TimerStoreにも同じ設定を適用
+                timerStore.send(.loadSettings)
+                
+                // UserDefaultsの変更を監視するタイマーを設定
+                settingsMonitorTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+                    updateColorScheme()
+                    timerStore.send(.loadSettings)
+                }
             }
-            .onChange(of: UserDefaultsManager.shared.object(forKey: .appTheme) as? Bool) { oldValue, newValue in
-                // 設定変更を監視して反映
-                colorScheme = (newValue ?? false) ? .light : .dark
+            .onDisappear {
+                // タイマーを停止
+                settingsMonitorTimer?.invalidate()
+                settingsMonitorTimer = nil
             }
         }
+    }
+    
+    // テーマ設定を更新する関数
+    private func updateColorScheme() {
+        let isLightMode = UserDefaultsManager.shared.object(forKey: .appTheme) as? Bool ?? false
+        colorScheme = isLightMode ? .light : .dark
     }
 }

@@ -131,12 +131,14 @@ struct TimerReducer: Reducer {
                     let stopVibration = self.userDefaultsManager.object(forKey: .stopVibrationAutomatically) as? Bool ?? true
                     let typeRaw = self.userDefaultsManager.object(forKey: .hapticType) as? String
                     let hapticType = typeRaw.flatMap { HapticType(rawValue: $0) } ?? .default
-                    await send(.settingsLoaded(stopVibration: stopVibration, hapticType: hapticType))
+                    let isLightMode = self.userDefaultsManager.object(forKey: .appTheme) as? Bool ?? false
+                    await send(.settingsLoaded(stopVibration: stopVibration, hapticType: hapticType, isLightMode: isLightMode))
                 }
                 
-            case let .settingsLoaded(stopVibration, hapticType):
+            case let .settingsLoaded(stopVibration, hapticType, isLightMode):
                 state.stopVibrationAutomatically = stopVibration
                 state.selectedHapticType = hapticType
+                state.isLightMode = isLightMode
                 return .none
             }
         }

@@ -26,6 +26,9 @@ struct TimerState: Equatable {
     var stopVibrationAutomatically: Bool = true
     var selectedHapticType: HapticType = .default
     
+    // テーマ設定
+    var isLightMode: Bool = false
+    
     // タイマーの計算された合計秒数
     var calculatedTotalSeconds: Int {
         switch timerMode {

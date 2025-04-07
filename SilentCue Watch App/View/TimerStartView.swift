@@ -14,7 +14,7 @@ struct TimerStartView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: 8) {
                     // モード選択をカスタムボタンとして実装
                     HStack(spacing: 2) {
                         ForEach(TimerMode.allCases) { mode in
@@ -28,9 +28,12 @@ struct TimerStartView: View {
                                     .padding(.vertical, 8)
                                     .background(
                                         RoundedRectangle(cornerRadius: 8)
-                                            .fill(viewStore.timerMode == mode ? Color.blue : Color.gray.opacity(0.2))
+                                            .fill(viewStore.timerMode == mode ? 
+                                                  Color.blue : 
+                                                  (viewStore.isLightMode ? Color.gray.opacity(0.15) : Color.gray.opacity(0.2)))
                                     )
-                                    .foregroundStyle(viewStore.timerMode == mode ? .white : .primary)
+                                    .foregroundStyle(viewStore.timerMode == mode ? .white : 
+                                                     (viewStore.isLightMode ? .primary : .primary))
                             }
                             .buttonStyle(.plain)
                         }
@@ -115,8 +118,6 @@ struct TimerStartView: View {
                         .padding(.top, 10)
                     }
                     
-                    Spacer()
-                    
                     // 開始ボタン
                     Button {
                         // タイマーを開始して画面遷移
@@ -131,10 +132,11 @@ struct TimerStartView: View {
                     .tint(.blue)
                     .controlSize(.large)
                     .padding(.horizontal)
-                    .padding(.vertical, 10)
+                    .padding(.top, 16)
                 }
                 .padding(.top, 10)
             }
+            .scrollIndicators(.never)
             .navigationTitle("Silent Cue")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -143,10 +145,14 @@ struct TimerStartView: View {
                         onSettingsButtonTapped()
                     } label: {
                         Image(systemName: "gearshape.fill")
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(viewStore.isLightMode ? .blue : .blue)
                     }
                     .buttonStyle(.plain)
                 }
+            }
+            .onAppear {
+                // 画面表示時に設定を読み込む
+                viewStore.send(.loadSettings)
             }
         }
     }

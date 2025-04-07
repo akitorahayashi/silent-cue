@@ -12,8 +12,13 @@ struct CountdownView: View {
                 
                 Text(viewStore.displayTime)
                     .font(.system(size: 40, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(viewStore.remainingSeconds < 60 ? .red : .primary)
-                    .padding()
+                    .foregroundStyle(.primary)
+                    .padding(.top)
+                
+                Text("分:秒")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom)
                 
                 Spacer()
                 
@@ -22,13 +27,12 @@ struct CountdownView: View {
                     onCancel()
                 }) {
                     Text("キャンセル")
-                        .foregroundStyle(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding()
+                        .foregroundStyle(.primary)
+                        .font(.system(size: 16))
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
+                .padding(.horizontal)
             }
-            .navigationTitle("カウントダウン")
             .navigationBarBackButtonHidden(true)
         }
     }

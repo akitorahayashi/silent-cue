@@ -21,5 +21,5 @@ enum TimerAction: Equatable {
     
     // 設定関連
     case loadSettings
-    case settingsLoaded(stopVibration: Bool, hapticType: HapticType)
+    case settingsLoaded(stopVibration: Bool, hapticType: HapticType, isLightMode: Bool)
 } 
