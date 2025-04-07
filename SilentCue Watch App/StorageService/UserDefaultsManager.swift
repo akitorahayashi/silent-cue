@@ -6,7 +6,6 @@ final class UserDefaultsManager {
     enum Key: String, CaseIterable {
         case stopVibrationAutomatically
         case hapticType
-        case appTheme // アプリのテーマ設定（light/dark）
     }
     
     // シングルトンインスタンス

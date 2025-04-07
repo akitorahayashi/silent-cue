@@ -13,9 +13,6 @@ struct SettingsView: View {
     // ハプティックフィードバック種別の初期化
     @State private var selectedHapticTypeIndex: Int
     
-    // テーマモードの初期化
-    @State private var isLightMode: Bool
-    
     init(store: StoreOf<SettingsReducer>) {
         self.store = store
         
@@ -38,9 +35,6 @@ struct SettingsView: View {
         // ハプティックフィードバック種別の初期化 - ローカル関数を使用
         let typeRaw = userDefaultsManager.object(forKey: .hapticType) as? String
         _selectedHapticTypeIndex = State(initialValue: getIndexFromHapticType(typeRaw: typeRaw))
-        
-        // テーマモードの初期化
-        _isLightMode = State(initialValue: userDefaultsManager.object(forKey: .appTheme) as? Bool ?? false)
     }
     
     // クラスメソッドとして残しておく場合は、静的メソッドにする
@@ -62,40 +56,6 @@ struct SettingsView: View {
                         get: \.stopVibrationAutomatically,
                         send: SettingsAction.toggleStopVibrationAutomatically
                     ))
-                }
-                
-                Section(header: Text("Appearance")) {
-                    // カスタムセグメントコントロール
-                    HStack(spacing: 2) {
-                        Button {
-                            viewStore.send(.toggleThemeMode(true))
-                        } label: {
-                            Text("Light")
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(viewStore.isLightMode ? Color.blue : Color.gray.opacity(0.2))
-                                )
-                                .foregroundStyle(viewStore.isLightMode ? .white : .primary)
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Button {
-                            viewStore.send(.toggleThemeMode(false))
-                        } label: {
-                            Text("Dark")
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(!viewStore.isLightMode ? Color.blue : Color.gray.opacity(0.2))
-                                )
-                                .foregroundStyle(!viewStore.isLightMode ? .white : .primary)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.vertical, 4)
                 }
                 
                 Section(header: Text("Vibration Type")) {
@@ -139,9 +99,8 @@ struct SettingsView: View {
                             // nilのハンドリング付き
                             let stopAuto = manager.object(forKey: UserDefaultsManager.Key.stopVibrationAutomatically) as? Bool ?? true
                             let hapticTypeRaw = manager.object(forKey: UserDefaultsManager.Key.hapticType) as? String
-                            let isLightMode = manager.object(forKey: UserDefaultsManager.Key.appTheme) as? Bool ?? false
                             
-                            print("Settings: stopAuto=\(stopAuto), hapticType=\(hapticTypeRaw ?? "none"), lightMode=\(isLightMode)")
+                            print("Settings: stopAuto=\(stopAuto), hapticType=\(hapticTypeRaw ?? "none")")
                         }
                         .foregroundStyle(.blue)
                     }

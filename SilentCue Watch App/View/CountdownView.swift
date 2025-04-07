@@ -10,15 +10,13 @@ struct CountdownView: View {
             VStack {
                 Spacer()
                 
+                Text(viewStore.remainingSeconds >= 3600 ? "時間  :  分" : "分  :  秒")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    
                 Text(viewStore.displayTime)
                     .font(.system(size: 40, weight: .semibold, design: .monospaced))
                     .foregroundStyle(.primary)
-                    .padding(.top)
-                
-                Text("分:秒")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-                    .padding(.bottom)
                 
                 Spacer()
                 
@@ -34,6 +32,9 @@ struct CountdownView: View {
                 .padding(.horizontal)
             }
             .navigationBarBackButtonHidden(true)
+            .onAppear {
+                viewStore.send(.loadSettings)
+            }
         }
     }
 } 

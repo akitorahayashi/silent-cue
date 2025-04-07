@@ -19,14 +19,12 @@ struct SettingsReducer: Reducer {
                     let stopVibration = self.userDefaultsManager.object(forKey: .stopVibrationAutomatically) as? Bool ?? true
                     let typeRaw = self.userDefaultsManager.object(forKey: .hapticType) as? String
                     let hapticType = typeRaw.flatMap { HapticType(rawValue: $0) } ?? .default
-                    let isLightMode = self.userDefaultsManager.object(forKey: .appTheme) as? Bool ?? false
-                    await send(.settingsLoaded(stopVibration: stopVibration, hapticType: hapticType, isLightMode: isLightMode))
+                    await send(.settingsLoaded(stopVibration: stopVibration, hapticType: hapticType))
                 }
                 
-            case let .settingsLoaded(stopVibration, hapticType, isLightMode):
+            case let .settingsLoaded(stopVibration, hapticType):
                 state.stopVibrationAutomatically = stopVibration
                 state.selectedHapticType = hapticType
-                state.isLightMode = isLightMode
                 state.hasLoaded = true
                 return .none
                 
@@ -89,19 +87,13 @@ struct SettingsReducer: Reducer {
                 state.isPreviewingHaptic = isPreviewingHaptic
                 return .none
                 
-            case .toggleThemeMode(let isLightMode):
-                state.isLightMode = isLightMode
-                return .send(.saveSettings)
-                
             case .saveSettings:
                 let stopAutoValue = state.stopVibrationAutomatically
                 let hapticTypeValue = state.selectedHapticType.rawValue
-                let isLightModeValue = state.isLightMode
                 
                 return .run { _ in
                     self.userDefaultsManager.set(stopAutoValue, forKey: .stopVibrationAutomatically)
                     self.userDefaultsManager.set(hapticTypeValue, forKey: .hapticType)
-                    self.userDefaultsManager.set(isLightModeValue, forKey: .appTheme)
                 }
                 
             case .backButtonTapped:
