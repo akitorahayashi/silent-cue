@@ -28,43 +28,76 @@ The timer continues to run accurately even after sending the app to the backgrou
 
 ## Architecture
 
-This project uses The Composable Architecture (TCA 1.19.0) to provide a consistent method for state management and UI updates:
+This project uses a simplified version of The Composable Architecture (TCA 1.19.0) focusing on independent features without a complex global state hierarchy:
 
 ```
-State → Action → Reducer → Effect → State (updated)
+[Feature-Specific State] → [Feature-Specific Action] → [Feature-Specific Reducer] → [Effect] → [Updated State]
 ```
 
-- **State**: Represents the app's state
-- **Action**: Represents user operations or system events
-- **Reducer**: Generates new state based on current state and actions
-- **Effect**: Represents asynchronous processing and side effects
-- **Store**: Central hub that holds state and dispatches actions
+The app has been refactored to remove unnecessary complexity, emphasizing a lightweight, pragmatic approach to TCA:
+
+- **Focused Features**: Each feature (Timer, Settings) maintains its own state and logic
+- **Direct Navigation**: Uses SwiftUI's native NavigationStack and callbacks for navigation
+- **Minimal State Management**: No global state container, just feature-specific stores
+- **Simplified Communication**: Features communicate via callbacks instead of complex action routing
 
 ### Navigation
 
-The app uses SwiftUI's `NavigationStack` for smooth screen transitions with animations:
+The app uses SwiftUI's `NavigationStack` with NavigationPath for declarative navigation:
 
 ```swift
-NavigationStack {
-    TimerStartView(store: timerStartStore)
-        .navigationDestination(isPresented: $showsCountdown) {
-            CountdownView(store: countdownStore)
+NavigationStack(path: $navPath) {
+    TimerStartView(
+        store: timerStore,
+        onSettingsButtonTapped: {
+            navPath.append(AppScreen.settings)
+        },
+        onTimerStart: {
+            navPath.append(AppScreen.countdown)
         }
-        .navigationDestination(isPresented: $showsSettings) {
+    )
+    .navigationDestination(for: AppScreen.self) { screen in
+        switch screen {
+        case .countdown:
+            CountdownView(store: timerStore, onCancel: { ... })
+        case .settings:
             SettingsView(store: settingsStore)
+        // ...
         }
+    }
 }
 ```
 
 This approach provides:
-1. **Smooth transitions**: Screens slide in and out with natural animation
-2. **Automatic back button**: Navigation bar automatically includes back buttons
-3. **Accessibility**: Standard navigation patterns enhance usability
-4. **Maintainability**: Uses SwiftUI's built-in navigation patterns
+1. **Native Animation**: Uses SwiftUI's built-in transitions for smooth movement
+2. **Type-Safe Navigation**: Destinations are tied to specific enum cases
+3. **Declarative Routing**: Screen flow is described with a clear navigation path
+4. **Simpler State Management**: Navigation state is managed with SwiftUI rather than TCA
+
+### Store Management
+
+The application now uses independent feature-specific stores instead of a complex hierarchy:
+
+```swift
+// Independent stores are created directly in the app entry point
+let timerStore = Store(initialState: TimerState()) {
+    TimerReducer()
+}
+
+let settingsStore = Store(initialState: SettingsState()) {
+    SettingsReducer()
+}
+```
+
+Benefits of this approach:
+1. **Reduced Complexity**: No need for complex scoping or action mapping
+2. **Independence**: Features operate independently without unnecessary coupling
+3. **Performance**: Each feature manages only its own state, minimizing rendering
+4. **Simplicity**: Easier to understand, maintain, and extend the codebase
 
 ### Dependency Injection
 
-The project leverages TCA's dependency injection system to manage external dependencies:
+The project still leverages TCA's dependency injection system for external dependencies:
 
 ```swift
 // Define a dependency 
@@ -76,7 +109,7 @@ extension DependencyValues {
 }
 
 // Use the dependency in a reducer
-struct MyFeature: Reducer {
+struct SettingsReducer: Reducer {
     @Dependency(\.userDefaultsManager) var userDefaultsManager
     
     // Access the dependency in effects
@@ -84,7 +117,7 @@ struct MyFeature: Reducer {
         Reduce { state, action in
             // ...
             return .run { _ in
-                let value = self.userDefaultsManager.object(forKey: .someKey)
+                self.userDefaultsManager.set(value, forKey: .someKey)
                 // ...
             }
         }
@@ -92,79 +125,30 @@ struct MyFeature: Reducer {
 }
 ```
 
-This approach offers several benefits:
-1. **Testability**: Dependencies can be easily mocked in tests
-2. **Modularity**: Features access only the dependencies they need
-3. **Consistency**: Dependencies are accessed the same way throughout the app
-4. **Control**: External services are accessed through well-defined interfaces
+### Project Structure
 
-### Store Management
-
-In TCA, the `Store` is a crucial component that maintains application state and coordinates actions. In our architecture:
-
-- The root `Store` is instantiated in `SilentCueApp.swift` as the app's entry point:
-  ```swift
-  let store: StoreOf<RootFeature> = Store(initialState: RootFeature.State()) {
-      RootFeature()
-  }
-  ```
-
-- This root store manages the entire app state through the root reducer, which combines all feature reducers
-- Child stores for individual features are derived from the root store using the `.scope()` method
-- Each view receives only the portion of state and actions it needs to function
-
-This approach follows the TCA pattern of having a single source of truth (the root store) while allowing components to access only the state they need, preventing unnecessary re-renders and maintaining a clean architecture.
-
-### Feature-Based Organization
-
-The project follows a feature-based directory structure where each feature has its own directory containing exactly one View file and one Feature file (containing the reducer):
-
-```
-Feature/
-└── FeatureName/
-    ├── FeatureNameFeature.swift  // Contains State, Action, and Reducer
-    └── FeatureNameView.swift     // Contains the SwiftUI View
-```
-
-This 1:1 pairing of View and Feature files serves several purposes:
-
-1. **Modularity**: Each feature is a self-contained unit with clear boundaries
-2. **Separation of Concerns**: UI logic (View) is kept separate from business logic (Feature)
-3. **Discoverability**: Related files are grouped together, making the codebase easier to navigate
-4. **Scalability**: New features can be added as independent modules without modifying existing code
-5. **Testability**: Each feature's business logic can be tested in isolation
-
-The reducer in each Feature file defines how the state changes in response to actions, while the View file defines how the state is rendered and how user interactions are translated into actions.
-
-## Apple Watch Series 10 Optimizations
-
-The app has been optimized for Apple Watch Series 10 and watchOS 11.2:
-
-1. **Safe Haptic Feedback**: Uses compatible WKHapticType members for vibration patterns
-2. **Swift 6 Compatibility**: Complies with Swift 6 rules for handling inout parameters in concurrent code
-3. **Modern TCA API**: Uses the latest TCA 1.19.0 APIs including forEach and Scope for child reducers
-4. **Improved Navigation**: Uses NavigationStack for smooth, animated transitions
-
-## Directory Structure
+The project has been simplified to focus on the essential features:
 
 ```
 SilentCue Watch App/
-├── Feature/
-│   ├── Root/
-│   │   ├── RootFeature.swift
-│   │   └── RootView.swift
-│   ├── TimerStart/
-│   │   ├── TimerStartFeature.swift
-│   │   └── TimerStartView.swift
-│   ├── Countdown/
-│   │   ├── CountdownFeature.swift
-│   │   └── CountdownView.swift
+├── Domain/
+│   ├── Timer/
+│   │   ├── TimerAction.swift
+│   │   ├── TimerReducer.swift
+│   │   ├── TimerState.swift
+│   │   └── TimerStore.swift
 │   └── Settings/
-│       ├── SettingsFeature.swift
-│       └── SettingsView.swift
+│       ├── SettingsAction.swift
+│       ├── SettingsReducer.swift
+│       ├── SettingsState.swift
+│       └── SettingsStore.swift
+├── View/
+│   ├── TimerStartView.swift
+│   ├── CountdownView.swift
+│   └── SettingsView.swift
 ├── Model/
 │   └── HapticType.swift
-├── Service/
+├── StorageService/
 │   ├── UserDefaultsManager.swift
 │   └── UserDefaultsDependency.swift
 ├── Util/
@@ -172,23 +156,22 @@ SilentCue Watch App/
 └── SilentCueApp.swift
 ```
 
-### Directory Responsibilities
+### Key Architectural Decisions
 
-- **Feature/**: Contains feature modules, each with its own reducer and view. The core of the application's functionality.
-  - **Root/**: Manages navigation between features and orchestrates the overall app flow
-  - **TimerStart/**: Handles the timer setup screen with hour/minute selection
-  - **Countdown/**: Manages the countdown timer and haptic feedback
-  - **Settings/**: Controls user preferences for haptic feedback types and behaviors
+1. **Removal of App Layer**: Eliminated the unnecessary App layer that added complexity without providing significant benefits
+2. **Independent Feature Stores**: Each feature has its own store without complex hierarchy
+3. **Native Navigation**: Using SwiftUI's navigation capabilities directly rather than managing navigation in TCA
+4. **Callback-Based Communication**: Features communicate via simple callbacks rather than complex action routing
+5. **Pragmatic TCA Usage**: Using TCA where it adds value (state management, effects, dependencies) but not where simpler solutions work better
 
-- **Model/**: Contains domain models and data structures used throughout the app.
-  - Includes enums like `HapticType` that represent core concepts in the domain
+## Apple Watch Series 10 Optimizations
 
-- **Service/**: Contains reusable services that interface with system frameworks or provide app-wide functionality.
-  - Includes the `UserDefaultsManager` for persistent storage
-  - Also contains dependency wrappers like `UserDefaultsDependency` for TCA integration
+The app has been optimized for Apple Watch Series 10 and watchOS 11.2:
 
-- **Util/**: Contains utility functions and extensions that are used across multiple features.
-  - Includes helpers like time formatting functions in a namespace
+1. **Safe Haptic Feedback**: Uses compatible WKHapticType members for vibration patterns
+2. **Swift 6 Compatibility**: Complies with Swift 6 rules for handling inout parameters in concurrent code
+3. **Modern TCA API**: Uses the latest TCA 1.19.0 APIs including @CasePathable macro for action handling
+4. **Improved Navigation**: Uses NavigationStack with NavigationPath for smooth, animated transitions
 
 ## Technology Stack
 

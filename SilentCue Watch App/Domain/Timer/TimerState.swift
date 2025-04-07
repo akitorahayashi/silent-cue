@@ -1,0 +1,76 @@
+import Foundation
+
+/// タイマーのモード（分後か時刻指定か）
+enum TimerMode: String, Equatable, CaseIterable, Identifiable {
+    case afterMinutes = "分後"  // 何分後に鳴らすか
+    case atTime = "時刻"       // 何時に鳴らすか
+    
+    var id: String { self.rawValue }
+}
+
+/// タイマーの状態を管理するクラス
+struct TimerState: Equatable {
+    // タイマー設定の状態
+    var timerMode: TimerMode = .afterMinutes
+    var selectedMinutes: Int = 5
+    var selectedHour: Int = Calendar.current.component(.hour, from: Date())
+    var selectedMinute: Int = (Calendar.current.component(.minute, from: Date()) + 5) % 60
+    
+    // カウントダウンの状態
+    var totalSeconds: Int = 0
+    var remainingSeconds: Int = 0
+    var isRunning: Bool = false
+    var displayTime: String = "00:00"
+    
+    // 振動設定
+    var stopVibrationAutomatically: Bool = true
+    var selectedHapticType: HapticType = .default
+    
+    // タイマーの計算された合計秒数
+    var calculatedTotalSeconds: Int {
+        switch timerMode {
+        case .afterMinutes:
+            return selectedMinutes * 60
+        case .atTime:
+            let now = Date()
+            let calendar = Calendar.current
+            let hour = selectedHour
+            let minute = selectedMinute
+            
+            var dateComponents = calendar.dateComponents([.year, .month, .day], from: now)
+            dateComponents.hour = hour
+            dateComponents.minute = minute
+            dateComponents.second = 0
+            
+            guard let targetDate = calendar.date(from: dateComponents) else {
+                return 0
+            }
+            
+            // 選択された時刻が現在時刻より前の場合は翌日とみなす
+            if targetDate < now {
+                guard let tomorrowDate = calendar.date(byAdding: .day, value: 1, to: targetDate) else {
+                    return 0
+                }
+                return Int(tomorrowDate.timeIntervalSince(now))
+            }
+            
+            return Int(targetDate.timeIntervalSince(now))
+        }
+    }
+    
+    init() {
+        // 現在時刻を取得して初期値として設定
+        let now = Date()
+        let calendar = Calendar.current
+        
+        self.selectedHour = calendar.component(.hour, from: now)
+        
+        // 「分後」モードは5分後をデフォルトにするが、
+        // 「時刻」モードの初期値は現在の分をそのまま使用
+        let currentMinute = calendar.component(.minute, from: now)
+        self.selectedMinute = currentMinute
+        
+        // 「分後」モードでは初期設定を5分に
+        self.selectedMinutes = 5
+    }
+} 

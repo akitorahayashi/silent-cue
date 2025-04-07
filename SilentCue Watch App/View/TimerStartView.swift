@@ -2,7 +2,11 @@ import SwiftUI
 import ComposableArchitecture
 
 struct TimerStartView: View {
-    let store: StoreOf<TimerStartFeature>
+    let store: StoreOf<TimerReducer>
+    
+    // コールバック関数を追加
+    var onSettingsButtonTapped: () -> Void
+    var onTimerStart: () -> Void
     
     // 環境変数からカラースキーム情報を取得
     @Environment(\.colorScheme) var colorScheme
@@ -13,7 +17,7 @@ struct TimerStartView: View {
                 VStack(spacing: 16) {
                     // モード選択をカスタムボタンとして実装
                     HStack(spacing: 2) {
-                        ForEach(TimerStartFeature.TimerMode.allCases) { mode in
+                        ForEach(TimerMode.allCases) { mode in
                             Button {
                                 viewStore.send(.timerModeSelected(mode))
                             } label: {
@@ -42,15 +46,21 @@ struct TimerStartView: View {
                             
                             Picker("分", selection: viewStore.binding(
                                 get: \.selectedMinutes,
-                                send: TimerStartFeature.Action.minutesSelected
+                                send: TimerAction.minutesSelected
                             )) {
                                 ForEach(1...60, id: \.self) { minute in
-                                    Text("\(minute)").tag(minute)
+                                    Text("\(minute)")
+                                        .tag(minute)
+                                        .font(.system(size: 16))
                                 }
                             }
                             .labelsHidden()
-                            .frame(height: 120)
+                            .frame(height: 100)
                             .containerShape(RoundedRectangle(cornerRadius: 8))
+                            .pickerStyle(.wheel)
+                            .compositingGroup()
+                            .clipped()
+                            .padding(.horizontal, 20)
                         }
                         .padding(.top, 10)
                     } else {
@@ -67,27 +77,40 @@ struct TimerStartView: View {
                             HStack(spacing: 0) {
                                 Picker("時", selection: viewStore.binding(
                                     get: \.selectedHour,
-                                    send: TimerStartFeature.Action.hourSelected
+                                    send: TimerAction.hourSelected
                                 )) {
                                     ForEach(0..<24) { hour in
-                                        Text("\(hour)").tag(hour)
+                                        Text("\(hour)")
+                                            .tag(hour)
+                                            .font(.system(size: 16))
                                     }
                                 }
                                 .labelsHidden()
                                 .frame(maxWidth: .infinity)
+                                .frame(height: 100)
+                                .pickerStyle(.wheel)
+                                .compositingGroup()
+                                .clipped()
                                 
                                 Picker("分", selection: viewStore.binding(
                                     get: \.selectedMinute,
-                                    send: TimerStartFeature.Action.minuteSelected
+                                    send: TimerAction.minuteSelected
                                 )) {
                                     ForEach(0..<60) { minute in
-                                        Text(String(format: "%02d", minute)).tag(minute)
+                                        Text(String(format: "%02d", minute))
+                                            .tag(minute)
+                                            .font(.system(size: 16))
                                     }
                                 }
                                 .labelsHidden()
                                 .frame(maxWidth: .infinity)
+                                .frame(height: 100)
+                                .pickerStyle(.wheel)
+                                .compositingGroup()
+                                .clipped()
                             }
-                            .frame(height: 120)
+                            .frame(height: 100)
+                            .padding(.horizontal, 10)
                         }
                         .padding(.top, 10)
                     }
@@ -96,7 +119,9 @@ struct TimerStartView: View {
                     
                     // 開始ボタン
                     Button {
-                        viewStore.send(.startButtonTapped)
+                        // タイマーを開始して画面遷移
+                        viewStore.send(.startTimer)
+                        onTimerStart()
                     } label: {
                         Text("タイマー開始")
                             .font(.system(size: 18, weight: .medium))
@@ -114,7 +139,8 @@ struct TimerStartView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        viewStore.send(.settingsButtonTapped)
+                        // 設定画面への遷移にコールバックを使用
+                        onSettingsButtonTapped()
                     } label: {
                         Image(systemName: "gearshape.fill")
                             .foregroundStyle(.blue)
@@ -124,4 +150,4 @@ struct TimerStartView: View {
             }
         }
     }
-}
+} 

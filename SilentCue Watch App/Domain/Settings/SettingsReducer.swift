@@ -2,25 +2,10 @@ import Foundation
 import ComposableArchitecture
 import WatchKit
 
-struct SettingsFeature: Reducer {
-    struct State: Equatable {
-        var stopVibrationAutomatically: Bool = true
-        var selectedHapticType: HapticType = .default
-        var isLightMode: Bool = false
-        var hasLoaded: Bool = false
-        var isPreviewingHaptic: Bool = false
-    }
-    
-    enum Action: Equatable {
-        case onAppear
-        case toggleStopVibrationAutomatically(Bool)
-        case selectHapticType(HapticType)
-        case toggleThemeMode(Bool)
-        case previewHapticFeedback(HapticType)
-        case saveSettings
-        case settingsLoaded(stopVibration: Bool, hapticType: HapticType, isLightMode: Bool)
-        case backButtonTapped
-    }
+/// 設定画面の機能を管理するReducer
+struct SettingsReducer: Reducer {
+    typealias State = SettingsState
+    typealias Action = SettingsAction
     
     @Dependency(\.userDefaultsManager) var userDefaultsManager
     
@@ -29,7 +14,7 @@ struct SettingsFeature: Reducer {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .onAppear:
+            case .loadSettings:
                 return .run { send in
                     let stopVibration = self.userDefaultsManager.object(forKey: .stopVibrationAutomatically) as? Bool ?? true
                     let typeRaw = self.userDefaultsManager.object(forKey: .hapticType) as? String
@@ -51,44 +36,58 @@ struct SettingsFeature: Reducer {
                 
             case .selectHapticType(let type):
                 state.selectedHapticType = type
-                // タイプを選択したら自動的にプレビュー
+                // タイプを選択したら自動的にプレビューと設定の保存
                 return .merge(
                     .send(.saveSettings),
                     .send(.previewHapticFeedback(type))
                 )
                 
             case .previewHapticFeedback(let hapticType):
-                // 既にプレビュー中ならキャンセル
-                if state.isPreviewingHaptic {
-                    return .cancel(id: CancelID.hapticPreview)
-                }
+                // 既にプレビュー中なら前のプレビューをキャンセル
+                let cancelEffect: Effect<SettingsAction> = state.isPreviewingHaptic 
+                    ? .cancel(id: CancelID.hapticPreview)
+                    : .none
                 
-                state.isPreviewingHaptic = true
+                // 状態を更新し、新しいハプティックフィードバックを再生
+                state.selectedHapticType = hapticType
                 
-                return .run { send in
-                    // Apple Watch向けのハプティックフィードバック
-                    let device = WKInterfaceDevice.current()
-                    
-                    // WKHapticType型を指定して適切なハプティックフィードバックを再生
-                    let hapticTypeToPlay: WKHapticType
-                    switch hapticType {
-                    case .default, .notification, .warning:
-                        hapticTypeToPlay = .notification
-                    case .success:
-                        hapticTypeToPlay = .success
-                    case .failure:
-                        hapticTypeToPlay = .click
+                return .merge(
+                    cancelEffect,
+                    .send(.previewingHapticChanged(true)),
+                    .run { send in
+                        // Apple Watch向けのハプティックフィードバック
+                        let device = WKInterfaceDevice.current()
+                        
+                        // WKHapticType型を指定して適切なハプティックフィードバックを再生
+                        let hapticTypeToPlay: WKHapticType
+                        switch hapticType {
+                        case .default, .notification, .warning:
+                            hapticTypeToPlay = .notification
+                        case .success:
+                            hapticTypeToPlay = .success
+                        case .failure:
+                            hapticTypeToPlay = .click
+                        }
+                        
+                        // 振動を再生
+                        device.play(hapticTypeToPlay)
+                        
+                        // 2秒後にプレビュー状態を終了（使いやすさのため短縮）
+                        try await Task.sleep(for: .seconds(2))
+                        
+                        // プレビュー完了アクションを送信
+                        await send(.previewHapticCompleted)
                     }
-                    
-                    // 振動を再生
-                    device.play(hapticTypeToPlay)
-                    
-                    // 3秒後にプレビュー状態を終了
-                    try await Task.sleep(for: .seconds(3))
-                    
-                    state.isPreviewingHaptic = false
-                }
-                .cancellable(id: CancelID.hapticPreview)
+                    .cancellable(id: CancelID.hapticPreview)
+                )
+                
+            case .previewHapticCompleted:
+                // プレビュー完了アクションでフラグを更新
+                return .send(.previewingHapticChanged(false))
+                
+            case .previewingHapticChanged(let isPreviewingHaptic):
+                state.isPreviewingHaptic = isPreviewingHaptic
+                return .none
                 
             case .toggleThemeMode(let isLightMode):
                 state.isLightMode = isLightMode
@@ -110,4 +109,4 @@ struct SettingsFeature: Reducer {
             }
         }
     }
-}
+} 

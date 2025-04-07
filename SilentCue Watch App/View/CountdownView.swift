@@ -2,7 +2,8 @@ import SwiftUI
 import ComposableArchitecture
 
 struct CountdownView: View {
-    let store: StoreOf<CountdownFeature>
+    let store: StoreOf<TimerReducer>
+    var onCancel: () -> Void
     
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
@@ -10,21 +11,25 @@ struct CountdownView: View {
                 Spacer()
                 
                 Text(viewStore.displayTime)
-                    .font(.system(size: 40, weight: .bold))
+                    .font(.system(size: 40, weight: .semibold, design: .monospaced))
                     .foregroundStyle(viewStore.remainingSeconds < 60 ? .red : .primary)
                     .padding()
                 
                 Spacer()
                 
-                Button("Cancel") {
-                    viewStore.send(.cancelButtonTapped)
+                Button(action: {
+                    viewStore.send(.cancelTimer)
+                    onCancel()
+                }) {
+                    Text("キャンセル")
+                        .foregroundStyle(.red)
+                        .frame(maxWidth: .infinity)
+                        .padding()
                 }
                 .buttonStyle(.bordered)
-                .tint(.red)
-                .padding(.bottom)
             }
             .navigationTitle("カウントダウン")
-            .navigationBarBackButtonHidden(true) // 戻るボタンを非表示（キャンセルボタンのみを使用）
+            .navigationBarBackButtonHidden(true)
         }
     }
 } 
