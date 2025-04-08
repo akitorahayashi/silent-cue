@@ -34,7 +34,15 @@ struct CountdownView: View {
             .navigationBarBackButtonHidden(true)
             .onAppear {
                 viewStore.send(.loadSettings)
+                if viewStore.isRunning {
+                    viewStore.send(.updateTimerDisplay)
+                }
             }
+            .onChange(of: Date.now.timeIntervalSince1970, { oldValue, newValue in
+                if viewStore.isRunning {
+                    viewStore.send(.updateTimerDisplay)
+                }
+            })
         }
     }
 } 

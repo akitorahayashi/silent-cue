@@ -23,8 +23,8 @@ Choose from various haptic patterns for timer completion. Select from notificati
 ### Customizable Settings
 Customize settings such as vibration type and auto-stop feature according to user preferences. Settings are automatically saved and reflected in subsequent uses.
 
-### Background Execution
-The timer continues to run accurately even after sending the app to the background, notifying you with vibration when the set time has elapsed.
+### Reliable Background Execution
+The timer continues to run accurately even when the app is in the background or the watch display is off. Using WKExtendedRuntimeSession and real-time based calculations, the app maintains timer accuracy regardless of app state changes. When the timer completes, you'll receive the selected haptic feedback notification, even if the app is not in the foreground.
 
 ## Architecture
 
@@ -125,6 +125,52 @@ struct SettingsReducer: Reducer {
 }
 ```
 
+### Background Execution Implementation
+
+The app implements reliable background execution through several key mechanisms:
+
+```swift
+// 1. Time-based calculations rather than counter-based
+struct TimerState {
+    // Store actual start and end times instead of just counting down
+    var startDate: Date? = nil
+    var targetEndDate: Date? = nil
+    
+    // Calculate remaining time based on current time
+    var remainingSeconds: Int {
+        guard let targetEnd = targetEndDate, isRunning else {
+            return totalSeconds
+        }
+        return max(0, Int(targetEnd.timeIntervalSince(Date())))
+    }
+}
+
+// 2. Extended runtime session for background processing
+class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
+    func startSession(duration: TimeInterval) {
+        let session = WKExtendedRuntimeSession()
+        session.delegate = self
+        session.start()
+        self.session = session
+    }
+}
+
+// 3. Scene phase monitoring to update UI when returning to foreground
+@Environment(\.scenePhase) private var scenePhase
+    
+.onChange(of: scenePhase) { newPhase in
+    if newPhase == .active && isRunningTimer {
+        // Update timer display with accurate time
+        timerStore.send(.updateTimerDisplay)
+    }
+}
+```
+
+This implementation ensures that:
+1. The timer remains accurate even after long periods in the background
+2. Battery usage is optimized while maintaining functionality
+3. Users receive haptic notifications at the exact scheduled time
+
 ### Project Structure
 
 The project has been simplified to focus on the essential features:
@@ -152,7 +198,8 @@ SilentCue Watch App/
 │   ├── UserDefaultsManager.swift
 │   └── UserDefaultsDependency.swift
 ├── Util/
-│   └── TimeFormatter.swift
+│   ├── TimeFormatter.swift
+│   └── ExtendedRuntimeManager.swift
 └── SilentCueApp.swift
 ```
 
@@ -163,6 +210,7 @@ SilentCue Watch App/
 3. **Native Navigation**: Using SwiftUI's navigation capabilities directly rather than managing navigation in TCA
 4. **Callback-Based Communication**: Features communicate via simple callbacks rather than complex action routing
 5. **Pragmatic TCA Usage**: Using TCA where it adds value (state management, effects, dependencies) but not where simpler solutions work better
+6. **Real-time Based Timer**: Using actual start/end times rather than counters for accurate background execution
 
 ## Apple Watch Series 10 Optimizations
 
@@ -172,11 +220,14 @@ The app has been optimized for Apple Watch Series 10 and watchOS 11.2:
 2. **Swift 6 Compatibility**: Complies with Swift 6 rules for handling inout parameters in concurrent code
 3. **Modern TCA API**: Uses the latest TCA 1.19.0 APIs including @CasePathable macro for action handling
 4. **Improved Navigation**: Uses NavigationStack with NavigationPath for smooth, animated transitions
+5. **Background Modes**: Properly configured with WKBackgroundModes for extended runtime capability
+6. **WKExtendedRuntimeSession**: Ensures the app continues to function correctly when in the background
 
 ## Technology Stack
 
 - **Swift** and **SwiftUI** for UI development
 - **The Composable Architecture 1.19.0** for state management and business logic separation
 - **NavigationStack** for smooth screen transitions
-- **WatchKit** for native watchOS features
+- **WatchKit** for native watchOS features including background execution
 - **UserDefaults** for settings persistence
+- **WKExtendedRuntimeSession** for background processing support

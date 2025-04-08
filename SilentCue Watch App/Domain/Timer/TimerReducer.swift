@@ -43,11 +43,16 @@ struct TimerReducer: Reducer {
                 
             // タイマー操作
             case .startTimer:
-                // 設定された時間をカウントダウン状態に適用
+                // 開始時間と終了時間を設定
+                let now = Date()
                 state.totalSeconds = state.calculatedTotalSeconds
-                state.remainingSeconds = state.totalSeconds
-                state.displayTime = TimeFormatter.formatTime(state.totalSeconds)
+                state.startDate = now
+                state.targetEndDate = now.addingTimeInterval(TimeInterval(state.totalSeconds))
+                state.displayTime = TimeFormatter.formatTime(state.remainingSeconds)
                 state.isRunning = true
+                
+                // 拡張ランタイムセッションを開始
+                ExtendedRuntimeManager.shared.startSession(duration: TimeInterval(state.totalSeconds + 10))
                 
                 return .run { send in
                     // 設定の読み込み
@@ -62,14 +67,30 @@ struct TimerReducer: Reducer {
                 
             case .cancelTimer:
                 state.isRunning = false
+                state.startDate = nil
+                state.targetEndDate = nil
+                
+                // 拡張ランタイムセッションを停止
+                ExtendedRuntimeManager.shared.stopSession()
+                
                 return .cancel(id: CancelID.timer)
                 
             case .pauseTimer:
                 state.isRunning = false
+                
+                // 一時停止時は残り時間を記録
+                let remainingTime = state.remainingSeconds
+                state.totalSeconds = remainingTime
+                
                 return .cancel(id: CancelID.timer)
                 
             case .resumeTimer:
+                // 再開時は新たに開始時間と終了時間を設定
+                let now = Date()
+                state.startDate = now
+                state.targetEndDate = now.addingTimeInterval(TimeInterval(state.totalSeconds))
                 state.isRunning = true
+                
                 return .run { send in
                     for await _ in self.clock.timer(interval: .seconds(1)) {
                         await send(.tick)
@@ -78,15 +99,11 @@ struct TimerReducer: Reducer {
                 .cancellable(id: CancelID.timer)
                 
             case .tick:
-                // 1秒ごとにカウントダウンを更新
-                guard state.isRunning, state.remainingSeconds > 0 else { 
-                    return .send(.timerFinished)
-                }
-                
-                // 残り秒数を減らして表示を更新
-                state.remainingSeconds -= 1
+                // 残り時間を計算（計算プロパティになったので直接更新は不要）
+                // 表示だけを更新
                 state.displayTime = TimeFormatter.formatTime(state.remainingSeconds)
                 
+                // タイマー完了判定
                 if state.remainingSeconds <= 0 {
                     return .send(.timerFinished)
                 }
@@ -95,6 +112,11 @@ struct TimerReducer: Reducer {
                 
             case .timerFinished:
                 state.isRunning = false
+                state.startDate = nil
+                state.targetEndDate = nil
+                
+                // 拡張ランタイムセッションを停止
+                ExtendedRuntimeManager.shared.stopSession()
                 
                 // 非同期クロージャーで使う値を先に取得（inoutパラメータを直接キャプチャできないため）
                 let selectedHapticType = state.selectedHapticType
@@ -124,6 +146,19 @@ struct TimerReducer: Reducer {
                     }
                 }
                 .cancellable(id: CancelID.timer)
+                
+            // バックグラウンド対応
+            case .updateTimerDisplay:
+                // バックグラウンドから復帰時に表示を更新
+                if state.isRunning {
+                    state.displayTime = TimeFormatter.formatTime(state.remainingSeconds)
+                    
+                    // タイマー完了判定
+                    if state.remainingSeconds <= 0 {
+                        return .send(.timerFinished)
+                    }
+                }
+                return .none
                 
             // その他
             case .loadSettings:
