@@ -58,7 +58,7 @@ struct SettingsView: View {
                     ))
                 }
                 
-                Section(header: Text("タイマー完了時の振動")) {
+                Section(header: Text("Vibration Type")) {
                     ForEach(HapticType.allCases) { hapticType in
                         Button(action: {
                             viewStore.send(.selectHapticType(hapticType))
@@ -78,38 +78,17 @@ struct SettingsView: View {
                 }
                 
                 // デバッグセクション
-                Section(header: Text("Debug")) {
-                    Button("Show Debug Info") {
-                        showDebug.toggle()
+                Section(header: Text("Danger Zone")) {
+                    Button("Reset All Settings") {
+                        UserDefaultsManager.shared.removeAll()
+                        viewStore.send(.loadSettings)
                     }
-                    
-                    if showDebug {
-                        Button("Reset All Settings") {
-                            // TCAの外部でUserDefaultsManagerを直接使用する例
-                            UserDefaultsManager.shared.removeAll()
-                            // loadSettingsメソッドの代わりに.loadSettingsアクションを送信
-                            viewStore.send(.loadSettings)
-                        }
-                        .foregroundStyle(.red)
-                        
-                        Button("Print Current Settings") {
-                            // 現在の設定を取得して表示
-                            let manager = UserDefaultsManager.shared
-                            
-                            // nilのハンドリング付き
-                            let stopAuto = manager.object(forKey: UserDefaultsManager.Key.stopVibrationAutomatically) as? Bool ?? true
-                            let hapticTypeRaw = manager.object(forKey: UserDefaultsManager.Key.hapticType) as? String
-                            
-                            print("Settings: stopAuto=\(stopAuto), hapticType=\(hapticTypeRaw ?? "none")")
-                        }
-                        .foregroundStyle(.blue)
-                    }
+                    .foregroundStyle(.red)
                 }
             }
             .navigationTitle("設定")
             .onAppear {
                 if !viewStore.hasLoaded {
-                    // loadSettingsメソッドの代わりに.loadSettingsアクションを送信
                     viewStore.send(.loadSettings)
                 }
             }

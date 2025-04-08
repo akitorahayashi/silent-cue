@@ -132,12 +132,16 @@ struct TimerReducer: Reducer {
                     // ハプティックフィードバックを再生
                     let device = WKInterfaceDevice.current()
                     
-                    // 選択された振動パターンを再生
-                    device.play(selectedHapticType.wkHapticType)
+                    // 3秒間繰り返し振動を再生
+                    let startTime = Date()
+                    let endTime = startTime.addingTimeInterval(3.0)
                     
-                    // 自動停止が有効な場合、3秒後に停止
-                    if stopVibrationAutomatically {
-                        try await Task.sleep(for: .seconds(3))
+                    while Date() < endTime {
+                        // 選択された振動パターンを再生
+                        device.play(selectedHapticType.wkHapticType)
+                        
+                        // 次の振動までの間隔を待機
+                        try await Task.sleep(for: .seconds(selectedHapticType.interval))
                     }
                 }
                 .cancellable(id: CancelID.timer)

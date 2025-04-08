@@ -56,14 +56,17 @@ struct SettingsReducer: Reducer {
                         // Apple Watch向けのハプティックフィードバック
                         let device = WKInterfaceDevice.current()
                         
-                        // WKHapticType型を指定して適切なハプティックフィードバックを再生
-                        let hapticTypeToPlay = hapticType.wkHapticType
+                        // 3秒間繰り返し振動を再生
+                        let startTime = Date()
+                        let endTime = startTime.addingTimeInterval(3.0)
                         
-                        // 振動を再生
-                        device.play(hapticTypeToPlay)
-                        
-                        // 2秒後にプレビュー状態を終了（使いやすさのため短縮）
-                        try await Task.sleep(for: .seconds(2))
+                        while Date() < endTime {
+                            // 選択された振動パターンを再生
+                            device.play(hapticType.wkHapticType)
+                            
+                            // 次の振動までの間隔を待機
+                            try await Task.sleep(for: .seconds(hapticType.interval))
+                        }
                         
                         // プレビュー完了アクションを送信
                         await send(.previewHapticCompleted)
