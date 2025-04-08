@@ -18,7 +18,7 @@ struct SettingsReducer: Reducer {
                 return .run { send in
                     let stopVibration = self.userDefaultsManager.object(forKey: .stopVibrationAutomatically) as? Bool ?? true
                     let typeRaw = self.userDefaultsManager.object(forKey: .hapticType) as? String
-                    let hapticType = typeRaw.flatMap { HapticType(rawValue: $0) } ?? .default
+                    let hapticType = typeRaw.flatMap { HapticType(rawValue: $0) } ?? HapticType.standard
                     await send(.settingsLoaded(stopVibration: stopVibration, hapticType: hapticType))
                 }
                 
@@ -57,17 +57,7 @@ struct SettingsReducer: Reducer {
                         let device = WKInterfaceDevice.current()
                         
                         // WKHapticType型を指定して適切なハプティックフィードバックを再生
-                        let hapticTypeToPlay: WKHapticType
-                        switch hapticType {
-                        case .default, .notification:
-                            hapticTypeToPlay = .notification
-                        case .warning:
-                            hapticTypeToPlay = .directionUp
-                        case .success:
-                            hapticTypeToPlay = .success
-                        case .failure:
-                            hapticTypeToPlay = .failure
-                        }
+                        let hapticTypeToPlay = hapticType.wkHapticType
                         
                         // 振動を再生
                         device.play(hapticTypeToPlay)

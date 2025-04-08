@@ -2,7 +2,7 @@ import Foundation
 
 /// タイマーのモード（分後か時刻指定か）
 enum TimerMode: String, Equatable, CaseIterable, Identifiable {
-    case afterMinutes = "分後"  // 何分後に鳴らすか
+    case afterMinutes = "分数"  // 何分後に鳴らすか
     case atTime = "時刻"       // 何時に鳴らすか
     
     var id: String { self.rawValue }
@@ -31,7 +31,7 @@ struct TimerState: Equatable {
     
     // 振動設定
     var stopVibrationAutomatically: Bool = true
-    var selectedHapticType: HapticType = .default
+    var selectedHapticType: HapticType = .standard
     
     // remainingSecondsを計算プロパティに変更
     var remainingSeconds: Int {

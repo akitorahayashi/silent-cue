@@ -132,19 +132,8 @@ struct TimerReducer: Reducer {
                     // ハプティックフィードバックを再生
                     let device = WKInterfaceDevice.current()
                     
-                    // WKHapticType型を指定して適切なハプティックフィードバックを再生
-                    let hapticTypeToPlay: WKHapticType
-                    switch selectedHapticType {
-                    case .default, .notification, .warning:
-                        hapticTypeToPlay = .notification
-                    case .success:
-                        hapticTypeToPlay = .success
-                    case .failure:
-                        hapticTypeToPlay = .click
-                    }
-                    
-                    // 振動を再生
-                    device.play(hapticTypeToPlay)
+                    // 選択された振動パターンを再生
+                    device.play(selectedHapticType.wkHapticType)
                     
                     // 自動停止が有効な場合、3秒後に停止
                     if stopVibrationAutomatically {
@@ -176,7 +165,7 @@ struct TimerReducer: Reducer {
                 return .run { send in
                     let stopVibration = self.userDefaultsManager.object(forKey: .stopVibrationAutomatically) as? Bool ?? true
                     let typeRaw = self.userDefaultsManager.object(forKey: .hapticType) as? String
-                    let hapticType = typeRaw.flatMap { HapticType(rawValue: $0) } ?? .default
+                    let hapticType = typeRaw.flatMap { HapticType(rawValue: $0) } ?? HapticType.standard
                     await send(.settingsLoaded(stopVibration: stopVibration, hapticType: hapticType))
                 }
                 
