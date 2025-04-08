@@ -4,7 +4,10 @@ enum SCTimeFormatter {
     static func formatSecondsToTimeString(_ seconds: Int) -> String {
         if seconds >= 3600 {
             let hours = seconds / 3600
-            let minutes = (seconds % 3600) / 60
+            let remainingSeconds = seconds % 3600
+            
+            // 秒数が0でない場合は分を切り上げる
+            let minutes = (remainingSeconds == 0) ? 0 : (remainingSeconds / 60) + (remainingSeconds % 60 > 0 ? 1 : 0)
             
             return String(format: "%02d:%02d", hours, minutes)
         } else if seconds >= 60 {
