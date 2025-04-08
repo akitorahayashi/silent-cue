@@ -58,7 +58,7 @@ struct SettingsView: View {
                     ))
                 }
                 
-                Section(header: Text("Vibration Type")) {
+                Section(header: Text("タイマー完了時の振動")) {
                     ForEach(HapticType.allCases) { hapticType in
                         Button(action: {
                             viewStore.send(.selectHapticType(hapticType))
