@@ -132,16 +132,28 @@ struct TimerReducer: Reducer {
                     // ハプティックフィードバックを再生
                     let device = WKInterfaceDevice.current()
                     
-                    // 3秒間繰り返し振動を再生
-                    let startTime = Date()
-                    let endTime = startTime.addingTimeInterval(3.0)
-                    
-                    while Date() < endTime {
-                        // 選択された振動パターンを再生
-                        device.play(selectedHapticType.wkHapticType)
+                    // 設定に応じて振動を制御
+                    if stopVibrationAutomatically {
+                        // 3秒間繰り返し振動を再生
+                        let startTime = Date()
+                        let endTime = startTime.addingTimeInterval(3.0)
                         
-                        // 次の振動までの間隔を待機
-                        try await Task.sleep(for: .seconds(selectedHapticType.interval))
+                        while Date() < endTime {
+                            // 選択された振動パターンを再生
+                            device.play(selectedHapticType.wkHapticType)
+                            
+                            // 次の振動までの間隔を待機
+                            try await Task.sleep(for: .seconds(selectedHapticType.interval))
+                        }
+                    } else {
+                        // 設定がオフの場合は無限に振動を続ける
+                        while true {
+                            // 選択された振動パターンを再生
+                            device.play(selectedHapticType.wkHapticType)
+                            
+                            // 次の振動までの間隔を待機
+                            try await Task.sleep(for: .seconds(selectedHapticType.interval))
+                        }
                     }
                 }
                 .cancellable(id: CancelID.timer)
@@ -149,7 +161,8 @@ struct TimerReducer: Reducer {
             case .dismissCompletionView:
                 // 完了情報をリセット
                 state.completionDate = nil
-                return .none
+                // 閉じるボタンで振動を停止
+                return .cancel(id: CancelID.timer)
                 
             // バックグラウンド対応
             case .updateTimerDisplay:
