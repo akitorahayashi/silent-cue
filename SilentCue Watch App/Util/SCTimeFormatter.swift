@@ -7,9 +7,16 @@ enum SCTimeFormatter {
             let remainingSeconds = seconds % 3600
             
             // 秒数が0でない場合は分を切り上げる
-            let minutes = (remainingSeconds == 0) ? 0 : (remainingSeconds / 60) + (remainingSeconds % 60 > 0 ? 1 : 0)
+            var minutes = (remainingSeconds == 0) ? 0 : (remainingSeconds / 60) + (remainingSeconds % 60 > 0 ? 1 : 0)
             
-            return String(format: "%02d:%02d", hours, minutes)
+            // 分が60になったら時間を+1して分を0に
+            var adjustedHours = hours
+            if minutes == 60 {
+                adjustedHours += 1
+                minutes = 0
+            }
+            
+            return String(format: "%02d:%02d", adjustedHours, minutes)
         } else if seconds >= 60 {
             let minutes = seconds / 60
             let secs = seconds % 60
