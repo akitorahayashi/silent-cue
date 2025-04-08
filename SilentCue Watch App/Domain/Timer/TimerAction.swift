@@ -18,6 +18,7 @@ enum TimerAction: Equatable {
     case resumeTimer
     case tick
     case timerFinished
+    case dismissCompletionView
     
     // バックグラウンド対応
     case updateTimerDisplay

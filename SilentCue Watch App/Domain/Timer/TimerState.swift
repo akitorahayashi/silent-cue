@@ -25,6 +25,10 @@ struct TimerState: Equatable {
     var startDate: Date? = nil
     var targetEndDate: Date? = nil
     
+    // 完了画面用の情報
+    var completionDate: Date? = nil
+    var timerDurationMinutes: Int = 0
+    
     // 振動設定
     var stopVibrationAutomatically: Bool = true
     var selectedHapticType: HapticType = .default

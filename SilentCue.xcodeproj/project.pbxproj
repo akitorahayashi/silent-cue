@@ -56,22 +56,9 @@
 		98210EEB2DA2C33900A222BB /* SilentCue Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SilentCue Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		98DEB00F2DA4D238007EEF13 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"SilentCue-Watch-App-Info.plist",
-			);
-			target = 98210ECE2DA2C33400A222BB /* SilentCue Watch App */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		98210ED32DA2C33400A222BB /* SilentCue Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				98DEB00F2DA4D238007EEF13 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */,
-			);
 			path = "SilentCue Watch App";
 			sourceTree = "<group>";
 		};

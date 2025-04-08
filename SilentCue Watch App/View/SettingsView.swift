@@ -68,7 +68,7 @@ struct SettingsView: View {
                                 Spacer()
                                 if hapticType == viewStore.selectedHapticType {
                                     Image(systemName: "circle.fill")
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(Color.green.opacity(0.7))
                                         .transition(.opacity)
                                         .animation(.spring(), value: viewStore.selectedHapticType)
                                 }
