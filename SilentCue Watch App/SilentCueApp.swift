@@ -24,6 +24,9 @@ struct SilentCue_Watch_AppApp: App {
     @State private var navPath = NavigationPath()
     @State private var currentScreen: AppScreen = .timerStart
     
+    // バックグラウンド/フォアグラウンド遷移を監視
+    @Environment(\.scenePhase) private var scenePhase
+    
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navPath) {
@@ -57,6 +60,22 @@ struct SilentCue_Watch_AppApp: App {
                 }
             }
             .accentColor(.blue)
+            .onChange(of: scenePhase) { newPhase in
+                switch newPhase {
+                case .active:
+                    // フォアグラウンドに戻った場合、タイマーの表示を更新
+                    if currentScreen == .countdown {
+                        timerStore.send(.updateTimerDisplay)
+                    }
+                case .background:
+                    // バックグラウンドに移行した場合の処理
+                    print("App went to background")
+                case .inactive:
+                    print("App became inactive")
+                @unknown default:
+                    break
+                }
+            }
             .onAppear {
                 // タイマーとSettingsStoreの両方に設定を適用
                 timerStore.send(.loadSettings)

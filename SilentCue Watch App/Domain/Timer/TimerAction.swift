@@ -19,6 +19,9 @@ enum TimerAction: Equatable {
     case tick
     case timerFinished
     
+    // バックグラウンド対応
+    case updateTimerDisplay
+    
     // 設定関連
     case loadSettings
     case settingsLoaded(stopVibration: Bool, hapticType: HapticType)

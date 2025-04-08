@@ -18,13 +18,25 @@ struct TimerState: Equatable {
     
     // カウントダウンの状態
     var totalSeconds: Int = 0
-    var remainingSeconds: Int = 0
     var isRunning: Bool = false
     var displayTime: String = "00:00"
+    
+    // バックグラウンド対応のための時間情報
+    var startDate: Date? = nil
+    var targetEndDate: Date? = nil
     
     // 振動設定
     var stopVibrationAutomatically: Bool = true
     var selectedHapticType: HapticType = .default
+    
+    // remainingSecondsを計算プロパティに変更
+    var remainingSeconds: Int {
+        guard let targetEnd = targetEndDate, isRunning else {
+            // タイマーが実行中でない場合はtotalSecondsを表示
+            return totalSeconds
+        }
+        return max(0, Int(targetEnd.timeIntervalSince(Date())))
+    }
     
     // タイマーの計算された合計秒数
     var calculatedTotalSeconds: Int {
