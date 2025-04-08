@@ -54,9 +54,11 @@ struct SilentCue_Watch_AppApp: App {
                             },
                             onTimerFinished: {
                                 // タイマー完了時は現在のパスをクリアして完了画面に移動
-                                navPath.removeLast() // カウントダウン画面を削除
-                                navPath.append(AppScreen.completion)
-                                currentScreen = .completion
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    navPath.removeLast() // カウントダウン画面を削除
+                                    navPath.append(AppScreen.completion)
+                                    currentScreen = .completion
+                                }
                             }
                         )
                     case .completion:
@@ -64,8 +66,10 @@ struct SilentCue_Watch_AppApp: App {
                             store: timerStore,
                             onDismiss: {
                                 // 現在のパスをクリアしてTimerStartViewに戻る
-                                navPath.removeLast()
-                                currentScreen = .timerStart
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    navPath.removeLast()
+                                    currentScreen = .timerStart
+                                }
                             }
                         )
                     case .settings:

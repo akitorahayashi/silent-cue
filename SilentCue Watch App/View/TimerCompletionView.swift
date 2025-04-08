@@ -5,6 +5,9 @@ struct TimerCompletionView: View {
     let store: StoreOf<TimerReducer>
     let onDismiss: () -> Void
     
+    // アニメーション用の状態変数
+    @State private var appearAnimation = false
+    
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(spacing: 16) {
@@ -14,6 +17,8 @@ struct TimerCompletionView: View {
                 Text(SCTimeFormatter.formatToHoursAndMinutes(Date()))
                     .font(.system(size: 44, weight: .semibold, design: .rounded))
                     .foregroundStyle(.primary)
+                    .opacity(appearAnimation ? 1.0 : 0.0)
+                    .animation(.easeInOut(duration: 0.5).delay(0.1), value: appearAnimation)
                 
                 VStack(spacing: 8) {
                     // 開始時刻
@@ -21,7 +26,7 @@ struct TimerCompletionView: View {
                         HStack {
                             Text("開始時刻:")
                                 .font(.system(size: 14))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.primary)
                             Spacer()
                             Text(SCTimeFormatter.formatToHoursAndMinutes(startDate))
                                 .font(.system(size: 14, weight: .medium))
@@ -34,7 +39,7 @@ struct TimerCompletionView: View {
                     HStack {
                         Text("タイマー時間:")
                             .font(.system(size: 14))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.primary)
                         Spacer()
                         Text("\(viewStore.timerDurationMinutes)分")
                             .font(.system(size: 14, weight: .medium))
@@ -48,13 +53,18 @@ struct TimerCompletionView: View {
                         .fill(Color.secondary.opacity(0.1))
                 )
                 .padding(.horizontal)
+                .opacity(appearAnimation ? 1.0 : 0.0)
+                .offset(y: appearAnimation ? 0 : 20)
+                .animation(.easeInOut(duration: 0.5).delay(0.3), value: appearAnimation)
                 
                 Spacer()
                 
                 // 閉じるボタン（TimerStartViewの開始ボタンと同じデザイン）
                 Button {
-                    viewStore.send(.dismissCompletionView)
-                    onDismiss()
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewStore.send(.dismissCompletionView)
+                        onDismiss()
+                    }
                 } label: {
                     Text("閉じる")
                         .font(.system(size: 18, weight: .medium))
@@ -73,9 +83,17 @@ struct TimerCompletionView: View {
                 .buttonStyle(.plain)
                 .padding(.horizontal)
                 .padding(.bottom, 12)
+                .opacity(appearAnimation ? 1.0 : 0.0)
+                .offset(y: appearAnimation ? 0 : 20)
+                .animation(.easeInOut(duration: 0.5).delay(0.5), value: appearAnimation)
             }
             .navigationBarBackButtonHidden(true)
             .onAppear {
+                // アニメーションを開始
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    appearAnimation = true
+                }
+                
                 // タイマーの音を再度再生（必要に応じて）
                 if viewStore.completionDate == nil {
                     // 正常に完了していない場合は終了処理を呼ぶ
