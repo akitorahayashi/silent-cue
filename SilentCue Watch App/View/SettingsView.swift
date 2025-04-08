@@ -52,7 +52,7 @@ struct SettingsView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             List {
                 Section {
-                    Toggle("Auto-stop after 3s", isOn: viewStore.binding(
+                    Toggle("auto-stop after 3s", isOn: viewStore.binding(
                         get: \.stopVibrationAutomatically,
                         send: SettingsAction.toggleStopVibrationAutomatically
                     ))
