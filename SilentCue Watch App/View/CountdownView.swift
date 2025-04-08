@@ -4,6 +4,7 @@ import ComposableArchitecture
 struct CountdownView: View {
     let store: StoreOf<TimerReducer>
     var onCancel: () -> Void
+    var onTimerFinished: () -> Void
     
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
@@ -38,11 +39,18 @@ struct CountdownView: View {
                     viewStore.send(.updateTimerDisplay)
                 }
             }
-            .onChange(of: Date.now.timeIntervalSince1970, { oldValue, newValue in
+            .onChange(of: Date.now.timeIntervalSince1970) { _, _ in
                 if viewStore.isRunning {
                     viewStore.send(.updateTimerDisplay)
                 }
-            })
+            }
+            .onChange(of: viewStore.isRunning) { oldValue, newValue in
+                // タイマーが完了した場合（実行中→停止、かつ完了日時が設定されている）
+                if oldValue && !newValue && viewStore.completionDate != nil {
+                    // 完了画面への遷移を伝える
+                    onTimerFinished()
+                }
+            }
         }
     }
 } 

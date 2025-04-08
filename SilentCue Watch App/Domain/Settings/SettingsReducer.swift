@@ -59,12 +59,14 @@ struct SettingsReducer: Reducer {
                         // WKHapticType型を指定して適切なハプティックフィードバックを再生
                         let hapticTypeToPlay: WKHapticType
                         switch hapticType {
-                        case .default, .notification, .warning:
+                        case .default, .notification:
                             hapticTypeToPlay = .notification
+                        case .warning:
+                            hapticTypeToPlay = .directionUp
                         case .success:
                             hapticTypeToPlay = .success
                         case .failure:
-                            hapticTypeToPlay = .click
+                            hapticTypeToPlay = .failure
                         }
                         
                         // 振動を再生

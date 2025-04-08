@@ -7,6 +7,7 @@ struct SilentCue_Watch_AppApp: App {
     enum AppScreen: Hashable {
         case timerStart
         case countdown
+        case completion
         case settings
     }
     
@@ -50,6 +51,25 @@ struct SilentCue_Watch_AppApp: App {
                             onCancel: {
                                 navPath.removeLast()
                                 currentScreen = .timerStart
+                            },
+                            onTimerFinished: {
+                                // タイマー完了時は現在のパスをクリアして完了画面に移動
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    navPath.removeLast() // カウントダウン画面を削除
+                                    navPath.append(AppScreen.completion)
+                                    currentScreen = .completion
+                                }
+                            }
+                        )
+                    case .completion:
+                        TimerCompletionView(
+                            store: timerStore,
+                            onDismiss: {
+                                // 現在のパスをクリアしてTimerStartViewに戻る
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    navPath.removeLast()
+                                    currentScreen = .timerStart
+                                }
                             }
                         )
                     case .settings:
@@ -60,7 +80,7 @@ struct SilentCue_Watch_AppApp: App {
                 }
             }
             .accentColor(.blue)
-            .onChange(of: scenePhase) { newPhase in
+            .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
                 case .active:
                     // フォアグラウンドに戻った場合、タイマーの表示を更新

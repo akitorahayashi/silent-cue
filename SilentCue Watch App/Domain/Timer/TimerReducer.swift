@@ -48,8 +48,12 @@ struct TimerReducer: Reducer {
                 state.totalSeconds = state.calculatedTotalSeconds
                 state.startDate = now
                 state.targetEndDate = now.addingTimeInterval(TimeInterval(state.totalSeconds))
-                state.displayTime = TimeFormatter.formatTime(state.remainingSeconds)
+                state.displayTime = SCTimeFormatter.formatSecondsToTimeString(state.remainingSeconds)
                 state.isRunning = true
+                
+                // 完了情報をリセット
+                state.completionDate = nil
+                state.timerDurationMinutes = state.totalSeconds / 60
                 
                 // 拡張ランタイムセッションを開始
                 ExtendedRuntimeManager.shared.startSession(duration: TimeInterval(state.totalSeconds + 10))
@@ -69,6 +73,7 @@ struct TimerReducer: Reducer {
                 state.isRunning = false
                 state.startDate = nil
                 state.targetEndDate = nil
+                state.completionDate = nil
                 
                 // 拡張ランタイムセッションを停止
                 ExtendedRuntimeManager.shared.stopSession()
@@ -101,7 +106,7 @@ struct TimerReducer: Reducer {
             case .tick:
                 // 残り時間を計算（計算プロパティになったので直接更新は不要）
                 // 表示だけを更新
-                state.displayTime = TimeFormatter.formatTime(state.remainingSeconds)
+                state.displayTime = SCTimeFormatter.formatSecondsToTimeString(state.remainingSeconds)
                 
                 // タイマー完了判定
                 if state.remainingSeconds <= 0 {
@@ -112,8 +117,9 @@ struct TimerReducer: Reducer {
                 
             case .timerFinished:
                 state.isRunning = false
-                state.startDate = nil
-                state.targetEndDate = nil
+                
+                // 完了情報を保存
+                state.completionDate = Date()
                 
                 // 拡張ランタイムセッションを停止
                 ExtendedRuntimeManager.shared.stopSession()
@@ -147,11 +153,16 @@ struct TimerReducer: Reducer {
                 }
                 .cancellable(id: CancelID.timer)
                 
+            case .dismissCompletionView:
+                // 完了情報をリセット
+                state.completionDate = nil
+                return .none
+                
             // バックグラウンド対応
             case .updateTimerDisplay:
                 // バックグラウンドから復帰時に表示を更新
                 if state.isRunning {
-                    state.displayTime = TimeFormatter.formatTime(state.remainingSeconds)
+                    state.displayTime = SCTimeFormatter.formatSecondsToTimeString(state.remainingSeconds)
                     
                     // タイマー完了判定
                     if state.remainingSeconds <= 0 {

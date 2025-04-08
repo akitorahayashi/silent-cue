@@ -12,7 +12,7 @@ enum TimerMode: String, Equatable, CaseIterable, Identifiable {
 struct TimerState: Equatable {
     // タイマー設定の状態
     var timerMode: TimerMode = .afterMinutes
-    var selectedMinutes: Int = 5
+    var selectedMinutes: Int = 1
     var selectedHour: Int = Calendar.current.component(.hour, from: Date())
     var selectedMinute: Int = (Calendar.current.component(.minute, from: Date()) + 5) % 60
     
@@ -25,6 +25,10 @@ struct TimerState: Equatable {
     var startDate: Date? = nil
     var targetEndDate: Date? = nil
     
+    // 完了画面用の情報
+    var completionDate: Date? = nil
+    var timerDurationMinutes: Int = 0
+    
     // 振動設定
     var stopVibrationAutomatically: Bool = true
     var selectedHapticType: HapticType = .default
@@ -35,7 +39,8 @@ struct TimerState: Equatable {
             // タイマーが実行中でない場合はtotalSecondsを表示
             return totalSeconds
         }
-        return max(0, Int(targetEnd.timeIntervalSince(Date())))
+        // timeIntervalSinceの値を切り上げて整数に変換
+        return max(0, Int(ceil(targetEnd.timeIntervalSince(Date()))))
     }
     
     // タイマーの計算された合計秒数
@@ -82,7 +87,7 @@ struct TimerState: Equatable {
         let currentMinute = calendar.component(.minute, from: now)
         self.selectedMinute = currentMinute
         
-        // 「分後」モードでは初期設定を5分に
-        self.selectedMinutes = 5
+        // 「分後」モードでは初期設定を1分に
+        self.selectedMinutes = 1
     }
 } 

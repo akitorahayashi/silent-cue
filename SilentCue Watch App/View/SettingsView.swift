@@ -58,7 +58,7 @@ struct SettingsView: View {
                     ))
                 }
                 
-                Section(header: Text("Vibration Type")) {
+                Section(header: Text("タイマー完了時の振動")) {
                     ForEach(HapticType.allCases) { hapticType in
                         Button(action: {
                             viewStore.send(.selectHapticType(hapticType))
@@ -68,7 +68,7 @@ struct SettingsView: View {
                                 Spacer()
                                 if hapticType == viewStore.selectedHapticType {
                                     Image(systemName: "circle.fill")
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(Color.green.opacity(0.7))
                                         .transition(.opacity)
                                         .animation(.spring(), value: viewStore.selectedHapticType)
                                 }
