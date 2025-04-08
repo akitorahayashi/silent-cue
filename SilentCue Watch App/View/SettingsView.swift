@@ -13,6 +13,10 @@ struct SettingsView: View {
     // ハプティックフィードバック種別の初期化
     @State private var selectedHapticTypeIndex: Int
     
+    // アラート表示用の状態変数
+    @State private var showResetAlert = false
+    @State private var showResetConfirmationAlert = false
+    
     init(store: StoreOf<SettingsReducer>) {
         self.store = store
         
@@ -77,11 +81,10 @@ struct SettingsView: View {
                     }
                 }
                 
-                // デバッグセクション
+                // Danger Zone
                 Section(header: Text("Danger Zone")) {
                     Button("Reset All Settings") {
-                        UserDefaultsManager.shared.removeAll()
-                        viewStore.send(.loadSettings)
+                        showResetConfirmationAlert = true
                     }
                     .foregroundStyle(.red)
                 }
@@ -91,6 +94,28 @@ struct SettingsView: View {
                 if !viewStore.hasLoaded {
                     viewStore.send(.loadSettings)
                 }
+            }
+            .alert("すべての設定項目が初期値に戻されました", isPresented: $showResetAlert) {
+                Button("OK") {
+                    showResetAlert = false
+                }
+            }
+            .alert("設定をリセットしますか？", isPresented: $showResetConfirmationAlert) {
+                Button("キャンセル", role: .cancel) {
+                    showResetConfirmationAlert = false
+                }
+                Button("リセット", role: .destructive) {
+                    UserDefaultsManager.shared.removeAll()
+                    viewStore.send(.loadSettings)
+                    showResetConfirmationAlert = false
+                    
+                    // 少し遅延させて完了アラートを表示
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showResetAlert = true
+                    }
+                }
+            } message: {
+                Text("この操作は取り消せません")
             }
         }
     }
