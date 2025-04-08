@@ -10,52 +10,98 @@ struct TimerCompletionView: View {
     
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack(spacing: 16) {
-                Spacer()
+            VStack(spacing: 20) {
+                Spacer(minLength: 6)
                 
-                // 現在時刻
-                Text(SCTimeFormatter.formatToHoursAndMinutes(Date()))
-                    .font(.system(size: 44, weight: .semibold, design: .rounded))
+                // タイトル
+                Text("タイマー完了")
+                    .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.primary)
                     .opacity(appearAnimation ? 1.0 : 0.0)
-                    .animation(.easeInOut(duration: 0.5).delay(0.1), value: appearAnimation)
+                    .animation(.easeInOut(duration: 0.4), value: appearAnimation)
                 
-                VStack(spacing: 8) {
+                VStack(spacing: 0) {
                     // 開始時刻
                     if let startDate = viewStore.startDate {
-                        HStack {
-                            Text("開始時刻:")
-                                .font(.system(size: 14))
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text(SCTimeFormatter.formatToHoursAndMinutes(startDate))
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(.primary)
+                        VStack(spacing: 4) {
+                            HStack {
+                                Text("開始時刻")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                            }
+                            
+                            HStack {
+                                Text(SCTimeFormatter.formatToHoursAndMinutes(startDate))
+                                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                            }
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        
+                        Divider()
+                            .background(Color.primary.opacity(0.1))
+                            .padding(.horizontal, 8)
+                    }
+                    
+                    // 終了時刻
+                    if let completionDate = viewStore.completionDate {
+                        VStack(spacing: 4) {
+                            HStack {
+                                Text("終了時刻")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                            }
+                            
+                            HStack {
+                                Text(SCTimeFormatter.formatToHoursAndMinutes(completionDate))
+                                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        
+                        Divider()
+                            .background(Color.primary.opacity(0.1))
+                            .padding(.horizontal, 8)
                     }
                     
                     // 使用時間
-                    HStack {
-                        Text("タイマー時間:")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        Text("\(viewStore.timerDurationMinutes)分")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.primary)
+                    VStack(spacing: 4) {
+                        HStack {
+                            Text("タイマー時間")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                        }
+                        
+                        HStack {
+                            Text("\(viewStore.timerDurationMinutes)分")
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .foregroundStyle(.primary)
+                            Spacer()
+                        }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
                 }
-                .padding(.vertical, 4)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.secondary.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.secondary.opacity(0.07))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.secondary.opacity(0.15), lineWidth: 1)
                 )
                 .padding(.horizontal)
                 .opacity(appearAnimation ? 1.0 : 0.0)
                 .offset(y: appearAnimation ? 0 : 20)
-                .animation(.easeInOut(duration: 0.5).delay(0.3), value: appearAnimation)
+                .animation(.easeInOut(duration: 0.5).delay(0.2), value: appearAnimation)
                 
                 Spacer()
                 
@@ -67,7 +113,7 @@ struct TimerCompletionView: View {
                     }
                 } label: {
                     Text("閉じる")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
@@ -85,7 +131,7 @@ struct TimerCompletionView: View {
                 .padding(.bottom, 12)
                 .opacity(appearAnimation ? 1.0 : 0.0)
                 .offset(y: appearAnimation ? 0 : 20)
-                .animation(.easeInOut(duration: 0.5).delay(0.5), value: appearAnimation)
+                .animation(.easeInOut(duration: 0.5).delay(0.4), value: appearAnimation)
             }
             .navigationBarBackButtonHidden(true)
             .onAppear {
