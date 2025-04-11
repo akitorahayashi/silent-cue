@@ -1,233 +1,91 @@
-# SilentCue - Silent Timer App for Apple Watch
+# SilentCue - Apple Watch用のサイレントタイマーアプリ
 
-## Project Overview
+## プロジェクト概要
 
-SilentCue is a silent timer app for Apple Watch that notifies you with haptic feedback instead of sound alerts. It's perfect for use in meetings or quiet environments where audio notifications would be disruptive.
+SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特有の触覚フィードバックで通知するため、音を出さずにタイマーを使用できます。
 
-The app offers a simple interface optimized for the compact Apple Watch screen, allowing you to easily set timers and choose vibration patterns. Built with The Composable Architecture (TCA), it ensures stable operation and maintainability. The app is optimized for Apple Watch Series 10 and watchOS 11.2.
+従来のiPhoneタイマーアプリと異なり、腕に装着しているApple Watchだけで完結するため、デバイスを取り出す手間がありません。また、デフォルトでは振動が3秒後に自動停止するため、タイマーが終了した際は、アプリを開いて操作する必要がなく、より快適なユーザー体験を提供します。
 
-## Key Features
+振動の強さや停止機能のオン・オフなど、各種設定は好みに合わせてカスタマイズできます。
 
-### Intuitive Timer Setting
-Provides an interface for easily selecting hours and minutes to start a timer immediately. The simple design allows for quick operation even on a small screen.
+## アーキテクチャ
 
-### Smooth Navigation
-Uses SwiftUI's NavigationStack for fluid, animated transitions between screens, providing a more polished user experience.
+このプロジェクトはThe Composable Architecture (TCA 1.19.0)のシンプル版を使用し、独立した機能に焦点を当てています：
 
-### Countdown Display
-Visually displays the countdown from the set time. When the remaining time is less than 1 minute, it changes color to red for added visibility.
+- **機能ごとの状態管理**: 各機能（タイマー、設定）が独自の状態とロジックを維持
+- **直接的なナビゲーション**: SwiftUIのNavigationStackとコールバックを使用
+- **最小限の状態管理**: グローバル状態コンテナなし、機能ごとのストアのみ
 
-### Haptic Feedback
-Choose from various haptic patterns for timer completion. Select from notification, success, and other vibration patterns to customize feedback based on your situation.
-
-### Customizable Settings
-Customize settings such as vibration type and auto-stop feature according to user preferences. Settings are automatically saved and reflected in subsequent uses.
-
-### Reliable Background Execution
-The timer continues to run accurately even when the app is in the background or the watch display is off. Using WKExtendedRuntimeSession and real-time based calculations, the app maintains timer accuracy regardless of app state changes. When the timer completes, you'll receive the selected haptic feedback notification, even if the app is not in the foreground.
-
-## Architecture
-
-This project uses a simplified version of The Composable Architecture (TCA 1.19.0) focusing on independent features without a complex global state hierarchy:
+## ディレクトリ構成
 
 ```
-[Feature-Specific State] → [Feature-Specific Action] → [Feature-Specific Reducer] → [Effect] → [Updated State]
+SilentCue/
+├── SilentCue Watch App/
+│   ├── Domain/
+│   │   ├── Timer/
+│   │   └── Settings/
+│   ├── View/
+│   │   ├── TimerStartView.swift
+│   │   ├── CountdownView.swift
+│   │   └── SettingsView.swift
+│   ├── Model/
+│   ├── StorageService/
+│   └── Util/
+├── .swiftformat
+├── .swiftlint.yml
+├── Mintfile
+└── .github/workflows/
 ```
 
-The app has been refactored to remove unnecessary complexity, emphasizing a lightweight, pragmatic approach to TCA:
+## 技術スタック
 
-- **Focused Features**: Each feature (Timer, Settings) maintains its own state and logic
-- **Direct Navigation**: Uses SwiftUI's native NavigationStack and callbacks for navigation
-- **Minimal State Management**: No global state container, just feature-specific stores
-- **Simplified Communication**: Features communicate via callbacks instead of complex action routing
+- **言語とフレームワーク**
+  - Swift
+  - SwiftUI
+  - WatchKit
 
-### Navigation
+- **状態管理**
+  - The Composable Architecture 1.19.0
 
-The app uses SwiftUI's `NavigationStack` with NavigationPath for declarative navigation:
+- **永続化**
+  - UserDefaults
 
-```swift
-NavigationStack(path: $navPath) {
-    TimerStartView(
-        store: timerStore,
-        onSettingsButtonTapped: {
-            navPath.append(AppScreen.settings)
-        },
-        onTimerStart: {
-            navPath.append(AppScreen.countdown)
-        }
-    )
-    .navigationDestination(for: AppScreen.self) { screen in
-        switch screen {
-        case .countdown:
-            CountdownView(store: timerStore, onCancel: { ... })
-        case .settings:
-            SettingsView(store: settingsStore)
-        // ...
-        }
-    }
-}
+- **ネイティブ機能**
+  - WKExtendedRuntimeSession
+  - WKHapticType
+
+- **開発ツール**
+  - SwiftFormat
+  - SwiftLint
+  - Mint
+  - GitHub Actions（CI/CD）
+
+## 主要機能
+
+### 直感的なタイマー設定
+Apple Watchの小さな画面でも使いやすさを重視した洗練されたインターフェースを提供します。時間を直感的に設定でき、分数を指定する他に特定の時刻までの正確なカウントダウンにも対応しています。
+
+### 振動による無音通知
+Apple Watch独自の触覚フィードバック機能を活用し、最小限の音でタイマーの完了を通知します。複数の振動パターンから好みの振動を選択することも可能です。
+
+### 自動停止機能
+タイマー完了時の振動が3秒後に自動的に停止するため、アプリを開いて操作する必要がありません。これにより、スムーズな体験を実現します。
+
+### カスタマイズ可能な設定
+触覚フィードバックのパターンや強度、自動停止機能のオン・オフなど、様々な設定をユーザーの好みに合わせて調整できます。各設定は永続的に保存され、アプリを再起動しても維持されます。
+
+### バックグラウンド実行
+Apple Watchアプリを閉じた後もタイマーが正確に動作し続けます。WKExtendedRuntimeSessionを活用した高度なバックグラウンド処理により、アプリがバックグラウンドにある状態でも正確な時間計測と通知を実現しています。長時間のタイマーでも精度を維持します。
+
+## 環境構築
+
+### Mint
+
+Mintを使用してSwiftFormatとSwiftLintを管理しています。以下のコマンドで初期設定が可能です：
+
+```bash
+brew install mint
+mint bootstrap
 ```
 
-This approach provides:
-1. **Native Animation**: Uses SwiftUI's built-in transitions for smooth movement
-2. **Type-Safe Navigation**: Destinations are tied to specific enum cases
-3. **Declarative Routing**: Screen flow is described with a clear navigation path
-4. **Simpler State Management**: Navigation state is managed with SwiftUI rather than TCA
-
-### Store Management
-
-The application now uses independent feature-specific stores instead of a complex hierarchy:
-
-```swift
-// Independent stores are created directly in the app entry point
-let timerStore = Store(initialState: TimerState()) {
-    TimerReducer()
-}
-
-let settingsStore = Store(initialState: SettingsState()) {
-    SettingsReducer()
-}
-```
-
-Benefits of this approach:
-1. **Reduced Complexity**: No need for complex scoping or action mapping
-2. **Independence**: Features operate independently without unnecessary coupling
-3. **Performance**: Each feature manages only its own state, minimizing rendering
-4. **Simplicity**: Easier to understand, maintain, and extend the codebase
-
-### Dependency Injection
-
-The project still leverages TCA's dependency injection system for external dependencies:
-
-```swift
-// Define a dependency 
-extension DependencyValues {
-    var userDefaultsManager: UserDefaultsManager {
-        get { self[UserDefaultsManagerKey.self] }
-        set { self[UserDefaultsManagerKey.self] = newValue }
-    }
-}
-
-// Use the dependency in a reducer
-struct SettingsReducer: Reducer {
-    @Dependency(\.userDefaultsManager) var userDefaultsManager
-    
-    // Access the dependency in effects
-    var body: some ReducerOf<Self> {
-        Reduce { state, action in
-            // ...
-            return .run { _ in
-                self.userDefaultsManager.set(value, forKey: .someKey)
-                // ...
-            }
-        }
-    }
-}
-```
-
-### Background Execution Implementation
-
-The app implements reliable background execution through several key mechanisms:
-
-```swift
-// 1. Time-based calculations rather than counter-based
-struct TimerState {
-    // Store actual start and end times instead of just counting down
-    var startDate: Date? = nil
-    var targetEndDate: Date? = nil
-    
-    // Calculate remaining time based on current time
-    var remainingSeconds: Int {
-        guard let targetEnd = targetEndDate, isRunning else {
-            return totalSeconds
-        }
-        return max(0, Int(targetEnd.timeIntervalSince(Date())))
-    }
-}
-
-// 2. Extended runtime session for background processing
-class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
-    func startSession(duration: TimeInterval) {
-        let session = WKExtendedRuntimeSession()
-        session.delegate = self
-        session.start()
-        self.session = session
-    }
-}
-
-// 3. Scene phase monitoring to update UI when returning to foreground
-@Environment(\.scenePhase) private var scenePhase
-    
-.onChange(of: scenePhase) { newPhase in
-    if newPhase == .active && isRunningTimer {
-        // Update timer display with accurate time
-        timerStore.send(.updateTimerDisplay)
-    }
-}
-```
-
-This implementation ensures that:
-1. The timer remains accurate even after long periods in the background
-2. Battery usage is optimized while maintaining functionality
-3. Users receive haptic notifications at the exact scheduled time
-
-### Project Structure
-
-The project has been simplified to focus on the essential features:
-
-```
-SilentCue Watch App/
-├── Domain/
-│   ├── Timer/
-│   │   ├── TimerAction.swift
-│   │   ├── TimerReducer.swift
-│   │   ├── TimerState.swift
-│   │   └── TimerStore.swift
-│   └── Settings/
-│       ├── SettingsAction.swift
-│       ├── SettingsReducer.swift
-│       ├── SettingsState.swift
-│       └── SettingsStore.swift
-├── View/
-│   ├── TimerStartView.swift
-│   ├── CountdownView.swift
-│   └── SettingsView.swift
-├── Model/
-│   └── HapticType.swift
-├── StorageService/
-│   ├── UserDefaultsManager.swift
-│   └── UserDefaultsDependency.swift
-├── Util/
-│   ├── TimeFormatter.swift
-│   └── ExtendedRuntimeManager.swift
-└── SilentCueApp.swift
-```
-
-### Key Architectural Decisions
-
-1. **Removal of App Layer**: Eliminated the unnecessary App layer that added complexity without providing significant benefits
-2. **Independent Feature Stores**: Each feature has its own store without complex hierarchy
-3. **Native Navigation**: Using SwiftUI's navigation capabilities directly rather than managing navigation in TCA
-4. **Callback-Based Communication**: Features communicate via simple callbacks rather than complex action routing
-5. **Pragmatic TCA Usage**: Using TCA where it adds value (state management, effects, dependencies) but not where simpler solutions work better
-6. **Real-time Based Timer**: Using actual start/end times rather than counters for accurate background execution
-
-## Apple Watch Series 10 Optimizations
-
-The app has been optimized for Apple Watch Series 10 and watchOS 11.2:
-
-1. **Safe Haptic Feedback**: Uses compatible WKHapticType members for vibration patterns
-2. **Swift 6 Compatibility**: Complies with Swift 6 rules for handling inout parameters in concurrent code
-3. **Modern TCA API**: Uses the latest TCA 1.19.0 APIs including @CasePathable macro for action handling
-4. **Improved Navigation**: Uses NavigationStack with NavigationPath for smooth, animated transitions
-5. **Background Modes**: Properly configured with WKBackgroundModes for extended runtime capability
-6. **WKExtendedRuntimeSession**: Ensures the app continues to function correctly when in the background
-
-## Technology Stack
-
-- **Swift** and **SwiftUI** for UI development
-- **The Composable Architecture 1.19.0** for state management and business logic separation
-- **NavigationStack** for smooth screen transitions
-- **WatchKit** for native watchOS features including background execution
-- **UserDefaults** for settings persistence
-- **WKExtendedRuntimeSession** for background processing support
+TCAなどの依存パッケージはSwift Package Managerによって自動的に管理されるため、Xcodeがプロジェクトを開く際に必要なパッケージを自動的にダウンロードします。
