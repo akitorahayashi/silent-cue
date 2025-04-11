@@ -21,16 +21,16 @@ jobs:
       run: |
         mint bootstrap
         
-    - name: Run SwiftLint
-      run: |
-        mint run swiftlint lint
-        
     - name: Run SwiftFormat
       run: |
         mint run swiftformat .
+        
+    - name: Run SwiftLint
+      run: |
+        mint run swiftlint lint
 
-  build-and-test:
-    name: Build and Test
+  test:
+    name: Run Tests
     runs-on: macos-latest
     needs: quality
     steps:
@@ -39,28 +39,6 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -s /Applications/Xcode.app
       
-    - name: Build Watch App
-      run: |
-        xcodebuild build \
-          -project SilentCue.xcodeproj \
-          -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm" \
-          -configuration Debug \
-          -derivedDataPath ./build \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
-          
-    - name: Build Unit Tests
-      run: |
-        xcodebuild build \
-          -project SilentCue.xcodeproj \
-          -scheme "SilentCue Watch AppTests" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm" \
-          -configuration Debug \
-          -derivedDataPath ./build \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
-          
     - name: Run Unit Tests
       run: |
         xcodebuild test \
@@ -73,17 +51,6 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
-    - name: Build UI Tests
-      run: |
-        xcodebuild build \
-          -project SilentCue.xcodeproj \
-          -scheme "SilentCue Watch AppUITests" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm" \
-          -configuration Debug \
-          -derivedDataPath ./build \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
-          
     - name: Run UI Tests
       run: |
         xcodebuild test \
