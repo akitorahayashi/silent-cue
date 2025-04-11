@@ -29,15 +29,15 @@ struct TimerStartView: View {
     var onTimerStart: () -> Void
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }, content: { viewStore in
             ScrollView {
                 VStack(spacing: 16) {
                     // モード選択
                     HStack(spacing: 2) {
                         ForEach(TimerMode.allCases) { mode in
-                            Button {
+                            Button(action: {
                                 viewStore.send(.timerModeSelected(mode))
-                            } label: {
+                            }, label: {
                                 Text(mode.rawValue)
                                     .font(.system(size: 14))
                                     .fontWeight(viewStore.timerMode == mode ? .semibold : .regular)
@@ -54,7 +54,7 @@ struct TimerStartView: View {
                                             .stroke(Color.secondary.opacity(0.4), lineWidth: 1)
                                     )
                                     .foregroundStyle(Color.primary)
-                            }
+                            })
                             .buttonStyle(.plain)
                         }
                     }
@@ -108,10 +108,10 @@ struct TimerStartView: View {
                     .animation(.easeInOut(duration: 0.2), value: viewStore.timerMode)
                     
                     // 開始ボタン
-                    Button {
+                    Button(action: {
                         viewStore.send(.startTimer)
                         onTimerStart()
-                    } label: {
+                    }, label: {
                         Text("開始")
                             .font(.system(size: 18, weight: .medium))
                             .frame(maxWidth: .infinity)
@@ -125,7 +125,7 @@ struct TimerStartView: View {
                                     .stroke(Color.secondary.opacity(0.4), lineWidth: 1)
                             )
                             .foregroundStyle(.primary)
-                    }
+                    })
                     .buttonStyle(.plain)
                     .padding(.horizontal)
                     .padding(.top, 12)
@@ -137,18 +137,18 @@ struct TimerStartView: View {
             .navigationTitle("Silent Cue")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
+                    Button(action: {
                         onSettingsButtonTapped()
-                    } label: {
+                    }, label: {
                         Image(systemName: "gearshape.fill")
                             .foregroundStyle(Color.primary.opacity(0.8))
-                    }
+                    })
                     .buttonStyle(.plain)
                 }
             }
             .onAppear {
                 viewStore.send(.loadSettings)
             }
-        }
+        })
     }
 } 

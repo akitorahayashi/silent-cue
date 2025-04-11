@@ -53,12 +53,12 @@ struct SettingsView: View {
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }, content: { viewStore in
             List {
                 Section {
                     Toggle("auto-stop after 3s", isOn: viewStore.binding(
-                        get: \.stopVibrationAutomatically,
-                        send: SettingsAction.toggleStopVibrationAutomatically
+                        get: { $0.stopVibrationAutomatically },
+                        send: { SettingsAction.toggleStopVibrationAutomatically($0) }
                     ))
                 }
                 
@@ -66,7 +66,7 @@ struct SettingsView: View {
                     ForEach(HapticType.allCases) { hapticType in
                         Button(action: {
                             viewStore.send(.selectHapticType(hapticType))
-                        }) {
+                        }, label: {
                             HStack {
                                 Text(hapticType.rawValue.capitalized)
                                 Spacer()
@@ -77,7 +77,7 @@ struct SettingsView: View {
                                         .animation(.spring(), value: viewStore.selectedHapticType)
                                 }
                             }
-                        }
+                        })
                     }
                 }
                 
@@ -117,6 +117,6 @@ struct SettingsView: View {
             } message: {
                 Text("この操作は取り消せません")
             }
-        }
+        })
     }
 }

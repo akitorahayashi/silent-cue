@@ -9,17 +9,17 @@ struct TimerCompletionView: View {
     @State private var appearAnimation = false
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }, content: { viewStore in
             ZStack {
                 ScrollView {
                     VStack {
                         
-                        Button {
+                        Button(action: {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 viewStore.send(.dismissCompletionView)
                                 onDismiss()
                             }
-                        } label: {
+                        }, label: {
                             Text("閉じる")
                                 .font(.system(size: 16, weight: .medium))
                                 .frame(maxWidth: .infinity)
@@ -33,7 +33,7 @@ struct TimerCompletionView: View {
                                         .stroke(Color.secondary.opacity(0.4), lineWidth: 1)
                                 )
                                 .foregroundStyle(.primary)
-                        }
+                        })
                         .buttonStyle(.plain)
                         .padding(.horizontal)
                         .opacity(appearAnimation ? 1.0 : 0.0)
@@ -146,7 +146,7 @@ struct TimerCompletionView: View {
                     onDismiss()
                 }
             }
-        }
+        })
     }
 }
 

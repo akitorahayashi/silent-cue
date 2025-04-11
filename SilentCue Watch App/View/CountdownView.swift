@@ -7,7 +7,7 @@ struct CountdownView: View {
     var onTimerFinished: () -> Void
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }, content: { viewStore in
             VStack {
                 Spacer()
                 
@@ -24,11 +24,11 @@ struct CountdownView: View {
                 Button(action: {
                     viewStore.send(.cancelTimer)
                     onCancel()
-                }) {
+                }, label: {
                     Text("キャンセル")
                         .foregroundStyle(.primary)
                         .font(.system(size: 16))
-                }
+                })
                 .buttonStyle(.plain)
                 .padding(.horizontal)
             }
@@ -51,6 +51,6 @@ struct CountdownView: View {
                     onTimerFinished()
                 }
             }
-        }
+        })
     }
 } 

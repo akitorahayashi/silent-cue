@@ -2,6 +2,7 @@
 disabled_rules:
   - trailing_whitespace     # 行末の空白を許可
   - line_length             # 行の長さは別途カスタマイズ
+  - trailing_newline        # 末尾の改行を無視
 
 # 明示的に有効化するルール
 opt_in_rules:
