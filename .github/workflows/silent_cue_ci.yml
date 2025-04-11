@@ -44,7 +44,7 @@ jobs:
         xcodebuild test \
           -project SilentCue.xcodeproj \
           -scheme "SilentCue Watch AppTests" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm" \
+          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
           -configuration Debug \
           -derivedDataPath ./build \
           -testPlan "SilentCue Watch AppTests" \
@@ -56,7 +56,7 @@ jobs:
         xcodebuild test \
           -project SilentCue.xcodeproj \
           -scheme "SilentCue Watch AppUITests" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm" \
+          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
           -configuration Debug \
           -derivedDataPath ./build \
           -testPlan "SilentCue Watch AppUITests" \

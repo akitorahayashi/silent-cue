@@ -3,7 +3,7 @@ import ComposableArchitecture
 
 // TCAの依存性としてUserDefaultsManagerを登録
 extension DependencyValues {
-    var userDefaultsManager: UserDefaultsManager {
+    var userDefaultsManager: UserDefaultsManagerProtocol {
         get { self[UserDefaultsManagerKey.self] }
         set { self[UserDefaultsManagerKey.self] = newValue }
     }
@@ -11,10 +11,10 @@ extension DependencyValues {
 
 // UserDefaultsManagerのための依存性キーの定義
 private enum UserDefaultsManagerKey: DependencyKey {
-    static let liveValue = UserDefaultsManager.shared
+    static let liveValue: UserDefaultsManagerProtocol = UserDefaultsManager.shared
     
     // テスト用の値もここで定義できる
-    static var testValue = UserDefaultsManager.shared
+    static var testValue: UserDefaultsManagerProtocol = UserDefaultsManager.shared
 }
 
 // 既存の依存性は互換性のために残しておく

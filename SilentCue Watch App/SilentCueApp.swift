@@ -2,7 +2,7 @@ import SwiftUI
 import ComposableArchitecture
 
 @main
-struct SilentCue_Watch_AppApp: App {
+struct SilentCueWatchApp: App {
     /// アプリの画面を表す列挙型
     enum AppScreen: Hashable {
         case timerStart
@@ -25,8 +25,32 @@ struct SilentCue_Watch_AppApp: App {
     @State private var navPath = NavigationPath()
     @State private var currentScreen: AppScreen = .timerStart
     
+    // UIテスト用のフラグ
+    private let isUITesting: Bool
+    private let showCompletionView: Bool
+    
     // バックグラウンド/フォアグラウンド遷移を監視
     @Environment(\.scenePhase) private var scenePhase
+    
+    init() {
+        // コマンドライン引数を確認してUIテストモードかどうかを判断
+        let arguments = ProcessInfo.processInfo.arguments
+        isUITesting = arguments.contains("--ui-testing")
+        showCompletionView = arguments.contains("--show-completion-view")
+        
+        // UIテストモードの場合は、設定を初期化
+        if isUITesting {
+            if showCompletionView {
+                // タイマー完了画面表示用の設定
+                // 完了日時を設定してタイマーが終了したことにする
+                // 使用しない変数は"_"で置き換え
+                _ = TimerState()
+                timerStore.send(.minutesSelected(5))
+                timerStore.send(.startTimer)
+                timerStore.send(.timerFinished)
+            }
+        }
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -100,6 +124,15 @@ struct SilentCue_Watch_AppApp: App {
                 // タイマーとSettingsStoreの両方に設定を適用
                 timerStore.send(.loadSettings)
                 settingsStore.send(.loadSettings)
+                
+                // UIテストモードで特定の画面を表示
+                if isUITesting {
+                    if showCompletionView {
+                        // 完了画面を表示
+                        navPath.append(AppScreen.completion)
+                        currentScreen = .completion
+                    }
+                }
             }
         }
     }

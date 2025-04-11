@@ -22,11 +22,11 @@ struct TimerState: Equatable {
     var displayTime: String = "00:00"
     
     // バックグラウンド対応のための時間情報
-    var startDate: Date? = nil
-    var targetEndDate: Date? = nil
+    var startDate: Date?
+    var targetEndDate: Date?
     
     // 完了画面用の情報
-    var completionDate: Date? = nil
+    var completionDate: Date?
     var timerDurationMinutes: Int = 0
     
     // 振動設定

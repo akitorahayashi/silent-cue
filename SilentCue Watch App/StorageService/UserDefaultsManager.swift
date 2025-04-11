@@ -1,13 +1,7 @@
 import Foundation
 
 /// UserDefaultsへのアクセスを管理するシングルトンクラス
-final class UserDefaultsManager {
-    // UserDefaultsのキーを管理する列挙型
-    enum Key: String, CaseIterable {
-        case stopVibrationAutomatically
-        case hapticType
-    }
-    
+final class UserDefaultsManager: UserDefaultsManagerProtocol {
     // シングルトンインスタンス
     static let shared = UserDefaultsManager()
     private init() {}
@@ -18,23 +12,23 @@ final class UserDefaultsManager {
     // MARK: - 汎用的な操作
     
     /// 値の保存（任意のオブジェクト型）
-    func set(_ value: Any, forKey key: Key) {
-        defaults.set(value, forKey: key.rawValue)
+    func set(_ value: Any?, forKey defaultName: UserDefaultsKeys) {
+        defaults.set(value, forKey: defaultName.rawValue)
     }
     
     /// オブジェクトの取得
-    func object(forKey key: Key) -> Any? {
-        return defaults.object(forKey: key.rawValue)
+    func object(forKey defaultName: UserDefaultsKeys) -> Any? {
+        return defaults.object(forKey: defaultName.rawValue)
     }
     
     /// 値の削除
-    func remove(forKey key: Key) {
-        defaults.removeObject(forKey: key.rawValue)
+    func remove(forKey defaultName: UserDefaultsKeys) {
+        defaults.removeObject(forKey: defaultName.rawValue)
     }
     
     /// 全ての値をリセット
     func removeAll() {
-        Key.allCases.forEach { key in
+        UserDefaultsKeys.allCases.forEach { key in
             defaults.removeObject(forKey: key.rawValue)
         }
     }

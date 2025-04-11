@@ -16,8 +16,6 @@
 --self remove              # 不要なself削除
 --stripunusedargs always   # 未使用引数を_に置換
 --redundanttype inferred   # 冗長な型宣言削除
---redundantparens          # 不要な括弧削除
---patternlet hoist         # パターンマッチ最適化
 
 # インポート
 --importgrouping alphabetized  # アルファベット順
