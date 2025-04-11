@@ -1,0 +1,29 @@
+# ファイルの除外
+--exclude Pods, Carthage, build, .build, DerivedData
+
+# インデント
+--indent 4
+
+# 最大行の長さ
+--maxwidth 120
+
+# 空行の制御
+--trimwhitespace always
+--stripunusedargs always
+
+# 括弧のスタイル
+--allman false
+--closingparen balanced
+
+# スペースの制御
+--commas always
+--semicolons never
+--trimwhitespace always
+
+# その他の設定
+--header ignore
+--importgrouping alphabetized
+--patternlet hoist
+--self remove
+--stripunusedargs always
+--swiftversion 5.9 

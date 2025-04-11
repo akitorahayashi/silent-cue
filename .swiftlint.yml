@@ -1,0 +1,55 @@
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+
+opt_in_rules:
+  - empty_count
+  - missing_docs
+  - force_unwrapping
+
+excluded:
+  - Carthage
+  - Pods
+  - build
+  - SilentCue Watch AppTests
+  - SilentCue Watch AppUITests
+
+line_length:
+  warning: 120
+  error: 200
+
+function_body_length:
+  warning: 50
+  error: 100
+
+type_body_length:
+  warning: 300
+  error: 500
+
+file_length:
+  warning: 500
+  error: 1000
+
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+nesting:
+  type_level:
+    warning: 3
+  function_level:
+    warning: 5
+
+identifier_name:
+  min_length: 2
+  max_length: 40
+  excluded:
+    - id
+    - URL
+    - x
+    - y
+    - to
+    - at
+    - of
+    - up
+    - vm 
