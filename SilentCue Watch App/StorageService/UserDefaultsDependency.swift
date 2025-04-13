@@ -1,5 +1,5 @@
-import Foundation
 import ComposableArchitecture
+import Foundation
 
 // TCAの依存性としてUserDefaultsManagerを登録
 extension DependencyValues {
@@ -12,7 +12,7 @@ extension DependencyValues {
 // UserDefaultsManagerのための依存性キーの定義
 private enum UserDefaultsManagerKey: DependencyKey {
     static let liveValue: UserDefaultsManagerProtocol = UserDefaultsManager.shared
-    
+
     // テスト用の値もここで定義できる
     static var testValue: UserDefaultsManagerProtocol = UserDefaultsManager.shared
 }
@@ -28,7 +28,7 @@ extension DependencyValues {
 struct UserDefaultsClient {
     var setBool: @Sendable (Bool, String) -> Void
     var bool: @Sendable (String) -> Bool
-    
+
     var setString: @Sendable (String, String) -> Void
     var string: @Sendable (String) -> String?
 }
@@ -40,4 +40,4 @@ extension UserDefaultsClient: DependencyKey {
         setString: { UserDefaults.standard.set($0, forKey: $1) },
         string: { UserDefaults.standard.string(forKey: $0) }
     )
-} 
+}

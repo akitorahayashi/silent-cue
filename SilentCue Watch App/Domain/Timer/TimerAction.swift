@@ -1,6 +1,6 @@
-import Foundation
 import CasePaths
 import ComposableArchitecture
+import Foundation
 
 /// タイマーに関連するすべてのアクション
 @CasePathable
@@ -10,7 +10,7 @@ enum TimerAction: Equatable {
     case minutesSelected(Int)
     case hourSelected(Int)
     case minuteSelected(Int)
-    
+
     // タイマー操作
     case startTimer
     case cancelTimer
@@ -19,11 +19,12 @@ enum TimerAction: Equatable {
     case tick
     case timerFinished
     case dismissCompletionView
-    
+
     // バックグラウンド対応
     case updateTimerDisplay
-    
+    case backgroundTimerFinished
+
     // 設定関連
     case loadSettings
     case settingsLoaded(stopVibration: Bool, hapticType: HapticType)
-} 
+}

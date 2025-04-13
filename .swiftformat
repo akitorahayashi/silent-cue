@@ -1,15 +1,16 @@
 # 対象外のディレクトリ
---exclude build, .build, DerivedData, .git
+--exclude .build,DerivedData,fastlane,.git,build
 
 # 基本のスタイル
 --indent 4                 # 4スペースインデント
+--indentcase false          # case文をswitchと同じレベルにインデント
 --maxwidth 120             # 最大行幅
 --trimwhitespace always    # 余分な空白削除
 --semicolons never         # セミコロン非使用
 --commas always            # カンマ後にスペース
 
 # 括弧のスタイル
---allman false             # K&Rスタイル
+--allman false             # 開き括弧を同じ行に配置（例：if (condition) { ）
 --closingparen balanced    # 括弧位置の整列
 
 # コードの最適化
@@ -17,8 +18,12 @@
 --stripunusedargs always   # 未使用引数を_に置換
 --redundanttype inferred   # 冗長な型宣言削除
 
+# 引数とコレクションの折り返し
+--wraparguments before-first    # 長い引数リストは最初の引数の前で折り返す
+--wrapcollections before-first  # 長いコレクションリテラルは最初の要素の前で折り返す
+
 # インポート
---importgrouping alphabetized  # アルファベット順
+--importgrouping alphabetized   # アルファベット順
 
 # Swiftのバージョン
---swiftversion 5.9 
+--swiftversion 5.8 

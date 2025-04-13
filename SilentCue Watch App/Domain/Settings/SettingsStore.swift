@@ -1,5 +1,5 @@
-import Foundation
 import ComposableArchitecture
+import Foundation
 
 /// 設定機能のStoreを提供するクラス
 struct SettingsStore {
@@ -9,4 +9,4 @@ struct SettingsStore {
             SettingsReducer()
         }
     }
-} 
+}

@@ -1,5 +1,5 @@
-import Foundation
 import ComposableArchitecture
+import Foundation
 
 /// タイマー機能のStoreを提供するクラス
 struct TimerStore {
@@ -9,4 +9,4 @@ struct TimerStore {
             TimerReducer()
         }
     }
-} 
+}

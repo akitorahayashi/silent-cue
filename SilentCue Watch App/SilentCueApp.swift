@@ -1,5 +1,5 @@
-import SwiftUI
 import ComposableArchitecture
+import SwiftUI
 
 @main
 struct SilentCueWatchApp: App {
@@ -10,34 +10,34 @@ struct SilentCueWatchApp: App {
         case completion
         case settings
     }
-    
+
     // タイマー機能用のストア
     let timerStore = Store(initialState: TimerState()) {
         TimerReducer()
     }
-    
+
     // 設定機能用のストア
     let settingsStore = Store(initialState: SettingsState()) {
         SettingsReducer()
     }
-    
+
     // 現在の画面を管理する状態変数
     @State private var navPath = NavigationPath()
     @State private var currentScreen: AppScreen = .timerStart
-    
+
     // UIテスト用のフラグ
     private let isUITesting: Bool
     private let showCompletionView: Bool
-    
+
     // バックグラウンド/フォアグラウンド遷移を監視
     @Environment(\.scenePhase) private var scenePhase
-    
+
     init() {
         // コマンドライン引数を確認してUIテストモードかどうかを判断
         let arguments = ProcessInfo.processInfo.arguments
         isUITesting = arguments.contains("--ui-testing")
         showCompletionView = arguments.contains("--show-completion-view")
-        
+
         // UIテストモードの場合は、設定を初期化
         if isUITesting {
             if showCompletionView {
@@ -51,7 +51,7 @@ struct SilentCueWatchApp: App {
             }
         }
     }
-    
+
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navPath) {
@@ -69,62 +69,62 @@ struct SilentCueWatchApp: App {
                 )
                 .navigationDestination(for: AppScreen.self) { screen in
                     switch screen {
-                    case .countdown:
-                        CountdownView(
-                            store: timerStore,
-                            onCancel: {
-                                navPath.removeLast()
-                                currentScreen = .timerStart
-                            },
-                            onTimerFinished: {
-                                // タイマー完了時は現在のパスをクリアして完了画面に移動
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    navPath.removeLast() // カウントダウン画面を削除
-                                    navPath.append(AppScreen.completion)
-                                    currentScreen = .completion
-                                }
-                            }
-                        )
-                    case .completion:
-                        TimerCompletionView(
-                            store: timerStore,
-                            onDismiss: {
-                                // 現在のパスをクリアしてTimerStartViewに戻る
-                                withAnimation(.easeInOut(duration: 0.3)) {
+                        case .countdown:
+                            CountdownView(
+                                store: timerStore,
+                                onCancel: {
                                     navPath.removeLast()
                                     currentScreen = .timerStart
+                                },
+                                onTimerFinished: {
+                                    // タイマー完了時は現在のパスをクリアして完了画面に移動
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        navPath.removeLast() // カウントダウン画面を削除
+                                        navPath.append(AppScreen.completion)
+                                        currentScreen = .completion
+                                    }
                                 }
-                            }
-                        )
-                    case .settings:
-                        SettingsView(store: settingsStore)
-                    case .timerStart:
-                        EmptyView() // この場合は使われない
+                            )
+                        case .completion:
+                            TimerCompletionView(
+                                store: timerStore,
+                                onDismiss: {
+                                    // 現在のパスをクリアしてTimerStartViewに戻る
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        navPath.removeLast()
+                                        currentScreen = .timerStart
+                                    }
+                                }
+                            )
+                        case .settings:
+                            SettingsView(store: settingsStore)
+                        case .timerStart:
+                            EmptyView() // この場合は使われない
                     }
                 }
             }
             .accentColor(.blue)
             .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
-                case .active:
-                    // フォアグラウンドに戻った場合、タイマーの表示を更新
-                    if currentScreen == .countdown {
-                        timerStore.send(.updateTimerDisplay)
-                    }
-                case .background:
-                    // バックグラウンドに移行した場合の処理
-                    print("App went to background")
-                case .inactive:
-                    print("App became inactive")
-                @unknown default:
-                    break
+                    case .active:
+                        // フォアグラウンドに戻った場合、タイマーの表示を更新
+                        if currentScreen == .countdown {
+                            timerStore.send(.updateTimerDisplay)
+                        }
+                    case .background:
+                        // バックグラウンドに移行した場合の処理
+                        print("App went to background")
+                    case .inactive:
+                        print("App became inactive")
+                    @unknown default:
+                        break
                 }
             }
             .onAppear {
                 // タイマーとSettingsStoreの両方に設定を適用
                 timerStore.send(.loadSettings)
                 settingsStore.send(.loadSettings)
-                
+
                 // UIテストモードで特定の画面を表示
                 if isUITesting {
                     if showCompletionView {

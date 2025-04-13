@@ -8,7 +8,6 @@
 import XCTest
 
 final class SilentCue_Watch_AppUITests: XCTestCase {
-    
     func testTimerFlow() throws {
         // タイマー関連のUIテストをすべて実行
         let timerTests = TimerUITests()
@@ -17,7 +16,7 @@ final class SilentCue_Watch_AppUITests: XCTestCase {
         try timerTests.testTimeModeSelection()
         try timerTests.testSettingsNavigation()
     }
-    
+
     func testSettingsFlow() throws {
         // 設定関連のUIテストをすべて実行
         let settingsTests = SettingsUITests()
@@ -27,7 +26,7 @@ final class SilentCue_Watch_AppUITests: XCTestCase {
         try settingsTests.testDangerZone()
         try settingsTests.testNavigationBack()
     }
-    
+
     func testCompletionFlow() throws {
         // 完了画面のUIテストをすべて実行
         let completionTests = CompletionUITests()

@@ -1,7 +1,8 @@
-import SwiftUI
 import ComposableArchitecture
+import SwiftUI
 
 // MARK: - 共通の色とスタイル定義
+
 private extension Color {
     static let controlBackground = Color.secondary.opacity(0.15)
     static let selectedBackground = Color.secondary.opacity(0.3)
@@ -11,15 +12,14 @@ private extension Color {
 
 private extension View {
     func standardControlStyle(isSelected: Bool = false) -> some View {
-        self
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.selectedBackground : Color.controlBackground)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(isSelected ? Color.selectedBorder : Color.controlBorder, lineWidth: 1)
-            )
+        background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(isSelected ? Color.selectedBackground : Color.controlBackground)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(isSelected ? Color.selectedBorder : Color.controlBorder, lineWidth: 1)
+        )
     }
 }
 
@@ -27,7 +27,7 @@ struct TimerStartView: View {
     let store: StoreOf<TimerReducer>
     var onSettingsButtonTapped: () -> Void
     var onTimerStart: () -> Void
-    
+
     var body: some View {
         WithViewStore(store, observe: { $0 }, content: { viewStore in
             ScrollView {
@@ -45,9 +45,11 @@ struct TimerStartView: View {
                                     .padding(.vertical, 8)
                                     .background(
                                         RoundedRectangle(cornerRadius: 8)
-                                            .fill(viewStore.timerMode == mode ? 
-                                                  Color.secondary.opacity(0.3) : 
-                                                  Color.secondary.opacity(0.1))
+                                            .fill(
+                                                viewStore.timerMode == mode ?
+                                                    Color.secondary.opacity(0.3) :
+                                                    Color.secondary.opacity(0.1)
+                                            )
                                     )
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 8)
@@ -59,54 +61,54 @@ struct TimerStartView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
+
                     // 時間選択エリア
                     VStack {
                         if viewStore.timerMode == .afterMinutes {
                             // 分選択
-                                Picker("分", selection: viewStore.binding(
-                                    get: \.selectedMinutes,
-                                    send: TimerAction.minutesSelected
+                            Picker("分", selection: viewStore.binding(
+                                get: \.selectedMinutes,
+                                send: TimerAction.minutesSelected
+                            )) {
+                                ForEach(1 ... 60, id: \.self) { minute in
+                                    Text("\(minute)")
+                                        .tag(minute)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(height: 100)
+                            .padding(.horizontal, 10)
+                        } else {
+                            HStack(spacing: 4) {
+                                Picker("時", selection: viewStore.binding(
+                                    get: \.selectedHour,
+                                    send: TimerAction.hourSelected
                                 )) {
-                                    ForEach(1...60, id: \.self) { minute in
-                                        Text("\(minute)")
+                                    ForEach(0 ..< 24) { hour in
+                                        Text("\(hour)")
+                                            .tag(hour)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+
+                                Picker("分", selection: viewStore.binding(
+                                    get: \.selectedMinute,
+                                    send: TimerAction.minuteSelected
+                                )) {
+                                    ForEach(0 ..< 60) { minute in
+                                        Text(String(format: "%02d", minute))
                                             .tag(minute)
                                     }
                                 }
                                 .pickerStyle(.wheel)
-                                .frame(height: 100)
-                                .padding(.horizontal, 10)
-                        } else {
-                                HStack(spacing: 4) {
-                                    Picker("時", selection: viewStore.binding(
-                                        get: \.selectedHour,
-                                        send: TimerAction.hourSelected
-                                    )) {
-                                        ForEach(0..<24) { hour in
-                                            Text("\(hour)")
-                                                .tag(hour)
-                                        }
-                                    }
-                                    .pickerStyle(.wheel)
-                                    
-                                    Picker("分", selection: viewStore.binding(
-                                        get: \.selectedMinute,
-                                        send: TimerAction.minuteSelected
-                                    )) {
-                                        ForEach(0..<60) { minute in
-                                            Text(String(format: "%02d", minute))
-                                                .tag(minute)
-                                        }
-                                    }
-                                    .pickerStyle(.wheel)
-                                }
-                                .frame(height: 100)
-                                .padding(.horizontal, 6)
+                            }
+                            .frame(height: 100)
+                            .padding(.horizontal, 6)
                         }
                     }
                     .padding(.horizontal)
                     .animation(.easeInOut(duration: 0.2), value: viewStore.timerMode)
-                    
+
                     // 開始ボタン
                     Button(action: {
                         viewStore.send(.startTimer)
@@ -151,4 +153,4 @@ struct TimerStartView: View {
             }
         })
     }
-} 
+}

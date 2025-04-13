@@ -10,10 +10,10 @@ enum UserDefaultsKeys: String, CaseIterable {
 protocol UserDefaultsManagerProtocol {
     /// 値の保存（任意のオブジェクト型）
     func set(_ value: Any?, forKey defaultName: UserDefaultsKeys)
-    
+
     /// オブジェクトの取得
     func object(forKey defaultName: UserDefaultsKeys) -> Any?
-    
+
     /// 値の削除
     func remove(forKey defaultName: UserDefaultsKeys)
-} 
+}
