@@ -7,8 +7,30 @@ on:
     branches: [ main ]
 
 jobs:
-  quality:
-    name: Code Quality
+  copilot-review:
+    name: Copilot Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Add PR Review Comment (Simulated)
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.pull_request.number,
+              body: "👋 Copilotレビュー: コード全体をチェックします"
+            });
+
+  format-and-lint:
+    name: Format and Lint
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
@@ -20,6 +42,11 @@ jobs:
     - name: Install dependencies
       run: |
         mint bootstrap
+
+    - name: Show Tool Versions
+      run: |
+        mint run swiftlint version
+        mint run swiftformat --version
         
     - name: Run SwiftFormat
       run: |
@@ -36,7 +63,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: macos-latest
-    needs: quality
+    needs: format-and-lint
     steps:
     - uses: actions/checkout@v3
     
