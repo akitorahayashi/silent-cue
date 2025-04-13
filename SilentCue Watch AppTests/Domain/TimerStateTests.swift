@@ -60,9 +60,13 @@ class TimerStateTests: XCTestCase {
         // 現在時刻より後の時刻を設定
         let calendar = Calendar.current
         let now = Date()
-        let components = calendar.dateComponents([.hour, .minute], from: now)
-        let currentHour = components.hour!
-        let currentMinute = components.minute!
+        guard let components = calendar.dateComponents([.hour, .minute], from: now),
+              let currentHour = components.hour,
+              let currentMinute = components.minute
+        else {
+            XCTFail("Failed to get date components")
+            return
+        }
 
         // 同じ時間の30分後（現在時刻が30分未満の場合）
         if currentMinute < 30 {
@@ -94,13 +98,18 @@ class TimerStateTests: XCTestCase {
         // 現在時刻より前の時刻を設定（次の日とみなされるはず）
         let calendar = Calendar.current
         let now = Date()
-        let components = calendar.dateComponents([.hour, .minute], from: now)
-        let currentHour = components.hour!
+        guard let components = calendar.dateComponents([.hour, .minute], from: now),
+              let currentHour = components.hour,
+              let currentMinute = components.minute
+        else {
+            XCTFail("Failed to get date components")
+            return
+        }
 
         // 現在より1時間前
         let pastHour = (currentHour - 1 + 24) % 24
         state.selectedHour = pastHour
-        state.selectedMinute = components.minute!
+        state.selectedMinute = currentMinute
 
         // 23時間後になるはず（現在より1時間前 = 翌日の同時刻まで23時間）
         let expectedSeconds = 23 * 60 * 60

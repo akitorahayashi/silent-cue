@@ -97,7 +97,7 @@ identifier_name:
 
 # switch文のcaseのアライメント - SwiftFormatと一致させる
 switch_case_alignment:
-  indented_cases: true     
+  indented_cases: true
 
 # -------------------------------------------------------------------
 # 出力設定

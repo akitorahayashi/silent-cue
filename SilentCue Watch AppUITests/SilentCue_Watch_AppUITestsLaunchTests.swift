@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class SilentCue_Watch_AppUITestsLaunchTests: XCTestCase {
+final class SilentCueWatchAppUITestsLaunchTests: XCTestCase {
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }
