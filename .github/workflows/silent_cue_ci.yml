@@ -103,6 +103,10 @@ jobs:
     - name: Get Apple Watch Simulator UUID
       id: get-sim
       run: |
+        echo "--- Available Simulators ---"
+        xcrun simctl list devices available
+        echo "-----------------------------"
+        
         SIMULATOR_ID=$(xcrun simctl list devices available | \
           grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
@@ -113,14 +117,15 @@ jobs:
           exit 1
         fi
         
-        echo "使用するシミュレータ: $SIMULATOR_ID"
+        echo "simulator-id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
+        echo "使用するシミュレータ: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
   
     - name: Build App for Testing
       run: |
         xcodebuild build-for-testing \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,id=${SIMULATOR_ID}" \
+          -destination "platform=watchOS Simulator,id=${{ steps.get-sim.outputs.simulator-id }}" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           CODE_SIGNING_ALLOWED=NO
@@ -163,6 +168,10 @@ jobs:
     - name: Get Apple Watch Simulator UUID
       id: get-sim
       run: |
+        echo "--- Available Simulators ---"
+        xcrun simctl list devices available
+        echo "-----------------------------"
+        
         SIMULATOR_ID=$(xcrun simctl list devices available | \
           grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
@@ -173,14 +182,15 @@ jobs:
           exit 1
         fi
         
-        echo "使用するシミュレータ: $SIMULATOR_ID"
+        echo "simulator-id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
+        echo "使用するシミュレータ: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
     
     - name: Run Unit Tests
       run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,id=${SIMULATOR_ID}" \
+          -destination "platform=watchOS Simulator,id=${{ steps.get-sim.outputs.simulator-id }}" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           -only-testing:"SilentCue Watch AppTests" \
@@ -217,6 +227,10 @@ jobs:
     - name: Get Apple Watch Simulator UUID
       id: get-sim
       run: |
+        echo "--- Available Simulators ---"
+        xcrun simctl list devices available
+        echo "-----------------------------"
+        
         SIMULATOR_ID=$(xcrun simctl list devices available | \
           grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
@@ -227,14 +241,15 @@ jobs:
           exit 1
         fi
         
-        echo "使用するシミュレータ: $SIMULATOR_ID"
+        echo "simulator-id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
+        echo "使用するシミュレータ: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
     
     - name: Run UI Tests
       run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,id=${SIMULATOR_ID}" \
+          -destination "platform=watchOS Simulator,id=${{ steps.get-sim.outputs.simulator-id }}" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           -only-testing:"SilentCue Watch AppUITests" \
