@@ -101,12 +101,22 @@ jobs:
         </plist>
         EOF
     
+    - name: Get Apple Watch Simulator UUID
+      id: get-sim
+      run: |
+        SIMULATOR_ID=$(xcrun simctl list devices available | \
+          grep 'Apple Watch Series 9 (45mm)' | \
+          grep -oE '[0-9A-F\-]{36}' | \
+          head -n 1)
+        echo "SIMULATOR_ID=$SIMULATOR_ID" >> $GITHUB_ENV
+        echo "Found simulator: $SIMULATOR_ID"
+
     - name: Build App for Testing
       run: |
         xcodebuild build-for-testing \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,OS=11.2,name=Apple Watch Series 10 (42mm),id=08B5E06C-53D9-46AD-B31E-A6FECF890357" \
+          -destination "platform=watchOS Simulator,id=${SIMULATOR_ID}" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           CODE_SIGNING_ALLOWED=NO
@@ -135,6 +145,16 @@ jobs:
       with:
         xcode-version: '16.2'
         
+    - name: Get Apple Watch Simulator UUID
+      id: get-sim
+      run: |
+        SIMULATOR_ID=$(xcrun simctl list devices available | \
+          grep 'Apple Watch Series 9 (45mm)' | \
+          grep -oE '[0-9A-F\-]{36}' | \
+          head -n 1)
+        echo "SIMULATOR_ID=$SIMULATOR_ID" >> $GITHUB_ENV
+        echo "Found simulator: $SIMULATOR_ID"
+        
     - name: Download Build Artifacts
       uses: actions/download-artifact@v4
       with:
@@ -151,7 +171,7 @@ jobs:
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,OS=11.2,name=Apple Watch Series 10 (42mm),id=08B5E06C-53D9-46AD-B31E-A6FECF890357" \
+          -destination "platform=watchOS Simulator,id=${SIMULATOR_ID}" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           -only-testing:"SilentCue Watch AppTests" \
@@ -168,6 +188,16 @@ jobs:
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '16.2'
+      
+    - name: Get Apple Watch Simulator UUID
+      id: get-sim
+      run: |
+        SIMULATOR_ID=$(xcrun simctl list devices available | \
+          grep 'Apple Watch Series 9 (45mm)' | \
+          grep -oE '[0-9A-F\-]{36}' | \
+          head -n 1)
+        echo "SIMULATOR_ID=$SIMULATOR_ID" >> $GITHUB_ENV
+        echo "Found simulator: $SIMULATOR_ID"
       
     - name: Install dependencies
       run: |
@@ -190,7 +220,7 @@ jobs:
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,OS=11.2,name=Apple Watch Series 10 (42mm),id=08B5E06C-53D9-46AD-B31E-A6FECF890357" \
+          -destination "platform=watchOS Simulator,id=${SIMULATOR_ID}" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           -only-testing:"SilentCue Watch AppUITests" \
