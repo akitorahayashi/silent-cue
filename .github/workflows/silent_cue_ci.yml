@@ -61,7 +61,6 @@ jobs:
 
   build:
     name: Build
-    # needs: format-and-lint
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
@@ -77,7 +76,6 @@ jobs:
         
     - name: Create Export Options Plist
       run: |
-        # This is a placeholder Team ID. Replace with your actual Team ID if needed for real builds.
         cat > ExportOptions.plist << EOF
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -104,12 +102,10 @@ jobs:
 
     - name: Build App for Testing
       run: |
-        # Get Simulator ID
         echo "--- Available watchOS Simulators ---"
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
 
-        # Find the simulator ID for Apple Watch Series 10 (42mm) with watchOS 11.2
         SIMULATOR_ID=$(xcrun simctl list devices available | \
             awk '/-- watchOS 11.2 --/{flag=1;next}/--/{flag=0}flag' | \
             grep 'Apple Watch Series 10 (42mm)' | \
@@ -122,19 +118,22 @@ jobs:
         fi
         echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
 
-        # Build
         xcodebuild build-for-testing \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
           -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
+          -skipPackagePluginValidation \
           CODE_SIGNING_ALLOWED=NO
     
     - name: Create Archive for Build
       run: |
+        echo "Archiving DerivedData..."
+        ls -R ./DerivedData
         mkdir -p ./archives
         tar czf ./archives/build-artifacts.tar.gz -C ./DerivedData .
+        echo "Archive created."
     
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
@@ -176,12 +175,10 @@ jobs:
 
     - name: Run Unit Tests
       run: |
-        # Get Simulator ID
         echo "--- Available watchOS Simulators ---"
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
 
-        # Find the simulator ID for Apple Watch Series 10 (42mm) with watchOS 11.2
         SIMULATOR_ID=$(xcrun simctl list devices available | \
             awk '/-- watchOS 11.2 --/{flag=1;next}/--/{flag=0}flag' | \
             grep 'Apple Watch Series 10 (42mm)' | \
@@ -194,7 +191,6 @@ jobs:
         fi
         echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
         
-        # Run Tests
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
@@ -242,12 +238,10 @@ jobs:
 
     - name: Run UI Tests
       run: |
-        # Get Simulator ID
         echo "--- Available watchOS Simulators ---"
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
 
-        # Find the simulator ID for Apple Watch Series 10 (42mm) with watchOS 11.2
         SIMULATOR_ID=$(xcrun simctl list devices available | \
             awk '/-- watchOS 11.2 --/{flag=1;next}/--/{flag=0}flag' | \
             grep 'Apple Watch Series 10 (42mm)' | \
@@ -260,7 +254,6 @@ jobs:
         fi
         echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
 
-        # Run Tests
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
