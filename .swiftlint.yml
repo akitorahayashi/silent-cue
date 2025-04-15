@@ -21,6 +21,8 @@ excluded:
   - .github
   - Carthage
   - build
+  - xcbuild
+  - "**/*.generated.swift"
 
 # -------------------------------------------------------------------
 # ルール設定

@@ -9,7 +9,7 @@
 --swiftversion 5.8
 
 # 除外するディレクトリ（ビルド成果物、依存関係など）
---exclude .build,DerivedData,fastlane,.git,build
+--exclude .build,DerivedData,fastlane,.git,build,xcbuild,**/*.generated.swift
 
 #-------------------------------------------------------------------
 # インデントとスペース
