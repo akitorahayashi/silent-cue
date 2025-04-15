@@ -33,22 +33,9 @@
 		98A0AD852DADF7DD00A0E3BD /* SilentCue Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SilentCue Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		98A0AE052DADF98000A0E3BD /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"SilentCue-Watch-App-Info.plist",
-			);
-			target = 98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				98A0AE052DADF98000A0E3BD /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */,
-			);
 			path = "SilentCue Watch App";
 			sourceTree = "<group>";
 		};
@@ -595,7 +582,7 @@
 			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.19.0;
+				minimumVersion = 1.8.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

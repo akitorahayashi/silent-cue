@@ -26,7 +26,10 @@ struct SilentCueWatchApp: App {
                 )) {
                     // メイン画面としてタイマー設定画面を表示
                     SetTimerView(
-                        store: store.scope(state: \.timer, action: { .timer($0) }),
+                        store: store.scope(
+                            state: \.timer,
+                            action: AppAction.timer
+                        ),
                         onSettingsButtonTapped: {
                             // Viewから遷移アクションを発行
                             viewStore.send(.pushScreen(.settings))
@@ -42,16 +45,28 @@ struct SilentCueWatchApp: App {
                         switch destination {
                             case .countdown:
                                 CountdownView(
-                                    store: store.scope(state: \.timer, action: { .timer($0) })
+                                    store: store.scope(
+                                        state: \.timer,
+                                        action: AppAction.timer
+                                    )
                                 )
                             case .completion:
                                 TimerCompletionView(
-                                    store: store.scope(state: \.timer, action: { .timer($0) })
+                                    store: store.scope(
+                                        state: \.timer,
+                                        action: AppAction.timer
+                                    )
                                 )
                             case .settings:
                                 SettingsView(
-                                    store: store.scope(state: \.settings, action: { .settings($0) }),
-                                    hapticsStore: store.scope(state: \.haptics, action: { .haptics($0) })
+                                    store: store.scope(
+                                        state: \.settings,
+                                        action: AppAction.settings
+                                    ),
+                                    hapticsStore: store.scope(
+                                        state: \.haptics,
+                                        action: AppAction.haptics
+                                    )
                                 )
                             case .timerStart:
                                 EmptyView() // この場合は使われない

@@ -4,6 +4,7 @@ xcuserdata/
 ## ビルド関連
 build/
 DerivedData/
+xcbuild/
 *.moved-aside
 *.pbxuser
 !default.pbxuser
