@@ -61,7 +61,7 @@ jobs:
 
   build:
     name: Build
-    needs: format-and-lint
+    # needs: format-and-lint
     runs-on: macos-14
     steps:
     - uses: actions/checkout@v4
