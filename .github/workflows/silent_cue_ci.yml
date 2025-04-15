@@ -106,7 +106,7 @@ jobs:
         xcodebuild build-for-testing \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
+          -destination "platform=watchOS Simulator,OS=11.2,name=Apple Watch Series 10 (42mm),id=08B5E06C-53D9-46AD-B31E-A6FECF890357" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           CODE_SIGNING_ALLOWED=NO
@@ -151,7 +151,7 @@ jobs:
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
+          -destination "platform=watchOS Simulator,OS=11.2,name=Apple Watch Series 10 (42mm),id=08B5E06C-53D9-46AD-B31E-A6FECF890357" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           -only-testing:"SilentCue Watch AppTests" \
@@ -190,7 +190,7 @@ jobs:
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
+          -destination "platform=watchOS Simulator,OS=11.2,name=Apple Watch Series 10 (42mm),id=08B5E06C-53D9-46AD-B31E-A6FECF890357" \
           -configuration Debug \
           -derivedDataPath ./DerivedData \
           -only-testing:"SilentCue Watch AppUITests" \
