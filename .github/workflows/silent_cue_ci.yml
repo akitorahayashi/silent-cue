@@ -123,7 +123,6 @@ jobs:
           -scheme "SilentCue Watch App" \
           -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
           -configuration Debug \
-          -derivedDataPath ./DerivedData \
           -skipPackagePluginValidation \
           CODE_SIGNING_ALLOWED=NO
     
