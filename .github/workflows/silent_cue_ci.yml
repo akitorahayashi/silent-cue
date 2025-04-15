@@ -166,6 +166,14 @@ jobs:
         mkdir -p ./DerivedData
         tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
     
+    - name: Check for xctestrun file (Debug)
+      run: |
+        echo "Checking contents of DerivedData..."
+        ls -R ./DerivedData
+        echo "Searching for .xctestrun file..."
+        find ./DerivedData -name "*.xctestrun"
+        echo "Debug check complete."
+
     - name: Run Unit Tests
       run: |
         # Get Simulator ID
@@ -224,6 +232,14 @@ jobs:
         mkdir -p ./DerivedData
         tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
     
+    - name: Check for xctestrun file (Debug)
+      run: |
+        echo "Checking contents of DerivedData..."
+        ls -R ./DerivedData
+        echo "Searching for .xctestrun file..."
+        find ./DerivedData -name "*.xctestrun"
+        echo "Debug check complete."
+
     - name: Run UI Tests
       run: |
         # Get Simulator ID
