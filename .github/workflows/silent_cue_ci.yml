@@ -99,44 +99,26 @@ jobs:
         </dict>
         </plist>
         EOF
-    
-    - name: Get Apple Watch Simulator UUID
-      id: get-sim
-      run: |
-        echo "--- Available watchOS Simulators ---"
-        xcrun simctl list devices available | grep -A 20 "watchOS"
-        echo "---------------------------------"
-        
-        SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 9 (41mm)' | \
-          grep -oE '[0-9A-F\-]{36}' | \
-          head -n 1)
-        
-        if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 9 (41mm) シミュレータが見つかりません"
-          exit 1
-        fi
-        
-        echo "simulator-id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
-        echo "使用するシミュレータ: $SIMULATOR_ID (Apple Watch Series 9 (41mm))"
-  
+        echo "Generated ExportOptions.plist:"
+        cat ExportOptions.plist
+
     - name: Build App for Testing
       run: |
         # Get Simulator ID
         echo "--- Available watchOS Simulators ---"
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
-        
+
         SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 9 (41mm)' | \
+          grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
           head -n 1)
-          
+
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 9 (41mm) シミュレータが見つかりません"
+          echo "Error: Apple Watch Series 10 (42mm) シミュレータが見つかりません"
           exit 1
         fi
-        echo "Using Simulator ID: $SIMULATOR_ID"
+        echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
 
         # Build
         xcodebuild build-for-testing \
@@ -182,43 +164,23 @@ jobs:
         mkdir -p ./DerivedData
         tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
     
-    - name: Get Apple Watch Simulator UUID
-      id: get-sim
-      run: |
-        echo "--- Available watchOS Simulators ---"
-        xcrun simctl list devices available | grep -A 20 "watchOS"
-        echo "---------------------------------"
-        
-        SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 9 (41mm)' | \
-          grep -oE '[0-9A-F\-]{36}' | \
-          head -n 1)
-        
-        if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 9 (41mm) シミュレータが見つかりません"
-          exit 1
-        fi
-        
-        echo "simulator-id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
-        echo "使用するシミュレータ: $SIMULATOR_ID (Apple Watch Series 9 (41mm))"
-    
     - name: Run Unit Tests
       run: |
         # Get Simulator ID
         echo "--- Available watchOS Simulators ---"
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
-        
+
         SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 9 (41mm)' | \
+          grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
           head -n 1)
-          
+
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 9 (41mm) シミュレータが見つかりません"
+          echo "Error: Apple Watch Series 10 (42mm) シミュレータが見つかりません"
           exit 1
         fi
-        echo "Using Simulator ID: $SIMULATOR_ID"
+        echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
         
         # Run Tests
         xcodebuild test-without-building \
@@ -258,43 +220,23 @@ jobs:
         mkdir -p ./DerivedData
         tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
     
-    - name: Get Apple Watch Simulator UUID
-      id: get-sim
-      run: |
-        echo "--- Available watchOS Simulators ---"
-        xcrun simctl list devices available | grep -A 20 "watchOS"
-        echo "---------------------------------"
-        
-        SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 9 (41mm)' | \
-          grep -oE '[0-9A-F\-]{36}' | \
-          head -n 1)
-        
-        if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 9 (41mm) シミュレータが見つかりません"
-          exit 1
-        fi
-        
-        echo "simulator-id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
-        echo "使用するシミュレータ: $SIMULATOR_ID (Apple Watch Series 9 (41mm))"
-    
     - name: Run UI Tests
       run: |
         # Get Simulator ID
         echo "--- Available watchOS Simulators ---"
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
-        
+
         SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 9 (41mm)' | \
+          grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
           head -n 1)
-          
+
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 9 (41mm) シミュレータが見つかりません"
+          echo "Error: Apple Watch Series 10 (42mm) シミュレータが見つかりません"
           exit 1
         fi
-        echo "Using Simulator ID: $SIMULATOR_ID"
+        echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
 
         # Run Tests
         xcodebuild test-without-building \
