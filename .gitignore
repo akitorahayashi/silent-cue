@@ -29,10 +29,4 @@ DerivedData/
 *.pem
 *.p12
 *.cer
-*.mobileprovision
-
-# XcodeGen生成ファイル
-*.xcodeproj
-*.xcworkspace
-
-SilentCue-Watch-App-Info.plist 
+*.mobileprovision 

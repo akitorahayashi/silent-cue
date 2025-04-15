@@ -37,14 +37,6 @@ jobs:
     - uses: actions/checkout@v4
 
     # --- Format and Lint Steps --- 
-    - name: Cache Mint
-      uses: actions/cache@v4
-      with:
-        path: ~/.mint
-        key: ${{ runner.os }}-mint-${{ hashFiles('Mintfile') }}
-        restore-keys: |
-          ${{ runner.os }}-mint-
-    
     - name: Install dependencies (Mint)
       run: |
         brew install mint
@@ -161,15 +153,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Cache Mint
-      uses: actions/cache@v4
-      with:
-        path: ~/.mint
-        key: ${{ runner.os }}-mint-${{ hashFiles('Mintfile') }}
-        restore-keys: |
-          ${{ runner.os }}-mint-
-          
+      
     - name: Install dependencies
       run: |
         brew install mint
