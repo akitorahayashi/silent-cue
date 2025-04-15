@@ -109,13 +109,15 @@ jobs:
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
 
+        # Find the simulator ID for Apple Watch Series 10 (42mm) with watchOS 11.2
         SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 10 (42mm)' | \
-          grep -oE '[0-9A-F\-]{36}' | \
-          head -n 1)
+            awk '/-- watchOS 11.2 --/{flag=1;next}/--/{flag=0}flag' | \
+            grep 'Apple Watch Series 10 (42mm)' | \
+            grep -oE '[0-9A-F\\-]{36}' | \
+            head -n 1)
 
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 10 (42mm) シミュレータが見つかりません"
+          echo "Error: Apple Watch Series 10 (42mm) with watchOS 11.2 シミュレータが見つかりません"
           exit 1
         fi
         echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
@@ -171,13 +173,15 @@ jobs:
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
 
+        # Find the simulator ID for Apple Watch Series 10 (42mm) with watchOS 11.2
         SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 10 (42mm)' | \
-          grep -oE '[0-9A-F\-]{36}' | \
-          head -n 1)
+            awk '/-- watchOS 11.2 --/{flag=1;next}/--/{flag=0}flag' | \
+            grep 'Apple Watch Series 10 (42mm)' | \
+            grep -oE '[0-9A-F\\-]{36}' | \
+            head -n 1)
 
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 10 (42mm) シミュレータが見つかりません"
+          echo "Error: Apple Watch Series 10 (42mm) with watchOS 11.2 シミュレータが見つかりません"
           exit 1
         fi
         echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
@@ -227,13 +231,15 @@ jobs:
         xcrun simctl list devices available | grep -A 20 "watchOS"
         echo "---------------------------------"
 
+        # Find the simulator ID for Apple Watch Series 10 (42mm) with watchOS 11.2
         SIMULATOR_ID=$(xcrun simctl list devices available | \
-          grep 'Apple Watch Series 10 (42mm)' | \
-          grep -oE '[0-9A-F\-]{36}' | \
-          head -n 1)
+            awk '/-- watchOS 11.2 --/{flag=1;next}/--/{flag=0}flag' | \
+            grep 'Apple Watch Series 10 (42mm)' | \
+            grep -oE '[0-9A-F\\-]{36}' | \
+            head -n 1)
 
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: Apple Watch Series 10 (42mm) シミュレータが見つかりません"
+          echo "Error: Apple Watch Series 10 (42mm) with watchOS 11.2 シミュレータが見つかりません"
           exit 1
         fi
         echo "Using Simulator ID: $SIMULATOR_ID (Apple Watch Series 10 (42mm))"
