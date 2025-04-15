@@ -62,7 +62,7 @@ jobs:
   build:
     name: Build
     # needs: format-and-lint
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -109,13 +109,11 @@ jobs:
           head -n 1)
         
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: 必要なシミュレータが見つかりません (Apple Watch Series 10)"
+          echo "Error: Apple Watch Series 10 (42mm)シミュレータが見つかりません"
           exit 1
         fi
         
-        echo "SIMULATOR_ID=$SIMULATOR_ID" >> $GITHUB_ENV
-        echo "SIMULATOR_ID=$SIMULATOR_ID" >> $GITHUB_OUTPUT
-        echo "Found simulator: $SIMULATOR_ID"
+        echo "使用するシミュレータ: $SIMULATOR_ID"
   
     - name: Build App for Testing
       run: |
@@ -142,7 +140,7 @@ jobs:
   unit-tests:
     name: Run Unit Tests
     needs: build
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     
@@ -162,21 +160,23 @@ jobs:
         mkdir -p ./DerivedData
         tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
     
-    - name: Run Unit Tests
+    - name: Get Apple Watch Simulator UUID
+      id: get-sim
       run: |
-        # ビルドジョブで検出したシミュレータIDを使用
         SIMULATOR_ID=$(xcrun simctl list devices available | \
           grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
           head -n 1)
         
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: 必要なシミュレータが見つかりません (Apple Watch Series 10)"
+          echo "Error: Apple Watch Series 10 (42mm)シミュレータが見つかりません"
           exit 1
         fi
         
-        echo "Found simulator: $SIMULATOR_ID"
-        
+        echo "使用するシミュレータ: $SIMULATOR_ID"
+    
+    - name: Run Unit Tests
+      run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
@@ -189,7 +189,7 @@ jobs:
   ui-tests:
     name: Run UI Tests
     needs: build
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     
@@ -214,21 +214,23 @@ jobs:
         mkdir -p ./DerivedData
         tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
     
-    - name: Run UI Tests
+    - name: Get Apple Watch Simulator UUID
+      id: get-sim
       run: |
-        # ビルドジョブで検出したシミュレータIDを使用
         SIMULATOR_ID=$(xcrun simctl list devices available | \
           grep 'Apple Watch Series 10 (42mm)' | \
           grep -oE '[0-9A-F\-]{36}' | \
           head -n 1)
         
         if [ -z "$SIMULATOR_ID" ]; then
-          echo "Error: 必要なシミュレータが見つかりません (Apple Watch Series 10)"
+          echo "Error: Apple Watch Series 10 (42mm)シミュレータが見つかりません"
           exit 1
         fi
         
-        echo "Found simulator: $SIMULATOR_ID"
-        
+        echo "使用するシミュレータ: $SIMULATOR_ID"
+    
+    - name: Run UI Tests
+      run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
