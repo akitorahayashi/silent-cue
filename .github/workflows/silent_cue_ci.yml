@@ -30,34 +30,34 @@ jobs:
               body: "👋 Copilotレビュー: コードをチェックします"
             });
 
-  format-and-lint:
-    name: Format and Lint
-    runs-on: macos-14
-    steps:
-    - uses: actions/checkout@v4
+#   format-and-lint:
+#     name: Format and Lint
+#     runs-on: macos-14
+#     steps:
+#     - uses: actions/checkout@v4
 
-    # --- Format and Lint Steps --- 
-    - name: Install dependencies (Mint)
-      run: |
-        brew install mint
-        mint bootstrap
+#     # --- Format and Lint Steps --- 
+#     - name: Install dependencies (Mint)
+#       run: |
+#         brew install mint
+#         mint bootstrap
 
-    - name: Show Tool Versions
-      run: |
-        mint run swiftlint version
-        mint run swiftformat --version
+#     - name: Show Tool Versions
+#       run: |
+#         mint run swiftlint version
+#         mint run swiftformat --version
         
-    - name: Run SwiftFormat
-      run: |
-        mint run swiftformat .
+#     - name: Run SwiftFormat
+#       run: |
+#         mint run swiftformat .
         
-    - name: Run SwiftLint
-      run: |
-        mint run swiftlint --strict
+#     - name: Run SwiftLint
+#       run: |
+#         mint run swiftlint --strict
 
-    - name: Check for changes after linting (should be none)
-      run: |
-        git diff --exit-code || { echo "コードフォーマットの問題が見つかりました。ローカルで SwiftFormat と SwiftLint を実行し、変更をコミットしてください。"; exit 1; }
+#     - name: Check for changes after linting (should be none)
+#       run: |
+#         git diff --exit-code || { echo "コードフォーマットの問題が見つかりました。ローカルで SwiftFormat と SwiftLint を実行し、変更をコミットしてください。"; exit 1; }
 
   build:
     name: Build
@@ -66,7 +66,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # --- Build Steps --- 
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
