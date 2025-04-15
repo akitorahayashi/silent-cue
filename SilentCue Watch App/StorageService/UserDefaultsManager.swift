@@ -55,7 +55,7 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
 
     /// 全ての値をリセット
     func removeAll() {
-        UserDefaultsKeys.allCases.forEach { key in
+        for key in UserDefaultsKeys.allCases {
             defaults.removeObject(forKey: key.rawValue)
         }
     }

@@ -10,7 +10,10 @@ final class HapticsReducerTests: XCTestCase {
             reducer: { AppReducer() }
         )
 
-        await store.send(AppAction.haptics(.updateHapticSettings(type: HapticType.strong, stopAutomatically: false))) { state in
+        await store.send(AppAction.haptics(.updateHapticSettings(
+            type: HapticType.strong,
+            stopAutomatically: false
+        ))) { state in
             state.haptics.hapticType = HapticType.strong
             state.haptics.stopAutomatically = false
         }
@@ -39,7 +42,7 @@ final class HapticsReducerTests: XCTestCase {
         }
         // .stopHapticで .cancel(id: .haptic) が発行されることを確認
         // TestStoreが自動でキャンセルをハンドルしてくれる
-        
+
         // エフェクト完了待ち (startHapticとstopHaptic)
         await store.finish()
     }

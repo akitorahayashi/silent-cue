@@ -9,9 +9,9 @@ final class AppReducerTests: XCTestCase {
         // モックに期待される初期値を設定
         mockUserDefaults.setupInitialValues([
             .stopVibrationAutomatically: true, // 例: true
-            .hapticType: HapticType.standard.rawValue // 例: standard
+            .hapticType: HapticType.standard.rawValue, // 例: standard
         ])
-        
+
         let store = TestStore(
             initialState: AppState(),
             reducer: { AppReducer() },
@@ -21,20 +21,26 @@ final class AppReducerTests: XCTestCase {
         )
 
         await store.send(AppAction.onAppear)
-        
+
         // まず loadSettings を期待
         await store.receive(AppAction.settings(.loadSettings))
-        
+
         // 次にエフェクトから settingsLoaded を期待
-        await store.receive(AppAction.settings(.settingsLoaded(stopVibration: true, hapticType: HapticType.standard))) { state in
+        await store.receive(AppAction.settings(.settingsLoaded(
+            stopVibration: true,
+            hapticType: HapticType.standard
+        ))) { state in
             state.settings.stopVibrationAutomatically = true
             state.settings.selectedHapticType = HapticType.standard
             state.settings.hasLoaded = true
         }
-        
+
         // 次にAppReducerの連携によるhaptics更新を期待
-        await store.receive(AppAction.haptics(.updateHapticSettings(type: HapticType.standard, stopAutomatically: true)))
-        
+        await store.receive(AppAction.haptics(.updateHapticSettings(
+            type: HapticType.standard,
+            stopAutomatically: true
+        )))
+
         await store.finish()
     }
 
@@ -53,7 +59,10 @@ final class AppReducerTests: XCTestCase {
         }
 
         // AppReducerの連携による後続のアクションをアサート
-        await store.receive(AppAction.haptics(.updateHapticSettings(type: HapticType.weak, stopAutomatically: false))) { state in
+        await store.receive(AppAction.haptics(.updateHapticSettings(
+            type: HapticType.weak,
+            stopAutomatically: false
+        ))) { state in
             state.haptics.hapticType = HapticType.weak
             state.haptics.stopAutomatically = false
         }
@@ -62,12 +71,12 @@ final class AppReducerTests: XCTestCase {
 
     func testDismissCompletionViewClearsPathAndStopsHaptic() async {
         let initialState = AppState(
-            path: [NavigationDestination.completion], 
+            path: [NavigationDestination.completion],
             haptics: HapticsState(isActive: true)
         )
         var mutableInitialState = initialState
         mutableInitialState.timer.completionDate = Date()
-        
+
         let store = TestStore(
             initialState: mutableInitialState,
             reducer: { AppReducer() }
@@ -75,8 +84,8 @@ final class AppReducerTests: XCTestCase {
 
         // dismissを送信し、即時の状態変更をアサート
         await store.send(AppAction.timer(.dismissCompletionView)) { state in
-            state.path = [] 
-            state.timer.completionDate = nil 
+            state.path = []
+            state.timer.completionDate = nil
         }
 
         // 後続のアクションをアサート

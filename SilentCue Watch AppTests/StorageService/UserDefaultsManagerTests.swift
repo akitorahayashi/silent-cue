@@ -15,8 +15,8 @@ class UserDefaultsManagerTests: XCTestCase {
 
     override func tearDown() {
         // 各テストの後にテストで使用したキーをクリーンアップ
-        UserDefaultsKeys.allCases.forEach {
-            testDefaults.removeObject(forKey: $0.rawValue)
+        for item in UserDefaultsKeys.allCases {
+            testDefaults.removeObject(forKey: item.rawValue)
         }
         userDefaultsManager = nil
         super.tearDown()
@@ -82,9 +82,9 @@ class UserDefaultsManagerTests: XCTestCase {
         userDefaultsManager.removeAll()
 
         // 全てのキーの値がnilになっていることを確認
-        UserDefaultsKeys.allCases.forEach {
-            XCTAssertNil(testDefaults.object(forKey: $0.rawValue))
-            XCTAssertNil(userDefaultsManager.object(forKey: $0))
+        for item in UserDefaultsKeys.allCases {
+            XCTAssertNil(testDefaults.object(forKey: item.rawValue))
+            XCTAssertNil(userDefaultsManager.object(forKey: item))
         }
     }
 
