@@ -1,0 +1,108 @@
+# ===================================================================
+# SilentCue SwiftLint 設定
+# ルールの詳細は https://realm.github.io/SwiftLint/rule-directory.html を参照
+# ===================================================================
+
+# -------------------------------------------------------------------
+# 解析対象
+# -------------------------------------------------------------------
+# 解析対象のパス
+included:
+  - SilentCue Watch App
+  - SilentCue Watch AppTests
+  - SilentCue Watch AppUITests
+
+# 解析対象外のパス
+excluded:
+  - .git
+  - .build
+  - DerivedData
+  - SilentCue.xcodeproj
+  - .github
+  - Carthage
+  - build
+
+# -------------------------------------------------------------------
+# ルール設定
+# -------------------------------------------------------------------
+# 無効化するルール
+disabled_rules:
+  - trailing_whitespace     # 行末の空白を許可
+  - line_length             # 行の長さは別途カスタマイズ
+  - trailing_newline        # 末尾の改行を無視
+  - trailing_comma          # SwiftFormatで制御するため無効化
+
+# 明示的に有効化するルール
+opt_in_rules:
+  - empty_count             # count == 0 の代わりに isEmpty を使用
+  - missing_docs            # 公開APIにドキュメントを要求
+  - force_unwrapping        # 強制アンラップを禁止
+  - sorted_imports          # importを整列
+  - vertical_whitespace     # 垂直方向の空白行を整理
+
+# 静的解析ルール
+analyzer_rules:
+  - unused_declaration      # 未使用宣言の検出
+  - unused_import           # 未使用importの検出
+
+# -------------------------------------------------------------------
+# 個別ルール設定
+# -------------------------------------------------------------------
+# 行の長さ制限 - SwiftFormatと一致させる
+line_length:
+  warning: 120
+  error: 150
+  ignores_comments: true    # コメントは長さ制限から除外
+  ignores_urls: true        # URLは長さ制限から除外
+
+# 関数本体の長さ制限
+function_body_length:
+  warning: 50
+  error: 100
+
+# 型定義の長さ制限
+type_body_length:
+  warning: 300
+  error: 500
+
+# ファイルの長さ制限
+file_length:
+  warning: 500
+  error: 1000
+
+# 循環的複雑度の制限
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+# ネスト制限
+nesting:
+  type_level:
+    warning: 3
+  function_level:
+    warning: 5
+
+# 識別子 (変数名、定数名など) の命名規則
+identifier_name:
+  min_length: 2             # 最小文字数
+  max_length: 40            # 最大文字数
+  excluded:                 # 例外とする短い名前のリスト
+    - id
+    - URL
+    - x
+    - y
+    - to
+    - at
+    - of
+    - from
+    - with
+
+# switch文のcaseのアライメント - SwiftFormatと一致させる
+switch_case_alignment:
+  indented_cases: true
+
+# -------------------------------------------------------------------
+# 出力設定
+# -------------------------------------------------------------------
+reporter: "emoji"
+    

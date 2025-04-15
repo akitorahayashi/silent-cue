@@ -1,0 +1,198 @@
+name: SilentCue CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  copilot-review:
+    name: Copilot Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Add PR Review Comment (Simulated)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.pull_request.number,
+              body: "👋 Copilotレビュー: コードをチェックします"
+            });
+
+  format-and-lint:
+    name: Format and Lint
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    # --- Format and Lint Steps --- 
+    - name: Cache Mint
+      uses: actions/cache@v4
+      with:
+        path: ~/.mint
+        key: ${{ runner.os }}-mint-${{ hashFiles('Mintfile') }}
+        restore-keys: |
+          ${{ runner.os }}-mint-
+    
+    - name: Install dependencies (Mint)
+      run: |
+        brew install mint
+        mint bootstrap
+
+    - name: Show Tool Versions
+      run: |
+        mint run swiftlint version
+        mint run swiftformat --version
+        
+    - name: Run SwiftFormat
+      run: |
+        mint run swiftformat .
+        
+    - name: Run SwiftLint
+      run: |
+        mint run swiftlint --strict
+
+    - name: Check for changes after linting (should be none)
+      run: |
+        git diff --exit-code || { echo "コードフォーマットの問題が見つかりました。ローカルで SwiftFormat と SwiftLint を実行し、変更をコミットしてください。"; exit 1; }
+
+  build:
+    name: Build
+    needs: format-and-lint
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    # --- Build Steps --- 
+    - name: Check Xcode version
+      run: |
+        xcodebuild -version
+        
+    - name: Create Export Options Plist
+      run: |
+        # This is a placeholder Team ID. Replace with your actual Team ID if needed for real builds.
+        cat > ExportOptions.plist << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>method</key>
+            <string>development</string>
+            <key>teamID</key>
+            <string>DEVELOPMENT_TEAM_ID</string> 
+            <key>compileBitcode</key>
+            <false/>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+                <key>com.akitorahayashi.SilentCue.WatchApp</key>
+                <string>Development Provisioning Profile Name</string> 
+            </dict>
+        </dict>
+        </plist>
+        EOF
+    
+    - name: Build App for Testing
+      run: |
+        xcodebuild build-for-testing \
+          -project "SilentCue.xcodeproj" \
+          -scheme "SilentCue Watch App" \
+          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
+          -configuration Debug \
+          -derivedDataPath ./DerivedData \
+          CODE_SIGNING_ALLOWED=NO
+          
+    - name: Create Archive for Build
+      run: |
+        mkdir -p ./archives
+        tar czf ./archives/build-artifacts.tar.gz -C ./DerivedData .
+    
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: ./archives/build-artifacts.tar.gz
+        retention-days: 1
+
+  unit-tests:
+    name: Run Unit Tests
+    needs: build
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+        
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+        path: ./archives
+        
+    - name: Extract Build Artifacts
+      run: |
+        mkdir -p ./DerivedData
+        tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
+    
+    - name: Run Unit Tests
+      run: |
+        xcodebuild test-without-building \
+          -project "SilentCue.xcodeproj" \
+          -scheme "SilentCue Watch App" \
+          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
+          -configuration Debug \
+          -derivedDataPath ./DerivedData \
+          -only-testing:"SilentCue Watch AppTests" \
+          CODE_SIGNING_ALLOWED=NO
+
+  ui-tests:
+    name: Run UI Tests
+    needs: build
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Cache Mint
+      uses: actions/cache@v4
+      with:
+        path: ~/.mint
+        key: ${{ runner.os }}-mint-${{ hashFiles('Mintfile') }}
+        restore-keys: |
+          ${{ runner.os }}-mint-
+          
+    - name: Install dependencies
+      run: |
+        brew install mint
+        mint bootstrap
+        
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+        path: ./archives
+        
+    - name: Extract Build Artifacts
+      run: |
+        mkdir -p ./DerivedData
+        tar xzf ./archives/build-artifacts.tar.gz -C ./DerivedData
+    
+    - name: Run UI Tests
+      run: |
+        xcodebuild test-without-building \
+          -project "SilentCue.xcodeproj" \
+          -scheme "SilentCue Watch App" \
+          -destination "platform=watchOS Simulator,name=Apple Watch Series 10 (42mm)" \
+          -configuration Debug \
+          -derivedDataPath ./DerivedData \
+          -only-testing:"SilentCue Watch AppUITests" \
+          CODE_SIGNING_ALLOWED=NO 
