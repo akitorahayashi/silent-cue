@@ -8,7 +8,7 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 
 ## アーキテクチャ
 
-このアプリは The Composable Architecture をベースに、Presentation Domain Separation の考え方を採用しています。これにより、UIロジックとロジックを分離しています。
+このアプリは The Composable Architecture をベースに、Presentation Domain Separation の考え方を採用しています。
 
 -   **Presentation (プレゼンテーション層)**:
     -   `SilentCue Watch App/View/` ディレクトリ以下に配置された SwiftUI View で構成されます。

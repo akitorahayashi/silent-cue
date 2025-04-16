@@ -34,9 +34,6 @@ jobs:
     name: Test Report Generation
     needs: build-and-test
     if: always()
-    permissions:
-      issues: write
-      pull-requests: write
     uses: ./.github/workflows/test-reporter.yml
     with:
       pr_number: ${{ github.event.pull_request.number || 0 }}
@@ -52,7 +49,7 @@ jobs:
     uses: ./.github/workflows/copilot-review.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
-      github-token: ${{ github.token }}
+    secrets: inherit
     
   # 本番用ビルド - mainブランチへのプッシュまたはPRマージ後
   production-build:
@@ -73,6 +70,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [code-quality, build-and-test, test-report, code-review, production-build]
     if: always()
+    permissions:
+      issues: write
     steps:
       - name: Determine Status
         id: status
