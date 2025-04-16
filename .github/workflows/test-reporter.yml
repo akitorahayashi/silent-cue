@@ -1,4 +1,4 @@
-name: Test and Coverage Report
+name: Test Reporter
 
 on:
   workflow_call:
@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout code # jq を使うためにリポジトリをチェックアウト
         uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Download test results artifact
         uses: actions/download-artifact@v4
@@ -125,12 +128,18 @@ jobs:
             }
 
             const { owner, repo } = context.repo;
-            const combinedCoverageFound = ${{ steps.coverage.outputs.found == 'true' }};
-            const combinedCoveragePercentage = combinedCoverageFound ? ${{ steps.coverage.outputs.percentage }} : null;
-            const unitCoverageFound = ${{ steps.unit_coverage.outputs.found == 'true' }};
-            const unitCoveragePercentage = unitCoverageFound ? ${{ steps.unit_coverage.outputs.percentage }} : null;
-            const uiCoverageFound = ${{ steps.ui_coverage.outputs.found == 'true' }};
-            const uiCoveragePercentage = uiCoverageFound ? ${{ steps.ui_coverage.outputs.percentage }} : null;
+            // Get step outputs as strings
+            const combinedCoverageFound = '${{ steps.coverage.outputs.found }}' === 'true';
+            const rawCombinedCoverage = '${{ steps.coverage.outputs.percentage }}';
+            const unitCoverageFound = '${{ steps.unit_coverage.outputs.found }}' === 'true';
+            const rawUnitCoverage = '${{ steps.unit_coverage.outputs.percentage }}';
+            const uiCoverageFound = '${{ steps.ui_coverage.outputs.found }}' === 'true';
+            const rawUiCoverage = '${{ steps.ui_coverage.outputs.percentage }}';
+            
+            // Parse percentages, providing null if not found or invalid
+            const combinedCoveragePercentage = combinedCoverageFound && !isNaN(parseFloat(rawCombinedCoverage)) ? parseFloat(rawCombinedCoverage) : null;
+            const unitCoveragePercentage = unitCoverageFound && !isNaN(parseFloat(rawUnitCoverage)) ? parseFloat(rawUnitCoverage) : null;
+            const uiCoveragePercentage = uiCoverageFound && !isNaN(parseFloat(rawUiCoverage)) ? parseFloat(rawUiCoverage) : null;
 
             const commentMarker = '<!-- test-and-coverage-report -->';
             let commentBody = `${commentMarker}\\n\\n## Test & Coverage Summary\\n\\n`;
@@ -148,16 +157,16 @@ jobs:
             // Coverage Info
             commentBody += `\\n📊 **Code Coverage:**\\n`; // Section header for coverage
             let coverageReported = false;
-            if (combinedCoverageFound) {
-              commentBody += `- **Overall:** **${combinedCoveragePercentage}%**\\n`;
+            if (combinedCoveragePercentage !== null) {
+              commentBody += `- **Overall:** **${combinedCoveragePercentage.toFixed(1)}%**\\n`;
               coverageReported = true;
             }
-            if (unitCoverageFound) {
-              commentBody += `- Unit Tests: ${unitCoveragePercentage}%\\n`;
+            if (unitCoveragePercentage !== null) {
+              commentBody += `- Unit Tests: ${unitCoveragePercentage.toFixed(1)}%\\n`;
               coverageReported = true;
             }
-            if (uiCoverageFound) {
-              commentBody += `- UI Tests: ${uiCoveragePercentage}%\\n`;
+            if (uiCoveragePercentage !== null) {
+              commentBody += `- UI Tests: ${uiCoveragePercentage.toFixed(1)}%\\n`;
               coverageReported = true;
             }
             if (!coverageReported) {
