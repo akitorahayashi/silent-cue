@@ -1,16 +1,24 @@
 name: SilentCue Build for Production
 
 on:
-  workflow_run:
-    workflows: [SilentCue Build & Test]
-    types: [completed]
-    branches: [main, master]
+  workflow_call:
+    inputs:
+      release_tag:
+        description: "Release Tag"
+        required: true
+        type: string
+        # Release Tagはビルド成果物をGitHub Releasesに公開する際のバージョン識別子として使用されます。
+        # 指定された場合、このタグ名でGitHubにドラフトリリースが自動作成され、ビルドされたIPAが添付されます。
+        # CI/CDパイプラインでは通常、github.run_numberに基づいて自動生成されます（例: v123）。
+      pr_number:
+        description: "Pull Request Number"
+        required: true
+        type: number
 
 jobs:
   prepare-release:
     name: Prepare Production Build
     runs-on: macos-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -185,11 +193,11 @@ jobs:
           
       # ===== GitHub Releasesへの自動ドラフト作成 - App Store リリース時は不要ならコメントアウト =====
       - name: Create GitHub Release
-        if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main'
+        if: inputs.release_tag != ''
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
+          tag_name: ${{ inputs.release_tag }}
+          name: Release ${{ inputs.release_tag }}
           draft: true
           files: ./build/Export/*.ipa
           token: ${{ secrets.GITHUB_TOKEN }}

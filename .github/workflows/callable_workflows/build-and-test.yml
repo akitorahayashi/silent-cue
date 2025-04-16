@@ -1,11 +1,11 @@
 name: SilentCue Build & Test
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+  workflow_call:
+    outputs:
+      test_result:
+        description: "Test Result"
+        value: ${{ jobs.tests.outputs.test_result }}
 
 jobs:
   build:
@@ -70,6 +70,8 @@ jobs:
     name: Run Tests
     needs: build
     runs-on: macos-latest
+    outputs:
+      test_result: ${{ steps.test_status.outputs.result }}
     steps:
     - uses: actions/checkout@v4
     
@@ -110,6 +112,7 @@ jobs:
       run: mkdir -p test-results/unit test-results/ui
     
     - name: Run Unit Tests
+      id: unit_tests
       run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
@@ -119,9 +122,12 @@ jobs:
           -resultBundlePath ./test-results/unit/TestResults.xcresult \
           -enableCodeCoverage YES \
           | xcbeautify --report junit --report-path ./test-results/unit/junit.xml
+        
+        echo "UNIT_TEST_STATUS=$?" >> $GITHUB_ENV
       continue-on-error: true
       
     - name: Run UI Tests
+      id: ui_tests
       run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
@@ -130,12 +136,23 @@ jobs:
           -derivedDataPath ./xcbuild \
           -resultBundlePath ./test-results/ui/TestResults.xcresult \
           | xcbeautify --report junit --report-path ./test-results/ui/junit.xml
+          
+        echo "UI_TEST_STATUS=$?" >> $GITHUB_ENV
       continue-on-error: true
       
     - name: Generate Code Coverage Report
       run: |
         xcrun xccov view --report --json ./test-results/unit/TestResults.xcresult > ./test-results/unit/coverage.json
       continue-on-error: true
+      
+    - name: Set Test Status
+      id: test_status
+      run: |
+        if [ "$UNIT_TEST_STATUS" == "0" ] && [ "$UI_TEST_STATUS" == "0" ]; then
+          echo "result=success" >> $GITHUB_OUTPUT
+        else
+          echo "result=failure" >> $GITHUB_OUTPUT
+        fi
       
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
