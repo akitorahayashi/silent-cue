@@ -6,7 +6,7 @@ on:
 
 jobs:
   copilot-review:
-    name: Copilot Review
+    name: Copilot PR Review
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -14,14 +14,38 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0
+          
       - name: Add PR Review Comment
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
+            const pullRequest = context.payload.pull_request;
+            
+            // First, add a comment to indicate review is starting
+            await github.rest.issues.createComment({
               ...context.repo,
-              issue_number: context.payload.pull_request.number,
-              body: "👋 Copilotレビュー: コードをチェックします"
-            }); 
+              issue_number: pullRequest.number,
+              body: "👋 自動コードレビューを開始します。少々お待ちください。"
+            });
+            
+            // Request review from Copilot (this will add Copilot as a reviewer)
+            try {
+              await github.rest.pulls.requestReviewers({
+                ...context.repo,
+                pull_number: pullRequest.number,
+                reviewers: ["copilot"]
+              });
+              console.log("Successfully requested review from Copilot");
+            } catch (error) {
+              console.log("Error requesting review from Copilot:", error);
+              
+              // If Copilot reviewer is not available, note it in a comment
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pullRequest.number,
+                body: "⚠️ GitHub Copilotでのレビューが利用できません。代替のAIレビュアーで続行します。"
+              });
+            }
