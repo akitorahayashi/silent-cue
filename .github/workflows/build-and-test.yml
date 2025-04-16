@@ -46,9 +46,6 @@ jobs:
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -quiet \
-          -enableCodeCoverage YES \
-          GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES \
-          GCC_GENERATE_TEST_COVERAGE_FILES=YES \
           CODE_SIGNING_ALLOWED=NO | xcpretty
     
     - name: Upload Build Artifacts
@@ -124,8 +121,6 @@ jobs:
           -derivedDataPath ./xcbuild \
           -resultBundlePath ./test-results/unit/TestResults.xcresult \
           -enableCodeCoverage YES \
-          GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES \
-          GCC_GENERATE_TEST_COVERAGE_FILES=YES \
           | xcbeautify --report junit --report-path ./test-results/unit/junit.xml
         
         echo "UNIT_TEST_STATUS=$?" >> $GITHUB_ENV
@@ -140,6 +135,7 @@ jobs:
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -resultBundlePath ./test-results/ui/TestResults.xcresult \
+          -enableCodeCoverage YES \
           | xcbeautify --report junit --report-path ./test-results/ui/junit.xml
           
         echo "UI_TEST_STATUS=$?" >> $GITHUB_ENV
@@ -147,15 +143,7 @@ jobs:
       
     - name: Generate Code Coverage Report
       run: |
-        # Check if coverage data exists before generating the report
-        if xcrun xccov view --report ./test-results/unit/TestResults.xcresult &>/dev/null; then
-          xcrun xccov view --report --json ./test-results/unit/TestResults.xcresult > ./test-results/unit/coverage.json
-          echo "Coverage data processed successfully"
-        else
-          echo "No coverage data found in the test results bundle"
-          # Create an empty coverage file to prevent workflow failures
-          echo "{}" > ./test-results/unit/coverage.json
-        fi
+        xcrun xccov view --report --json ./test-results/unit/TestResults.xcresult > ./test-results/unit/coverage.json
       continue-on-error: true
       
     - name: Set Test Status
