@@ -89,6 +89,19 @@ struct HapticsReducer: Reducer {
     // MARK: - プレビュー
 
     private func handlePreviewHaptic(_ state: inout State, type: HapticType) -> Effect<Action> {
+        // プレビュー中なら先に既存のプレビューを停止
+        if state.isPreviewingHaptic {
+            // プレビューをキャンセル
+            return .merge(
+                .cancel(id: CancelID.preview),
+                .run { send in
+                    // 短い遅延を入れて確実に前のタスクが終了してから新しいタスクを開始
+                    try? await Task.sleep(for: .milliseconds(50))
+                    await send(.previewHaptic(type))
+                }
+            )
+        }
+        
         // プレビュー中フラグを設定
         state.isPreviewingHaptic = true
 
