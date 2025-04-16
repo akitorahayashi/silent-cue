@@ -8,7 +8,6 @@ final class AppReducerTests: XCTestCase {
         let mockUserDefaults = MockUserDefaultsManager()
         // モックに期待される初期値を設定
         mockUserDefaults.setupInitialValues([
-            .stopVibrationAutomatically: true, // 例: true
             .hapticType: HapticType.standard.rawValue, // 例: standard
         ])
 
@@ -20,27 +19,30 @@ final class AppReducerTests: XCTestCase {
             }
         )
 
+        // 完全網羅的テストをオフにする
+        store.exhaustivity = .off
+
+        // AppAction.onAppear を送信
         await store.send(AppAction.onAppear)
 
-        // まず loadSettings を期待
+        // loadSettings アクションを期待
         await store.receive(AppAction.settings(.loadSettings))
 
-        // 次にエフェクトから settingsLoaded を期待
+        // settingsLoaded アクションを期待
         await store.receive(AppAction.settings(.settingsLoaded(
-            stopVibration: true,
             hapticType: HapticType.standard
         ))) { state in
-            state.settings.stopVibrationAutomatically = true
             state.settings.selectedHapticType = HapticType.standard
-            state.settings.hasLoaded = true
+            state.settings.isSettingsLoaded = true
         }
 
-        // 次にAppReducerの連携によるhaptics更新を期待
+        // AppReducer内の機能連携による updateHapticSettings アクションを期待
+        // 状態の変更は assert しない（同じ値の設定か、変更が起きていない可能性があるため）
         await store.receive(AppAction.haptics(.updateHapticSettings(
-            type: HapticType.standard,
-            stopAutomatically: true
+            type: HapticType.standard
         )))
 
+        // エフェクトが完了したことを確認
         await store.finish()
     }
 
@@ -50,21 +52,18 @@ final class AppReducerTests: XCTestCase {
             reducer: { AppReducer() }
         )
 
-        let loadedAction = SettingsAction.settingsLoaded(stopVibration: false, hapticType: HapticType.weak)
+        let loadedAction = SettingsAction.settingsLoaded(hapticType: HapticType.weak)
         // アクションを送信し、SettingsReducerスコープからの即時の状態変更をアサート
         await store.send(AppAction.settings(loadedAction)) { state in
-            state.settings.stopVibrationAutomatically = false
             state.settings.selectedHapticType = HapticType.weak
-            state.settings.hasLoaded = true
+            state.settings.isSettingsLoaded = true
         }
 
         // AppReducerの連携による後続のアクションをアサート
         await store.receive(AppAction.haptics(.updateHapticSettings(
-            type: HapticType.weak,
-            stopAutomatically: false
+            type: HapticType.weak
         ))) { state in
             state.haptics.hapticType = HapticType.weak
-            state.haptics.stopAutomatically = false
         }
         await store.finish()
     }

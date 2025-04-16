@@ -8,7 +8,7 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 
 ## アーキテクチャ
 
-このアプリは The Composable Architecture をベースに、Presentation Domain Separation の考え方を採用しています。これにより、UIロジックとロジックを分離しています。
+このアプリは The Composable Architecture をベースに、Presentation Domain Separation の考え方を採用しています。
 
 -   **Presentation (プレゼンテーション層)**:
     -   `SilentCue Watch App/View/` ディレクトリ以下に配置された SwiftUI View で構成されます。
@@ -27,7 +27,13 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 ```
 SilentCue/
 ├── .github/workflows/
-│   └── silent_cue_ci.yml
+│   ├── ci-cd-pipeline.yml
+│   ├── build-and-test.yml
+│   ├── build-for-production.yml
+│   ├── code-quality.yml
+│   ├── copilot-review.yml
+│   └── test-reporter.yml
+│   └── README.md # 各ワークフローの詳細はこちら
 ├── SilentCue Watch App/
 │   ├── Assets.xcassets/
 │   ├── Domain/
@@ -113,6 +119,28 @@ Apple Watch独自の触覚フィードバック機能を活用し、最小限の
 
 ### バックグラウンド実行
 Apple Watchアプリを閉じた後もタイマーが正確に動作し続けます。WKExtendedRuntimeSessionを活用した高度なバックグラウンド処理により、アプリがバックグラウンドにある状態でも正確な時間計測と通知を実現しています。長時間のタイマーでも精度を維持します。
+
+### バックグラウンドでのタイマー完了対応
+バックグラウンドでタイマーが完了した場合の動作は以下のようになっています：
+
+- **通知機能**: タイマー設定時に自動的に通知がスケジュールされ、タイマー完了時に通知が表示されます。これにより、アプリがバックグラウンドにある時でもタイマーの完了を知ることができます。
+
+- **通知アクション**: 通知には「アプリを開く」アクションが含まれており、タップするとタイマー完了画面に遷移します。通知自体ですでに音や振動でユーザーに知らせているため、通知から起動した場合は余計な振動を避ける設計になっています。
+
+- **フォアグラウンド復帰時**: アプリを通知以外の方法で直接開いた場合、タイマーが既に完了していれば完了画面が表示されます。通知経由でない場合のみ振動が発生する仕組みになっています。
+
+- **堅牢なバックグラウンド処理**: WKExtendedRuntimeSessionを活用して、Apple Watchの厳しいバックグラウンド制限下でも正確にタイマーの状態を追跡し、信頼性の高いタイマー機能を提供します。
+
+- **通知許可のガイダンス**: 通知を許可していないユーザーに対しては、タイマー完了画面で通知許可を促すボタンを表示します。「通知を有効にする」ボタンをタップすると、通知を許可することでアプリを閉じた状態でもタイマー完了を知ることができるようになります。
+
+## CI/CD パイプライン
+
+このプロジェクトでは、GitHub Actions を利用して CI/CD パイプラインを構築しています。`.github/workflows/` ディレクトリ以下に設定ファイルが格納されています。
+
+- **`ci-cd-pipeline.yml`**: メインとなる統合パイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、他のワークフローを順次実行します。
+- その他の `.yml` ファイル (`build-and-test.yml`, `code-quality.yml`, `copilot-review.yml` など): パイプラインの各ステップを実行する、呼び出し可能なワークフローです。`ci-cd-pipeline.yml` から呼び出されます。
+
+詳細なワークフローの説明は `.github/workflows/README.md` を参照してください。
 
 ## 開発環境
 

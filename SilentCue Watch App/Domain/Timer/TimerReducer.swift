@@ -106,6 +106,15 @@ struct TimerReducer: Reducer {
         // 非同期クロージャーで使う値を先に取得
         let targetEndDate = state.targetEndDate
         let totalSeconds = state.totalSeconds
+        let durationMinutes = state.timerDurationMinutes
+
+        // タイマー完了通知をスケジュール
+        if let targetDate = targetEndDate {
+            NotificationManager.shared.scheduleTimerCompletionNotification(
+                at: targetDate,
+                minutes: durationMinutes
+            )
+        }
 
         // バックグラウンドタイマー用コールバックを保存
         return .run { send in
@@ -149,6 +158,9 @@ struct TimerReducer: Reducer {
         // 拡張ランタイムセッションを停止
         ExtendedRuntimeManager.shared.stopSession()
 
+        // 通知をキャンセル
+        NotificationManager.shared.cancelTimerCompletionNotification()
+
         return .cancel(id: CancelID.timer)
     }
 
@@ -176,6 +188,9 @@ struct TimerReducer: Reducer {
 
         // 拡張ランタイムセッションを停止
         ExtendedRuntimeManager.shared.stopSession()
+
+        // タイマー完了時は通知をキャンセル（すでにアプリ内にいるため）
+        NotificationManager.shared.cancelTimerCompletionNotification()
 
         return .none
     }

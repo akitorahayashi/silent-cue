@@ -5,13 +5,19 @@ final class CountdownViewUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+
+        // テスト用の環境変数を設定
+        TestEnvironment.setupStandardTestEnvironment(for: app)
+
         app.launch()
 
-        // アプリが正常に起動するのを待機
-        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
+        // 通知許可の確認・実行
+        NotificationPermissionHelper.ensureNotificationPermission(for: app)
 
-        // アプリのタイトルが表示されるまで待機
-        XCTAssertTrue(app.staticTexts["Silent Cue"].waitForExistence(timeout: 5), "アプリタイトルが表示される")
+        XCTAssertTrue(
+            app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "アプリタイトルが表示される"
+        )
     }
 
     func testNavigateToCountdown() throws {
@@ -20,15 +26,15 @@ final class CountdownViewUITests: XCTestCase {
 
         // カウントダウン画面の要素が表示されるか確認
         let timeFormatExists = app.staticTexts.matching(identifier: "TimeFormatLabel").firstMatch
-            .waitForExistence(timeout: 5)
+            .waitForExistence(timeout: UITestConstants.Timeout.standard)
         XCTAssertTrue(timeFormatExists, "時間フォーマットラベルが表示される")
 
         let timeDisplayExists = app.staticTexts.matching(identifier: "CountdownTimeDisplay").firstMatch
-            .waitForExistence(timeout: 3)
+            .waitForExistence(timeout: UITestConstants.Timeout.short)
         XCTAssertTrue(timeDisplayExists, "カウントダウン表示が表示される")
 
         let cancelButtonExists = app.buttons.matching(identifier: "CancelTimerButton").firstMatch
-            .waitForExistence(timeout: 3)
+            .waitForExistence(timeout: UITestConstants.Timeout.short)
         XCTAssertTrue(cancelButtonExists, "キャンセルボタンが表示される")
     }
 
@@ -38,21 +44,22 @@ final class CountdownViewUITests: XCTestCase {
 
         // カウントダウン画面の要素が表示されるか確認
         XCTAssertTrue(
-            app.staticTexts.matching(identifier: "TimeFormatLabel").firstMatch.waitForExistence(timeout: 5),
+            app.staticTexts.matching(identifier: "TimeFormatLabel").firstMatch
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "時間をフォーマットしたラベルが表示される"
         )
 
         // キャンセルボタンをタップ
         let cancelButton = app.buttons.matching(identifier: "CancelTimerButton").firstMatch
-        XCTAssertTrue(cancelButton.waitForExistence(timeout: 3), "キャンセルボタンが表示される")
+        XCTAssertTrue(cancelButton.waitForExistence(timeout: UITestConstants.Timeout.short), "キャンセルボタンが表示される")
         cancelButton.tap()
 
         // タイマー開始画面に戻ったか確認
-        let titleExists = app.staticTexts["Silent Cue"].waitForExistence(timeout: 5)
+        let titleExists = app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard)
         XCTAssertTrue(titleExists, "キャンセル後、開始画面のタイトルが表示される")
     }
 
-    // カウントダウン画面に移動するヘルパーメソッド
+    // カウントダウン画面に移動するメソッド
     private func navigateToCountdownView() {
         // 画面上部3割あたりから上へスワイプ（ピッカーを避ける）
         let startPoint = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
@@ -61,7 +68,7 @@ final class CountdownViewUITests: XCTestCase {
 
         // StartTimerButtonを見つけてタップ
         let startButton = app.buttons.matching(identifier: "StartTimerButton").firstMatch
-        XCTAssertTrue(startButton.waitForExistence(timeout: 5), "開始ボタンが表示される")
+        XCTAssertTrue(startButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "開始ボタンが表示される")
         startButton.tap()
     }
 }

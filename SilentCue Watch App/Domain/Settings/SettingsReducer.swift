@@ -17,11 +17,8 @@ struct SettingsReducer: Reducer {
                 case .loadSettings:
                     return handleLoadSettings()
 
-                case let .settingsLoaded(stopVibration, hapticType):
-                    return handleSettingsLoaded(&state, stopVibration: stopVibration, hapticType: hapticType)
-
-                case let .toggleStopVibrationAutomatically(value):
-                    return handleToggleStopVibrationAutomatically(&state, value: value)
+                case let .settingsLoaded(hapticType):
+                    return handleSettingsLoaded(&state, hapticType: hapticType)
 
                 case let .selectHapticType(type):
                     return handleSelectHapticType(&state, type: type)
@@ -48,31 +45,22 @@ struct SettingsReducer: Reducer {
 
     private func handleLoadSettings() -> Effect<Action> {
         .run { send in
-            let stopVibration = userDefaultsManager
-                .object(forKey: .stopVibrationAutomatically) as? Bool ?? true
             let typeRaw = userDefaultsManager.object(forKey: .hapticType) as? String
             let hapticType = typeRaw.flatMap { HapticType(rawValue: $0) } ?? HapticType.standard
-            await send(.settingsLoaded(stopVibration: stopVibration, hapticType: hapticType))
+            await send(.settingsLoaded(hapticType: hapticType))
         }
     }
 
     private func handleSettingsLoaded(
         _ state: inout State,
-        stopVibration: Bool,
         hapticType: HapticType
     ) -> Effect<Action> {
-        state.stopVibrationAutomatically = stopVibration
         state.selectedHapticType = hapticType
-        state.hasLoaded = true
+        state.isSettingsLoaded = true
         return .none
     }
 
     // MARK: - 設定変更関連
-
-    private func handleToggleStopVibrationAutomatically(_ state: inout State, value: Bool) -> Effect<Action> {
-        state.stopVibrationAutomatically = value
-        return .send(.saveSettings)
-    }
 
     private func handleSelectHapticType(_ state: inout State, type: HapticType) -> Effect<Action> {
         state.selectedHapticType = type
@@ -84,11 +72,9 @@ struct SettingsReducer: Reducer {
     }
 
     private func handleSaveSettings(_ state: inout State) -> Effect<Action> {
-        let stopAutoValue = state.stopVibrationAutomatically
         let hapticTypeValue = state.selectedHapticType.rawValue
 
         return .run { _ in
-            userDefaultsManager.set(stopAutoValue, forKey: .stopVibrationAutomatically)
             userDefaultsManager.set(hapticTypeValue, forKey: .hapticType)
         }
     }

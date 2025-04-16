@@ -5,10 +5,9 @@ import Foundation
 enum SettingsAction: Equatable {
     // 設定の読み込み関連
     case loadSettings
-    case settingsLoaded(stopVibration: Bool, hapticType: HapticType)
+    case settingsLoaded(hapticType: HapticType)
 
     // 設定の変更関連
-    case toggleStopVibrationAutomatically(Bool)
     case selectHapticType(HapticType)
     case saveSettings
 

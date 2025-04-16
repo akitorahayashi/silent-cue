@@ -12,6 +12,9 @@ class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
     /// タイマー完了時のコールバック
     private var timerCompletionHandler: (() -> Void)?
 
+    /// バックグラウンドでタイマーが完了したかのフラグ
+    private(set) var isTimerCompletedInBackground = false
+
     /// 終了予定時間
     private var targetEndTime: Date?
 
@@ -26,6 +29,9 @@ class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
     func startSession(duration _: TimeInterval, targetEndTime: Date? = nil, completionHandler: (() -> Void)? = nil) {
         // 既存のセッションを終了
         stopSession()
+
+        // バックグラウンド完了フラグをリセット
+        isTimerCompletedInBackground = false
 
         // コールバックと終了時間を保存
         timerCompletionHandler = completionHandler
@@ -50,6 +56,9 @@ class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
 
         // バックグラウンドタイマーを停止
         stopBackgroundTimer()
+
+        // フラグをリセット
+        isTimerCompletedInBackground = false
 
         print("Extended runtime session stopped")
     }
@@ -82,11 +91,21 @@ class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
         // 現在時刻が終了予定時刻を過ぎていたらコールバックを実行
         if Date() >= targetEndTime {
             print("Timer completed in background")
+            // バックグラウンド完了フラグを設定
+            isTimerCompletedInBackground = true
             completionHandler()
 
             // 一度だけ実行するように参照をクリア
             timerCompletionHandler = nil
         }
+    }
+
+    /// アプリがフォアグラウンドに戻ったときに呼び出して、バックグラウンドでタイマーが完了していたかを確認
+    /// - Returns: バックグラウンドでタイマーが完了していたらtrue
+    func checkAndClearBackgroundCompletionFlag() -> Bool {
+        let wasCompleted = isTimerCompletedInBackground
+        isTimerCompletedInBackground = false
+        return wasCompleted
     }
 
     // MARK: - WKExtendedRuntimeSessionDelegate
