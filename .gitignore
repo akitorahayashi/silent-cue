@@ -9,6 +9,10 @@ xcbuild/
 *.pbxuser
 !default.pbxuser
 
+## テスト結果
+TestResults/
+TestResults.xcresult/
+
 ## Objective-C/Swift固有のファイル
 *.hmap
 
