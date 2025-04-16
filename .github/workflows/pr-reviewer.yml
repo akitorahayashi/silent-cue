@@ -7,6 +7,10 @@ on:
         description: "Review Target Pull Request Number"
         required: true
         type: number
+      github_token:
+        description: "GitHub Token for authentication"
+        required: true
+        type: string
 
 jobs:
   copilot-review:
@@ -26,7 +30,7 @@ jobs:
       - name: Add PR Review Comment
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ inputs.github_token }}
           script: |
             // First, add a comment to indicate review is starting
             await github.rest.issues.createComment({

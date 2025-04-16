@@ -4,12 +4,12 @@ on:
   workflow_call:
     inputs:
       workflow_run_id:
-        description: "テスト実行のWorkflow Run ID"
+        description: "Test Execution Workflow Run ID"
         required: false
         type: string
         default: ""
       pr_number:
-        description: "プルリクエスト番号"
+        description: "Pull Request Number"
         required: false
         type: number
         default: 0
