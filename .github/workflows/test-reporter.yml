@@ -1,22 +1,21 @@
-name: Test and Coverage Reporter
+name: Test and Coverage Report
 
 on:
-  workflow_run:
-    workflows: ["Build & Test"] 
-    types:
-      - completed
+  workflow_call:
+    inputs:
+      pull_request_number:
+        description: 'Pull Request number'
+        required: true
+        type: number
 
 permissions:
   checks: write          # JUnitレポートをChecksとして表示するために必要
-  actions: read          # workflow_runからアーティファクトをダウンロードするために必要
+  actions: read          # アーティファクトをダウンロードするために必要
   pull-requests: write   # PRにコメントするために必要
 
 jobs:
   report:
     runs-on: ubuntu-latest
-    # ワークフローが成功し、PRに関連する場合のみ実行
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
-
     steps:
       - name: Checkout code # jq を使うためにリポジトリをチェックアウト
         uses: actions/checkout@v4
@@ -26,14 +25,12 @@ jobs:
         with:
           name: test-results # build-and-test.yml でアップロードされたテスト結果のアーティファクト名
           path: ./test-results
-          run-id: ${{ github.event.workflow_run.id }} # トリガーとなったワークフローランのIDを指定
 
       - name: Download coverage reports artifact
         uses: actions/download-artifact@v4
         with:
           name: coverage-reports # build-and-test.yml でアップロードされたカバレッジアーティファクト名
           path: ./coverage-artifact
-          run-id: ${{ github.event.workflow_run.id }} # トリガーとなったワークフローランのIDを指定
 
       - name: List downloaded files (for debugging)
         run: |
@@ -121,7 +118,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = github.event.workflow_run.pull_requests?.[0]?.number;
+            const prNumber = ${{ inputs.pull_request_number }};
             if (!prNumber) {
               console.error('Could not extract pull request number.');
               return;
