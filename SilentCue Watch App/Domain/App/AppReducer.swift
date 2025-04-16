@@ -29,10 +29,20 @@ struct AppReducer: Reducer {
                     return .send(.settings(.loadSettings))
 
                 case let .scenePhaseChanged(newPhase):
-                    // バックグラウンドから復帰時にタイマー表示を更新
-                    // 現在の画面をパスの末尾から判断
-                    if newPhase == .active, state.path.last == .countdown {
-                        return .send(.timer(.updateTimerDisplay))
+                    // バックグラウンドから復帰時の処理
+                    if newPhase == .active {
+                        // カウントダウン画面表示中ならタイマー表示を更新
+                        if state.path.last == .countdown {
+                            return .send(.timer(.updateTimerDisplay))
+                        }
+                        
+                        // バックグラウンドでタイマーが完了していたかチェック
+                        let wasCompletedInBackground = ExtendedRuntimeManager.shared.checkAndClearBackgroundCompletionFlag()
+                        
+                        // バックグラウンドで完了していた場合、通知から来た可能性が高いので振動なしで完了画面に遷移
+                        if wasCompletedInBackground && state.timer.completionDate != nil {
+                            return .send(.pushScreen(.completion))
+                        }
                     }
                     return .none
 
@@ -71,12 +81,16 @@ struct AppReducer: Reducer {
                         stopAutomatically: state.settings.stopVibrationAutomatically
                     )))
 
-                case .timer(.timerFinished), .timer(.backgroundTimerFinished):
+                case .timer(.timerFinished):
                     // Haptics開始と同時に完了画面へ遷移
                     return .merge(
                         .send(.haptics(.startHaptic(state.settings.selectedHapticType))),
                         .send(.pushScreen(.completion)) // pathにcompletionを追加
                     )
+                    
+                case .timer(.backgroundTimerFinished):
+                    // バックグラウンドでタイマーが完了した場合は振動なしで完了画面へ遷移
+                    return .send(.pushScreen(.completion))
 
                 case .timer(.cancelTimer):
                     // Haptics停止と同時に前の画面へ

@@ -7,6 +7,7 @@ import Foundation
 enum UserDefaultsKeys: String, CaseIterable {
     case stopVibrationAutomatically
     case hapticType
+    case isFirstLaunch
 }
 
 // MARK: - UserDefaults Protocol
