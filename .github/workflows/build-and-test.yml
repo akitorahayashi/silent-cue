@@ -80,10 +80,9 @@ jobs:
       with:
         xcode-version: '16.2'
     
-    - name: Install Test Tools
+    - name: Install xcpretty
       run: |
         gem install xcpretty
-        brew install xcbeautify
         
     - name: Download Build Artifacts
       uses: actions/download-artifact@v4
