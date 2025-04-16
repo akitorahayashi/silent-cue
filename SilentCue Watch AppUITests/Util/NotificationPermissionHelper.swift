@@ -2,14 +2,14 @@ import XCTest
 
 enum NotificationPermissionHelper {
     
-    // 通知許可のダイアログを処理する関数
+    /// 通知許可のダイアログを処理する関数
     static func ensureNotificationPermission(for app: XCUIApplication) {
-        let velocity = UITestConstants.standardScrollVelocity
+        let velocity = UITestConstants.ScrollVelocity.standard
         
         // まだ認証していない
         let notificationNotAuthorizedAlertTitle = app.staticTexts["通知について"]
         // 1. アプリ内の通知説明アラート
-        if notificationNotAuthorizedAlertTitle.waitForExistence(timeout: UITestConstants.shortTimeout) {
+        if notificationNotAuthorizedAlertTitle.waitForExistence(timeout: UITestConstants.Timeout.short) {
             // スクロールして「許可する」ボタンを表示
             app.swipeUp(velocity: velocity)
             let allowButton = app.buttons["許可する"]
@@ -27,7 +27,7 @@ enum NotificationPermissionHelper {
             app.swipeUp(velocity: velocity)
             // "許可" ボタンを探す
             let carouselAllowButton = carousel.buttons["許可"]
-            if carouselAllowButton.waitForExistence(timeout: UITestConstants.standardTimeout) {
+            if carouselAllowButton.waitForExistence(timeout: UITestConstants.Timeout.standard) {
                 carouselAllowButton.tap()
             }
         }

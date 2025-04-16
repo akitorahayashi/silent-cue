@@ -24,7 +24,7 @@ class UserDefaultsManagerTests: XCTestCase {
 
     func testSetAndGetObject() {
         // Bool値の保存と取得
-        let keyBool = UserDefaultsKeys.stopVibrationAutomatically
+        let keyBool = UserDefaultsKeys.isFirstLaunch
         userDefaultsManager.set(true, forKey: keyBool)
         // 直接 UserDefaults.standard からも確認
         XCTAssertEqual(testDefaults.bool(forKey: keyBool.rawValue), true)
@@ -50,7 +50,7 @@ class UserDefaultsManagerTests: XCTestCase {
     }
 
     func testRemoveObject() {
-        let keyBool = UserDefaultsKeys.stopVibrationAutomatically
+        let keyBool = UserDefaultsKeys.isFirstLaunch
         let keyString = UserDefaultsKeys.hapticType
 
         // 初期値を設定
@@ -71,7 +71,7 @@ class UserDefaultsManagerTests: XCTestCase {
     }
 
     func testRemoveAll() {
-        let keyBool = UserDefaultsKeys.stopVibrationAutomatically
+        let keyBool = UserDefaultsKeys.isFirstLaunch
         let keyString = UserDefaultsKeys.hapticType
 
         // 初期値を設定
@@ -90,7 +90,7 @@ class UserDefaultsManagerTests: XCTestCase {
 
     func testGetObjectForNonExistentKey() {
         // 何も設定していないキーに対して object(forKey:) を呼ぶ
-        let keyBool = UserDefaultsKeys.stopVibrationAutomatically
+        let keyBool = UserDefaultsKeys.isFirstLaunch
         XCTAssertNil(userDefaultsManager.object(forKey: keyBool))
     }
 }

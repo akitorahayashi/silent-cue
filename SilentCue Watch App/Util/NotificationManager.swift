@@ -22,6 +22,12 @@ class NotificationManager {
         case timerCompleted = "TIMER_COMPLETED_NOTIFICATION"
     }
     
+    /// UIテスト実行中かどうかのフラグ
+    private var isNotificationsDisabled: Bool {
+        // ProcessInfo からテスト実行フラグを取得
+        return ProcessInfo.processInfo.environment[AppEnvironmentConstants.EnvKeys.disableNotifications] == AppEnvironmentConstants.EnvValues.yes
+    }
+    
     /// 初期化処理
     private init() {
         // 通知カテゴリの設定
@@ -79,6 +85,12 @@ class NotificationManager {
     ///   - targetDate: タイマー完了予定時刻
     ///   - minutes: タイマー設定分数
     func scheduleTimerCompletionNotification(at targetDate: Date, minutes: Int) {
+        // UIテスト実行中は通知をスケジュールしない
+        if isNotificationsDisabled {
+            print("通知はテスト中のため無効化されています")
+            return
+        }
+        
         // 通知内容の設定
         let content = UNMutableNotificationContent()
         content.title = "タイマー完了"
@@ -103,6 +115,11 @@ class NotificationManager {
     
     /// 通知をスケジュール
     private func scheduleNotification(with content: UNNotificationContent, identifier: String, triggerDate: Date) {
+        // UIテスト実行中は通知をスケジュールしない（冗長なチェックだが安全のため）
+        if isNotificationsDisabled {
+            return
+        }
+        
         // 日付トリガーの作成
         let triggerComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)

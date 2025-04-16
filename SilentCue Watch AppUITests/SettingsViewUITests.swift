@@ -6,6 +6,9 @@ final class SettingsViewUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         
+        // テスト用の環境変数を設定
+        TestEnvironment.setupStandardTestEnvironment(for: app)
+        
         app.launch()
         
         // 通知許可の確認・実行

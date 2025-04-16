@@ -11,11 +11,9 @@ final class HapticsReducerTests: XCTestCase {
         )
 
         await store.send(AppAction.haptics(.updateHapticSettings(
-            type: HapticType.strong,
-            stopAutomatically: false
+            type: HapticType.strong
         ))) { state in
             state.haptics.hapticType = HapticType.strong
-            state.haptics.stopAutomatically = false
         }
         await store.finish() // Add finish for potential effects
     }
