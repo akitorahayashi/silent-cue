@@ -80,7 +80,6 @@ struct SilentCueWatchApp: App {
                         }
                     }
                 }
-                .accentColor(.blue)
                 .onChange(of: scenePhase) { _, newPhase in
                     // scenePhaseの変更をAppReducerに通知
                     viewStore.send(.scenePhaseChanged(newPhase))
@@ -108,7 +107,7 @@ struct SilentCueWatchApp: App {
                         markAsLaunched()
                     }
                 } message: {
-                    Text("タイマー完了時に通知を受け取りますか？\n\n通知を許可すると、アプリが閉じていても完了をお知らせします。")
+                    Text("\nタイマー完了時に通知を受け取りますか？\n\n通知を許可すると、アプリが閉じていても完了をお知らせします。\n")
                 }
             })
         }
