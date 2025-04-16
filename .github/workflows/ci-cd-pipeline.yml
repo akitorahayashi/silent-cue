@@ -44,6 +44,8 @@ jobs:
     name: Code Review
     needs: build-and-test
     if: github.event_name == 'pull_request' && needs.build-and-test.result == 'success'
+    permissions:
+      pull-requests: write
     uses: ./.github/workflows/pr-reviewer.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
