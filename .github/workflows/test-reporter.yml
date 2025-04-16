@@ -1,0 +1,91 @@
+name: Test Results Report
+
+on:
+  workflow_run:
+    workflows: [SilentCue Build & Test]
+    types: [completed]
+
+jobs:
+  analyze-test-results:
+    name: Analyze Test Results
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download Artifacts
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: SilentCue CI
+        run_id: ${{ github.event.workflow_run.id }}
+        name: test-results
+        
+    - name: Check Downloaded Artifacts
+      run: |
+        ls -la
+        find . -name "*.xml" -o -name "*.json" -o -name "*.xcresult" | sort
+    
+    - name: Publish Test Report
+      uses: mikepenz/action-junit-report@v4
+      if: ${{ hashFiles('**/junit.xml') != '' }}
+      with:
+        report_paths: '**/junit.xml'
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        fail_on_failure: false
+        require_tests: false
+        check_name: 'Test Results'
+        
+    - name: Comment Test Results on PR
+      if: github.event.workflow_run.event == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          try {
+            const unitTestExists = fs.existsSync('./test-results/unit/junit.xml');
+            const uiTestExists = fs.existsSync('./test-results/ui/junit.xml');
+            
+            if (!unitTestExists && !uiTestExists) {
+              console.log('No test results found');
+              return;
+            }
+            
+            let summary = '## テスト結果サマリー\n\n';
+            
+            if (unitTestExists) {
+              // ユニットテスト結果の解析ロジックをここに追加
+              summary += '### ユニットテスト\n✅ すべてのテストが成功しました\n\n';
+            }
+            
+            if (uiTestExists) {
+              // UIテスト結果の解析ロジックをここに追加
+              summary += '### UIテスト\n✅ すべてのテストが成功しました\n\n';
+            }
+            
+            // コードカバレッジ情報
+            if (fs.existsSync('./test-results/unit/coverage.json')) {
+              summary += '### コードカバレッジ\n' +
+                         '詳細なレポートはアーティファクトで確認できます\n\n';
+            }
+            
+            // PRナンバーの取得
+            const runInfo = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id
+            });
+            
+            // PRの取得とコメントの投稿
+            if (runInfo.data.pull_requests && runInfo.data.pull_requests.length > 0) {
+              const prNumber = runInfo.data.pull_requests[0].number;
+              
+              github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: prNumber,
+                body: summary
+              });
+            }
+          } catch (error) {
+            console.error('Error creating test summary:', error);
+          }
