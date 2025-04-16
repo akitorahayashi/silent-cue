@@ -29,19 +29,6 @@ jobs:
     name: Build and Test
     uses: ./.github/workflows/build-and-test.yml
     
-  # テスト結果レポート
-  test-report:
-    name: Test Report Generation
-    needs: build-and-test
-    if: always()
-    permissions:
-      checks: write
-      issues: write
-      pull-requests: write
-    uses: ./.github/workflows/test-reporter.yml
-    with:
-      pr_number: ${{ github.event.pull_request.number || 0 }}
-    
   # コードレビュー - PRの場合のみ実行
   code-review:
     name: Code Review
@@ -72,7 +59,7 @@ jobs:
   notify-completion:
     name: Notify Completion
     runs-on: ubuntu-latest
-    needs: [code-quality, build-and-test, test-report, code-review, production-build]
+    needs: [code-quality, build-and-test, code-review, production-build]
     if: always()
     permissions:
       issues: write
@@ -107,7 +94,6 @@ jobs:
               ### ステータス概要:
               - コード品質チェック: ${{ needs.code-quality.result == 'success' && '✅' || '❌' }}
               - ビルドとテスト: ${{ needs.build-and-test.result == 'success' && '✅' || '❌' }}
-              - テストレポート: ${{ needs.test-report.result == 'success' && '✅' || '❓' }}
               - コードレビュー: ${{ needs.code-review.result == 'success' && '✅' || (needs.code-review.result == 'skipped' && '⏭️' || '❌') }}
               - 本番ビルド: ${{ needs.production-build.result == 'success' && '✅' || (needs.production-build.result == 'skipped' && '⏭️' || '❌') }}
               `

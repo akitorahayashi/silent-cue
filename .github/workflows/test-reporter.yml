@@ -68,48 +68,103 @@ jobs:
             echo "found=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Parse unit coverage report
+        id: unit_coverage
+        run: |
+          COVERAGE_FILE="./test-results/unit/TestResults.xcresult"
+          JSON_OUTPUT_TEMP="./test-results/unit/coverage.json" # Temporary file for JSON output
+          if [ -d "$COVERAGE_FILE" ]; then
+            echo "Generating unit test coverage report..."
+            if xcrun xccov view --report --json "$COVERAGE_FILE" > "$JSON_OUTPUT_TEMP"; then
+              COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$JSON_OUTPUT_TEMP")
+              COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE")
+              echo "Unit Test Line Coverage: ${COVERAGE_FORMATTED}%"
+              echo "percentage=${COVERAGE_FORMATTED}" >> $GITHUB_OUTPUT
+              echo "found=true" >> $GITHUB_OUTPUT
+              rm "$JSON_OUTPUT_TEMP" # Clean up temporary file
+            else
+              echo "Error generating unit test coverage report JSON from $COVERAGE_FILE"
+              echo "found=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "Unit test coverage result bundle not found at $COVERAGE_FILE"
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Parse ui coverage report
+        id: ui_coverage
+        run: |
+          COVERAGE_FILE="./test-results/ui/TestResults.xcresult"
+          JSON_OUTPUT_TEMP="./test-results/ui/coverage.json" # Temporary file for JSON output
+          if [ -d "$COVERAGE_FILE" ]; then
+            echo "Generating UI test coverage report..."
+            if xcrun xccov view --report --json "$COVERAGE_FILE" > "$JSON_OUTPUT_TEMP"; then
+              COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$JSON_OUTPUT_TEMP")
+              COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE")
+              echo "UI Test Line Coverage: ${COVERAGE_FORMATTED}%"
+              echo "percentage=${COVERAGE_FORMATTED}" >> $GITHUB_OUTPUT
+              echo "found=true" >> $GITHUB_OUTPUT
+              rm "$JSON_OUTPUT_TEMP" # Clean up temporary file
+            else
+              echo "Error generating UI test coverage report JSON from $COVERAGE_FILE"
+              echo "found=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "UI test coverage result bundle not found at $COVERAGE_FILE"
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create or Update PR Comment
-        # Run if test results or coverage report was found (PR context checked at job level)
-        if: ${{ hashFiles('./test-results/**/*.xml') != '' || steps.coverage.outputs.found == 'true' }}
+        # Run if test results or any coverage report was found
+        if: ${{ hashFiles('./test-results/**/*.xml') != '' || steps.coverage.outputs.found == 'true' || steps.unit_coverage.outputs.found == 'true' || steps.ui_coverage.outputs.found == 'true' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Use optional chaining to safely access the PR number
             const prNumber = github.event.workflow_run.pull_requests?.[0]?.number;
-            
-            // Check if prNumber was successfully retrieved
             if (!prNumber) {
-              console.error('Could not extract pull request number from workflow run event.');
-              return; // Exit script if PR number is missing
+              console.error('Could not extract pull request number.');
+              return;
             }
-            
+
             const { owner, repo } = context.repo;
-            // Use if/else instead of ternary operator for coveragePercentage
-            let coveragePercentage = null;
-            if (${{ steps.coverage.outputs.found == 'true' }}) {
-              coveragePercentage = ${{ steps.coverage.outputs.percentage }};
-            }
-            const commentMarker = '<!-- test-and-coverage-report -->'; // コメント識別用マーカー
-            let commentBody = `${commentMarker}\n\n## Test & Coverage Summary\n\n`;
+            const combinedCoverageFound = ${{ steps.coverage.outputs.found == 'true' }};
+            const combinedCoveragePercentage = combinedCoverageFound ? ${{ steps.coverage.outputs.percentage }} : null;
+            const unitCoverageFound = ${{ steps.unit_coverage.outputs.found == 'true' }};
+            const unitCoveragePercentage = unitCoverageFound ? ${{ steps.unit_coverage.outputs.percentage }} : null;
+            const uiCoverageFound = ${{ steps.ui_coverage.outputs.found == 'true' }};
+            const uiCoveragePercentage = uiCoverageFound ? ${{ steps.ui_coverage.outputs.percentage }} : null;
+
+            const commentMarker = '<!-- test-and-coverage-report -->';
+            let commentBody = `${commentMarker}\\n\\n## Test & Coverage Summary\\n\\n`;
             const fs = require('fs');
 
-            // JUnit結果の簡単なサマリー（詳細はChecksタブで確認）
+            // Test Results Summary
             const unitTestFile = './test-results/unit/junit.xml';
             const uiTestFile = './test-results/ui/junit.xml';
-
             if (fs.existsSync(unitTestFile) || fs.existsSync(uiTestFile)) {
-               // ここでJUnitをより詳細に解析して失敗数を表示することも可能
-               commentBody += `✅ Test Results: Available in Checks tab.\n`;
+               commentBody += `✅ Test Results: Available in Checks tab.\\n`;
             } else {
-               commentBody += `ℹ️ Test Results: No JUnit reports found.\n`;
+               commentBody += `ℹ️ Test Results: No JUnit reports found.\\n`;
             }
 
-            // カバレッジ情報
-            if (coveragePercentage !== null) {
-              commentBody += `📊 Overall Line Coverage: **${coveragePercentage}%**\n`;
-            } else {
-              commentBody += `⚠️ Coverage report not found.\n`;
+            // Coverage Info
+            commentBody += `\\n📊 **Code Coverage:**\\n`; // Section header for coverage
+            let coverageReported = false;
+            if (combinedCoverageFound) {
+              commentBody += `- **Overall:** **${combinedCoveragePercentage}%**\\n`;
+              coverageReported = true;
+            }
+            if (unitCoverageFound) {
+              commentBody += `- Unit Tests: ${unitCoveragePercentage}%\\n`;
+              coverageReported = true;
+            }
+            if (uiCoverageFound) {
+              commentBody += `- UI Tests: ${uiCoveragePercentage}%\\n`;
+              coverageReported = true;
+            }
+            if (!coverageReported) {
+              commentBody += `⚠️ No coverage reports found.\\n`;
             }
 
             // 既存コメントの検索・更新 or 新規作成
