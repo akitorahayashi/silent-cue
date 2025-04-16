@@ -8,7 +8,7 @@
 - **`build-and-test.yml`**: アプリのビルドとテストを実行します。
 - **`code-quality.yml`**: コード品質チェック（SwiftFormat, SwiftLint）を実行します。
 - **`test-reporter.yml`**: テスト結果のレポートを作成し、PRにコメントします。
-- **`pr-reviewer.yml`**: PRレビューの自動化を試みます。
+- **`copilot-review.yml`**: GitHub CopilotによるPRレビューを自動化します。
 - **`build-for-production.yml`**: 本番用（または開発用）のIPAビルドを実行します。
 
 ## 機能詳細
@@ -20,7 +20,7 @@
 1.  `code-quality.yml` を実行し、コード品質をチェックします。
 2.  `build-and-test.yml` を実行し、ビルドとテストを行います。
 3.  `test-reporter.yml` を実行し、テスト結果をレポートします。
-4.  Pull Requestの場合、`pr-reviewer.yml` を実行し、自動レビューを試みます。
+4.  Pull Requestの場合、`copilot-review.yml` を実行し、GitHub Copilotによる自動レビューを実施します。
 5.  mainブランチへのPushの場合、`build-for-production.yml` を実行し、本番用ビルドを生成します。
 6.  最後に、パイプライン全体の完了ステータスをPull Requestにコメントします。
 
@@ -46,12 +46,13 @@
 - JUnit形式のレポートがあれば解析し、GitHub Checks APIを通じて結果を報告します。
 - Pull Requestのコンテキストで実行された場合、テスト結果のサマリー（カバレッジ情報含む）をPRにコメントします。
 
-### `pr-reviewer.yml`
+### `copilot-review.yml`
 
-Pull Request時に `ci-cd-pipeline.yml` から呼び出され、自動コードレビューを開始します:
+Pull Request時に `ci-cd-pipeline.yml` から呼び出され、GitHub Copilotによる自動コードレビューを実行します:
 
-- レビュー開始を示すコメントをPull Requestに追加します。
-- GitHub Copilotをレビュアーとして追加しようと試みます（利用可能な場合）。
+- GitHub Copilotをレビュアーとして追加し、PRの自動レビューを依頼します。
+- レビュアー追加に失敗した場合、リポジトリの設定でGitHub Copilotコードレビュー機能が有効になっているか確認を促すコメントをPRに追加します。
+- GitHub Copilotによるレビューは、コードの品質向上や潜在的な問題の早期発見に役立ちます。
 
 ### `build-for-production.yml`
 

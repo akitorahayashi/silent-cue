@@ -46,7 +46,7 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-    uses: ./.github/workflows/pr-reviewer.yml
+    uses: ./.github/workflows/copilot-review.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
       github-token: ${{ github.token }}
