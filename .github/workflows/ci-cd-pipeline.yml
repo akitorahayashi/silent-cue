@@ -49,7 +49,7 @@ jobs:
     uses: ./.github/workflows/pr-reviewer.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
-      github_token: ${{ github.token }}
+      github-token: ${{ github.token }}
     
   # 本番用ビルド - mainブランチへのプッシュまたはPRマージ後
   production-build:

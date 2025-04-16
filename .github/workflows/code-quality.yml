@@ -5,10 +5,10 @@ on:
     outputs:
       result:
         description: "Check Result"
-        value: ${{ jobs.lint.outputs.result }}
+        value: ${{ jobs.format-and-lint.outputs.result }}
 
 jobs:
-  lint:
+  format-and-lint:
     runs-on: macos-14
     outputs:
       result: ${{ steps.result.outputs.status }}

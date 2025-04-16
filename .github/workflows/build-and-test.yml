@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: Build for Testing
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
@@ -66,6 +67,7 @@ jobs:
         retention-days: 1
   
   tests:
+    name: Run Tests
     needs: build
     runs-on: macos-latest
     outputs:
