@@ -12,6 +12,9 @@ xcbuild/
 ## テスト結果
 TestResults/
 TestResults.xcresult/
+test-results/
+test-results/unit/
+test-results/ui/
 
 ## Objective-C/Swift固有のファイル
 *.hmap

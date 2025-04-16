@@ -66,7 +66,7 @@ jobs:
     uses: ./.github/workflows/build-for-production.yml
     with:
       release_tag: v${{ github.run_number }}
-      pr_number: ${{ github.event.pull_request.number || github.event.after }}
+      pr_number: ${{ github.event.pull_request.number || 0 }}
       
   # ビルド完了通知
   notify-completion:

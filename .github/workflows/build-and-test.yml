@@ -9,7 +9,6 @@ on:
 
 jobs:
   test:
-    name: Build & Test
     runs-on: macos-latest
     outputs:
       test_result: ${{ steps.test_status.outputs.result }}
@@ -61,7 +60,7 @@ jobs:
       run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
-          -scheme "SilentCue Watch App" \
+          -scheme "SilentCue Watch AppTests" \
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -resultBundlePath ./test-results/unit/TestResults.xcresult \
@@ -76,7 +75,7 @@ jobs:
       run: |
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
-          -scheme "SilentCue Watch App UITests" \
+          -scheme "SilentCue Watch AppUITests" \
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -resultBundlePath ./test-results/ui/TestResults.xcresult \
@@ -88,16 +87,46 @@ jobs:
       
     - name: Generate Code Coverage Reports
       run: |
-        # Unit test coverage
-        xcrun xccov view --report --json ./test-results/unit/TestResults.xcresult > ./test-results/unit/coverage.json
-        
-        # UI test coverage
-        xcrun xccov view --report --json ./test-results/ui/TestResults.xcresult > ./test-results/ui/coverage.json
-        
-        # Combine reports for a unified view
-        mkdir -p ./test-results/combined
-        jq -s 'add' ./test-results/unit/coverage.json ./test-results/ui/coverage.json > ./test-results/combined/coverage.json || echo "Failed to combine coverage reports"
-      continue-on-error: true
+        echo "Checking for result bundles..."
+        UNIT_RESULT_BUNDLE="./test-results/unit/TestResults.xcresult"
+        UI_RESULT_BUNDLE="./test-results/ui/TestResults.xcresult"
+        COMBINED_DIR="./test-results/combined"
+        MERGED_RESULT_BUNDLE="$COMBINED_DIR/TestResults.xcresult"
+        COMBINED_COVERAGE_JSON="$COMBINED_DIR/coverage.json"
+
+        if [ ! -d "$UNIT_RESULT_BUNDLE" ]; then
+          echo "Warning: Unit test result bundle not found at $UNIT_RESULT_BUNDLE"
+        fi
+        if [ ! -d "$UI_RESULT_BUNDLE" ]; then
+          echo "Warning: UI test result bundle not found at $UI_RESULT_BUNDLE"
+        fi
+
+        # Only proceed if both bundles exist
+        if [ -d "$UNIT_RESULT_BUNDLE" ] && [ -d "$UI_RESULT_BUNDLE" ]; then
+          echo "Merging result bundles..."
+          mkdir -p "$COMBINED_DIR"
+          if xcrun xcresulttool merge "$UNIT_RESULT_BUNDLE" "$UI_RESULT_BUNDLE" --output-path "$MERGED_RESULT_BUNDLE"; then
+            echo "Result bundles merged successfully to $MERGED_RESULT_BUNDLE"
+            
+            if [ -d "$MERGED_RESULT_BUNDLE" ]; then
+              echo "Generating combined coverage report..."
+              if xcrun xccov view --report --json "$MERGED_RESULT_BUNDLE" > "$COMBINED_COVERAGE_JSON"; then
+                echo "Combined coverage report generated at $COMBINED_COVERAGE_JSON"
+              else
+                echo "Error: Failed to generate coverage report from merged bundle."
+                # Optionally view non-JSON report for debugging
+                xcrun xccov view "$MERGED_RESULT_BUNDLE" || echo "Warning: Could not view merged coverage data"
+              fi
+            else
+              echo "Error: Merged result bundle not found unexpectedly."
+            fi
+          else
+            echo "Error: Failed to merge result bundles."
+          fi
+        else
+          echo "Skipping merge and combined coverage generation as one or both source bundles are missing."
+        fi
+      continue-on-error: false
       
     - name: Set Test Status
       id: test_status
