@@ -34,6 +34,9 @@ jobs:
     name: Test Report Generation
     needs: build-and-test
     if: always()
+    permissions:
+      issues: write
+      pull-requests: write
     uses: ./.github/workflows/test-reporter.yml
     with:
       pr_number: ${{ github.event.pull_request.number || 0 }}
