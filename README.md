@@ -12,15 +12,13 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 
 -   **Presentation (プレゼンテーション層)**:
     -   `SilentCue Watch App/View/` ディレクトリ以下に配置された SwiftUI View で構成されます。
-    -   View は TCA の `ViewStore` を介して状態を監視し、ユーザー操作を `Action` として `Store` に送信する役割に集中します。UI の見た目やユーザーインタラクションを担当します。
+    -   View は TCA の `ViewStore` を介して状態を監視し、ユーザー操作を `Action` として `Store` に送信します。また、 UI の見た目やインタラクションを担当します。
 
 -   **Domain (ドメイン層)**:
     -   `SilentCue Watch App/Domain/` ディレクトリ以下に配置された TCA のコンポーネント (`State`, `Action`, `Reducer`) で構成されます。
     -   各機能（`App`, `Timer`, `Settings`, `Haptics`）が独立したドメインとして定義され、それぞれの状態管理、ビジネスロジック、副作用（UserDefaultsへの保存、振動の実行など）を担当します。
     -   `AppReducer` がルートとなり、各機能ドメインの Reducer を統合し、アプリ全体の状態遷移や機能間の連携（タイマー完了時の振動開始など）を管理します。
     -   依存性（UserDefaults, Clock など）は `@Dependency` を通じて注入され、テスト時にはモックに差し替えることが可能です。
-
-この構成により、各ドメインは他のドメインの実装詳細を知ることなく独立して開発・テストが可能となり、SwiftUI の View は状態を表示しユーザー入力を伝えるだけの薄い層になります。
 
 ## ディレクトリ構成
 
@@ -57,9 +55,7 @@ SilentCue/
 │   │       └── HapticType.swift
 │   ├── Preview Content/
 │   ├── StorageService/
-│   │   ├── UserDefaultsDependency.swift
-│   │   ├── UserDefaultsManager.swift
-│   │   └── UserDefaultsManagerProtocol.swift
+│   │   └── UserDefaultsManager.swift
 │   ├── Util/
 │   │   ├── ExtendedRuntimeManager.swift
 │   │   └── SCTimeFormatter.swift
@@ -72,8 +68,7 @@ SilentCue/
 ├── SilentCue Watch AppTests/
 │   ├── Domain/
 │   ├── Mocks/
-│   ├── StorageService/
-│   └── SilentCue_Watch_AppTests.swift
+│   └── StorageService/
 ├── SilentCue Watch AppUITests/
 │   ├── CountdownViewUITests.swift
 │   └── SettingsViewUITests.swift
@@ -94,10 +89,7 @@ SilentCue/
   - WatchKit
 
 - **状態管理**
-  - The Composable Architecture (バージョンは `Package.swift` を参照)
-
-- **永続化**
-  - UserDefaults
+  - The Composable Architecture
 
 - **ネイティブ機能**
   - WKExtendedRuntimeSession
@@ -125,19 +117,15 @@ Apple Watchアプリを閉じた後もタイマーが正確に動作し続けま
 
 - **通知機能**: タイマー設定時に自動的に通知がスケジュールされ、タイマー完了時に通知が表示されます。これにより、アプリがバックグラウンドにある時でもタイマーの完了を知ることができます。
 
-- **通知アクション**: 通知には「アプリを開く」アクションが含まれており、タップするとタイマー完了画面に遷移します。通知自体ですでに音や振動でユーザーに知らせているため、通知から起動した場合は余計な振動を避ける設計になっています。
+- **通知アクション**: 通知には「アプリを開く」アクションが含まれており、タップするとタイマー完了画面に遷移します。
 
 - **フォアグラウンド復帰時**: アプリを通知以外の方法で直接開いた場合、タイマーが既に完了していれば完了画面が表示されます。通知経由でない場合のみ振動が発生する仕組みになっています。
-
-- **堅牢なバックグラウンド処理**: WKExtendedRuntimeSessionを活用して、Apple Watchの厳しいバックグラウンド制限下でも正確にタイマーの状態を追跡し、信頼性の高いタイマー機能を提供します。
-
-- **通知許可のガイダンス**: 通知を許可していないユーザーに対しては、タイマー完了画面で通知許可を促すボタンを表示します。「通知を有効にする」ボタンをタップすると、通知を許可することでアプリを閉じた状態でもタイマー完了を知ることができるようになります。
 
 ## CI/CD パイプライン
 
 このプロジェクトでは、GitHub Actions を利用して CI/CD パイプラインを構築しています。`.github/workflows/` ディレクトリ以下に設定ファイルが格納されています。
 
-- **`ci-cd-pipeline.yml`**: メインとなる統合パイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、他のワークフローを順次実行します。
+- **`ci-cd-pipeline.yml`**: メインとなるパイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、他のワークフローを順次実行します。
 - その他の `.yml` ファイル (`build-and-test.yml`, `code-quality.yml`, `copilot-review.yml` など): パイプラインの各ステップを実行する、呼び出し可能なワークフローです。`ci-cd-pipeline.yml` から呼び出されます。
 
 詳細なワークフローの説明は `.github/workflows/README.md` を参照してください。
