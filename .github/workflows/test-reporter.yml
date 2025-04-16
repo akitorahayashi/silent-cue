@@ -56,13 +56,19 @@ jobs:
       - name: Parse coverage report
         id: coverage
         run: |
-          COVERAGE_FILE="./coverage-artifact/test-results/combined/coverage.json" # Correct path after download
+          COVERAGE_FILE="./coverage-artifact/combined/coverage.json" # Correct path based on ls output
           if [ -f "$COVERAGE_FILE" ]; then
-            COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$COVERAGE_FILE")
-            COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE") # 小数点第一位までフォーマット
-            echo "Overall Line Coverage: ${COVERAGE_FORMATTED}%"
-            echo "percentage=${COVERAGE_FORMATTED}" >> $GITHUB_OUTPUT
-            echo "found=true" >> $GITHUB_OUTPUT
+            # Check if the file is empty before running jq
+            if [ -s "$COVERAGE_FILE" ]; then 
+              COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$COVERAGE_FILE")
+              COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE") # 小数点第一位までフォーマット
+              echo "Overall Line Coverage: ${COVERAGE_FORMATTED}%"
+              echo "percentage=${COVERAGE_FORMATTED}" >> $GITHUB_OUTPUT
+              echo "found=true" >> $GITHUB_OUTPUT
+            else
+              echo "Coverage report file found but is empty: $COVERAGE_FILE"
+              echo "found=false" >> $GITHUB_OUTPUT
+            fi
           else
             echo "Coverage report not found at $COVERAGE_FILE"
             echo "found=false" >> $GITHUB_OUTPUT
