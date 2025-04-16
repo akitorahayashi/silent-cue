@@ -1,4 +1,4 @@
-name: Code Quality
+name: Format and Lint
 
 on:
   workflow_call:
@@ -9,7 +9,6 @@ on:
 
 jobs:
   lint:
-    name: Format and Lint
     runs-on: macos-14
     outputs:
       result: ${{ steps.result.outputs.status }}

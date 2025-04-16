@@ -16,7 +16,6 @@ on:
 
 jobs:
   analyze-test-results:
-    name: Analyze Test Results
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

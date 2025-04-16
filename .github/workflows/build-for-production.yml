@@ -1,4 +1,4 @@
-name: SilentCue Build for Production
+name: Build for Production
 
 on:
   workflow_call:
@@ -17,7 +17,6 @@ on:
 
 jobs:
   prepare-release:
-    name: Prepare Production Build
     runs-on: macos-latest
     steps:
       - name: Checkout repository

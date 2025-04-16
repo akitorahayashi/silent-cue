@@ -27,7 +27,6 @@ jobs:
   # ビルドとテスト
   build-and-test:
     name: Build and Test
-    needs: code-quality
     uses: ./.github/workflows/build-and-test.yml
     
   # テスト結果レポート
@@ -46,6 +45,7 @@ jobs:
     if: github.event_name == 'pull_request' && needs.build-and-test.result == 'success'
     permissions:
       pull-requests: write
+      contents: read
     uses: ./.github/workflows/pr-reviewer.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}

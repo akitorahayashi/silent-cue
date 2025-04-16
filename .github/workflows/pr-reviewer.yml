@@ -1,4 +1,4 @@
-name: PR Review
+name: Copilot PR Review
 
 on:
   workflow_call:
@@ -10,7 +10,6 @@ on:
 
 jobs:
   copilot-review:
-    name: Copilot PR Review
     runs-on: ubuntu-latest
     permissions:
       contents: read
