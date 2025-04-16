@@ -56,7 +56,7 @@ jobs:
       - name: Parse coverage report
         id: coverage
         run: |
-          COVERAGE_FILE="./coverage-artifact/combined/coverage.json" # アーティファクト内の正しいパスを指定
+          COVERAGE_FILE="./coverage-artifact/test-results/combined/coverage.json" # Correct path after download
           if [ -f "$COVERAGE_FILE" ]; then
             COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$COVERAGE_FILE")
             COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE") # 小数点第一位までフォーマット

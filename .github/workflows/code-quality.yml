@@ -9,7 +9,7 @@ on:
 
 jobs:
   format-and-lint:
-    runs-on: macos-14
+    runs-on: macos-latest
     outputs:
       result: ${{ steps.result.outputs.status }}
     steps:
