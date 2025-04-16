@@ -17,11 +17,6 @@ struct SettingsView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }, content: { viewStore in
             List {
-                AutoStopToggleView(isOn: viewStore.binding(
-                    get: { $0.stopVibrationAutomatically },
-                    send: { SettingsAction.toggleStopVibrationAutomatically($0) }
-                ))
-
                 VibrationTypeSectionView(
                     hapticTypes: HapticType.allCases,
                     selectedHapticType: viewStore.selectedHapticType,
@@ -38,7 +33,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .onAppear {
-                if !viewStore.hasLoaded {
+                if !viewStore.isSettingsLoaded {
                     viewStore.send(.loadSettings)
                 }
             }

@@ -66,19 +66,16 @@ struct AppReducer: Reducer {
 
             // MARK: - 機能連携
 
-                case let .settings(.settingsLoaded(stopVibration, hapticType)):
+                case let .settings(.settingsLoaded(hapticType)):
                     // 設定ロード完了時: HapticsReducerに直接設定を伝える
                     return .send(.haptics(.updateHapticSettings(
-                        type: hapticType, // Actionのペイロードを使う
-                        stopAutomatically: stopVibration // Actionのペイロードを使う
+                        type: hapticType // Actionのペイロードを使う
                     )))
 
-                case .settings(.selectHapticType), .settings(.toggleStopVibrationAutomatically):
+                case .settings(.selectHapticType):
                     // 設定変更時: SettingsReducerで状態が更新された後、HapticsReducerに直接設定を伝える
-                    // SettingsReducer内でsaveSettingsが非同期実行される場合、タイミングに注意が必要かも
                     return .send(.haptics(.updateHapticSettings(
-                        type: state.settings.selectedHapticType,
-                        stopAutomatically: state.settings.stopVibrationAutomatically
+                        type: state.settings.selectedHapticType
                     )))
 
                 case .timer(.timerFinished):

@@ -21,8 +21,8 @@ struct HapticsReducer: Reducer {
                 case .stopHaptic:
                     return handleStopHaptic(&state)
 
-                case let .updateHapticSettings(type, stopAutomatically):
-                    return handleUpdateHapticSettings(&state, type: type, stopAutomatically: stopAutomatically)
+                case let .updateHapticSettings(type):
+                    return handleUpdateHapticSettings(&state, type: type)
 
                 case let .previewHaptic(type):
                     return handlePreviewHaptic(&state, type: type)
@@ -44,17 +44,14 @@ struct HapticsReducer: Reducer {
         state.isActive = true
         state.hapticType = type
 
-        return .run { [stopAutomatically = state.stopAutomatically] _ in
+        return .run { _ in
             // 既存のタスクを確実にキャンセル
             Self.activeHapticTask?.cancel()
 
             // 新しいタスクを作成して保存
             Self.activeHapticTask = Task {
-                // ハプティックフィードバックを再生
-                await playHapticFeedback(
-                    type: type,
-                    stopAutomatically: stopAutomatically
-                )
+                // ハプティックフィードバックを再生 (常に3秒後に自動停止)
+                await playHapticFeedback(type: type)
             }
 
             // タスクが完了するまで待機
@@ -78,11 +75,9 @@ struct HapticsReducer: Reducer {
 
     private func handleUpdateHapticSettings(
         _ state: inout State,
-        type: HapticType,
-        stopAutomatically: Bool
+        type: HapticType
     ) -> Effect<Action> {
         state.hapticType = type
-        state.stopAutomatically = stopAutomatically
         return .none
     }
 
@@ -138,42 +133,25 @@ struct HapticsReducer: Reducer {
 
     // MARK: - ユーティリティメソッド
 
-    // ハプティックフィードバックを再生する関数
-    private func playHapticFeedback(type: HapticType, stopAutomatically: Bool) async {
+    // ハプティックフィードバックを再生する関数 (常に3秒後に自動停止)
+    private func playHapticFeedback(type: HapticType) async {
         let device = WKInterfaceDevice.current()
 
-        if stopAutomatically {
-            // 3秒間繰り返し振動を再生
-            let startTime = Date()
-            let endTime = startTime.addingTimeInterval(3.0)
+        // 3秒間繰り返し振動を再生
+        let startTime = Date()
+        let endTime = startTime.addingTimeInterval(3.0)
 
-            while Date() < endTime {
-                // 選択された振動パターンを再生
-                device.play(type.wkHapticType)
+        while Date() < endTime {
+            // 選択された振動パターンを再生
+            device.play(type.wkHapticType)
 
-                // 次の振動までの間隔を待機
-                try? await Task.sleep(for: .seconds(type.interval))
+            // 次の振動までの間隔を待機
+            try? await Task.sleep(for: .seconds(type.interval))
 
-                // タスクがキャンセルされたかチェック
-                if Task.isCancelled {
-                    print("Haptic feedback task was cancelled")
-                    return
-                }
-            }
-        } else {
-            // 設定がオフの場合は無限に振動を続ける
-            while true {
-                // 選択された振動パターンを再生
-                device.play(type.wkHapticType)
-
-                // 次の振動までの間隔を待機
-                try? await Task.sleep(for: .seconds(type.interval))
-
-                // タスクがキャンセルされたかチェック
-                if Task.isCancelled {
-                    print("Haptic feedback task was cancelled")
-                    return
-                }
+            // タスクがキャンセルされたかチェック
+            if Task.isCancelled {
+                print("Haptic feedback task was cancelled")
+                return
             }
         }
     }

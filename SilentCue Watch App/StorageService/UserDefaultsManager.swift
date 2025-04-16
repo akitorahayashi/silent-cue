@@ -5,7 +5,6 @@ import Foundation
 
 /// UserDefaultsのキーを管理する列挙型
 enum UserDefaultsKeys: String, CaseIterable {
-    case stopVibrationAutomatically
     case hapticType
     case isFirstLaunch
 }

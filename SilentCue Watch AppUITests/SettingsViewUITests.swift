@@ -21,9 +21,6 @@ final class SettingsViewUITests: XCTestCase {
         // 設定タイトルが表示されているか確認
         XCTAssertTrue(app.staticTexts["Settings"].exists)
 
-        // 自動停止トグルが表示されているか確認
-        XCTAssertTrue(app.switches.matching(identifier: "AutoStopToggle").firstMatch.exists)
-
         // バイブレーションタイプセクションが表示されているか確認
         XCTAssertTrue(app.staticTexts.matching(identifier: "VibrationTypeHeader").firstMatch.exists)
 
@@ -39,24 +36,6 @@ final class SettingsViewUITests: XCTestCase {
             app.buttons.matching(identifier: "ResetAllSettingsButton").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
             "リセットボタンが表示される"
         )
-    }
-
-    func testAutoStopToggle() throws {
-        // まず設定画面に移動
-        navigateToSettingsView()
-
-        // 自動停止トグルを見つける
-        let autoStopToggle = app.switches.matching(identifier: "AutoStopToggle").firstMatch
-
-        // 初期値を取得
-        let initialValue = autoStopToggle.value as? String
-
-        // スイッチを切り替え
-        autoStopToggle.tap()
-
-        // トグルが変更されたか確認
-        let newValue = autoStopToggle.value as? String
-        XCTAssertNotEqual(initialValue, newValue, "トグルの状態が変更されている")
     }
 
     func testVibrationTypeSelection() throws {
@@ -109,17 +88,6 @@ final class SettingsViewUITests: XCTestCase {
         // まず設定画面に移動
         navigateToSettingsView()
 
-        // 1. 設定を変更
-        // 自動停止トグルを切り替え
-        let autoStopToggle = app.switches.matching(identifier: "AutoStopToggle").firstMatch
-        let initialToggleValue = autoStopToggle.value as? String
-        autoStopToggle.tap()
-
-        // トグルの変更後の値を記録
-        let changedToggleValue = autoStopToggle.value as? String
-        // 値が確実に変わったことを確認
-        XCTAssertNotEqual(initialToggleValue, changedToggleValue, "トグルの状態が変更されている")
-
         // バイブレーションタイプを変更（デフォルトはStandardなので別のものに変更）
         app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
         XCTAssertTrue(
@@ -155,12 +123,6 @@ final class SettingsViewUITests: XCTestCase {
             app.buttons.matching(identifier: "VibrationTypeOptionStandard").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
             "Standardオプションが表示される"
         )
-
-        // トグルがリセットされたことを確認（変更後の値と異なることを検証）
-        app.swipeDown(velocity: UITestConstants.ScrollVelocity.slow)
-        let resetToggleValue = autoStopToggle.value as? String
-        // デフォルト値の "0" と比較する（リセット後の正しい値）
-        XCTAssertEqual(resetToggleValue, "0", "トグルの状態がデフォルト値にリセットされている")
     }
 
     // 設定画面に移動するヘルパーメソッド

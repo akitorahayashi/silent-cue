@@ -7,7 +7,6 @@ struct HapticsState: Equatable {
 
     /// ハプティック設定
     var hapticType: HapticType = .standard
-    var stopAutomatically = true
 
     /// 振動のプレビュー中かどうか
     var isPreviewingHaptic = false

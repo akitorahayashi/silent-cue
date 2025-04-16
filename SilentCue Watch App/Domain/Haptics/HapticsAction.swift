@@ -8,7 +8,7 @@ enum HapticsAction: Equatable {
     case stopHaptic
 
     // 設定
-    case updateHapticSettings(type: HapticType, stopAutomatically: Bool)
+    case updateHapticSettings(type: HapticType)
 
     // プレビュー
     case previewHaptic(HapticType)

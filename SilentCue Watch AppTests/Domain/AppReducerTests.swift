@@ -8,7 +8,6 @@ final class AppReducerTests: XCTestCase {
         let mockUserDefaults = MockUserDefaultsManager()
         // モックに期待される初期値を設定
         mockUserDefaults.setupInitialValues([
-            .stopVibrationAutomatically: true, // 例: true
             .hapticType: HapticType.standard.rawValue, // 例: standard
         ])
 
@@ -27,19 +26,18 @@ final class AppReducerTests: XCTestCase {
 
         // 次にエフェクトから settingsLoaded を期待
         await store.receive(AppAction.settings(.settingsLoaded(
-            stopVibration: true,
             hapticType: HapticType.standard
         ))) { state in
-            state.settings.stopVibrationAutomatically = true
             state.settings.selectedHapticType = HapticType.standard
-            state.settings.hasLoaded = true
+            state.settings.isSettingsLoaded = true
         }
 
         // 次にAppReducerの連携によるhaptics更新を期待
         await store.receive(AppAction.haptics(.updateHapticSettings(
-            type: HapticType.standard,
-            stopAutomatically: true
-        )))
+            type: HapticType.standard
+        ))) { state in
+            state.haptics.hapticType = HapticType.standard
+        }
 
         await store.finish()
     }
@@ -50,21 +48,18 @@ final class AppReducerTests: XCTestCase {
             reducer: { AppReducer() }
         )
 
-        let loadedAction = SettingsAction.settingsLoaded(stopVibration: false, hapticType: HapticType.weak)
+        let loadedAction = SettingsAction.settingsLoaded(hapticType: HapticType.weak)
         // アクションを送信し、SettingsReducerスコープからの即時の状態変更をアサート
         await store.send(AppAction.settings(loadedAction)) { state in
-            state.settings.stopVibrationAutomatically = false
             state.settings.selectedHapticType = HapticType.weak
-            state.settings.hasLoaded = true
+            state.settings.isSettingsLoaded = true
         }
 
         // AppReducerの連携による後続のアクションをアサート
         await store.receive(AppAction.haptics(.updateHapticSettings(
-            type: HapticType.weak,
-            stopAutomatically: false
+            type: HapticType.weak
         ))) { state in
             state.haptics.hapticType = HapticType.weak
-            state.haptics.stopAutomatically = false
         }
         await store.finish()
     }
