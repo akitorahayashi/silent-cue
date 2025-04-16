@@ -76,6 +76,7 @@ jobs:
     if: always()
     permissions:
       issues: write
+      pull-requests: write
     steps:
       - name: Determine Status
         id: status
