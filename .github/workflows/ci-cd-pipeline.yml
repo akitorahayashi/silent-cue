@@ -100,7 +100,7 @@ jobs:
             github.rest.issues.createComment({
               ...context.repo,
               issue_number: context.issue.number,
-              body: `## CI/CD パイプライン完了 ${{ steps.status.outputs.icon }}
+              body: `## CI/CD Pipeline Completed ${{ steps.status.outputs.icon }}
               
               ${{ steps.status.outputs.message }}
               

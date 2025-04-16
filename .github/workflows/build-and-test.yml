@@ -20,9 +20,6 @@ jobs:
       with:
         xcode-version: '16.2'
 
-    - name: Install jq
-      run: brew install jq
-
     - name: Find Simulator
       id: find-simulator
       run: |

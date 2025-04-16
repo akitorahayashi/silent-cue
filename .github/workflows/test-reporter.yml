@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+        run: brew install jq
 
       - name: Download test results artifact
         uses: actions/download-artifact@v4
