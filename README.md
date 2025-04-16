@@ -27,13 +27,13 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 ```
 SilentCue/
 ├── .github/workflows/
-│   ├── ci-cd-pipeline.yml # メインのCI/CDパイプライン
-│   └── callable_workflows/ # 再利用可能なワークフロー群
-│       ├── build-and-test.yml
-│       ├── build-for-production.yml
-│       ├── code-quality.yml
-│       ├── pr-reviewer.yml
-│       └── test-reporter.yml
+│   ├── ci-cd-pipeline.yml
+│   ├── build-and-test.yml
+│   ├── build-for-production.yml
+│   ├── code-quality.yml
+│   ├── pr-reviewer.yml
+│   └── test-reporter.yml
+│   └── README.md # 各ワークフローの詳細はこちら
 ├── SilentCue Watch App/
 │   ├── Assets.xcassets/
 │   ├── Domain/
@@ -137,20 +137,10 @@ Apple Watchアプリを閉じた後もタイマーが正確に動作し続けま
 
 このプロジェクトでは、GitHub Actions を利用して CI/CD パイプラインを構築しています。`.github/workflows/` ディレクトリ以下に設定ファイルが格納されています。
 
-- **`ci-cd-pipeline.yml`**: メインとなる統合パイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、以下のステップを順次実行します。
-    - コード品質チェック
-    - ビルドとテスト（ユニットテスト、UIテスト）
-    - テスト結果レポート
-    - (PR時) 自動コードレビュー
-    - (mainブランチ時) 本番用ビルド生成
-    - 完了通知
+- **`ci-cd-pipeline.yml`**: メインとなる統合パイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、他のワークフローを順次実行します。
+- その他の `.yml` ファイル (`build-and-test.yml`, `code-quality.yml` など): パイプラインの各ステップを実行する、呼び出し可能なワークフローです。`ci-cd-pipeline.yml` から呼び出されます。
 
-- **`callable_workflows/` ディレクトリ**: パイプラインの各ステップを実行する、再利用可能なワークフロー群です。
-    - **`code-quality.yml`**: SwiftFormatとSwiftLintによるコードフォーマットと静的解析を実行します。
-    - **`build-and-test.yml`**: アプリのビルド、ユニットテスト、UIテストを実行します。
-    - **`test-reporter.yml`**: テスト結果（JUnit形式）を解析し、Pull Requestにサマリーをコメントします。
-    - **`pr-reviewer.yml`**: (PR時) GitHub Copilotを利用した自動コードレビューを試みます。
-    - **`build-for-production.yml`**: mainブランチへのマージ時に、App Store提出用または開発用のIPAファイルを生成します。GitHub Releasesへのドラフト作成も行います。
+詳細なワークフローの説明は `.github/workflows/README.md` を参照してください。
 
 ## 開発環境
 

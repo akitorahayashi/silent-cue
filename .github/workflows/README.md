@@ -4,19 +4,18 @@
 
 ## ファイル構成
 
-- **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の呼び出し可能なワークフロー（callable workflows）を順次実行します。
-- **`callable_workflows/`**: `ci-cd-pipeline.yml` から呼び出される、再利用可能なワークフロー群が格納されています。
-    - `build-and-test.yml`: アプリのビルドとテストを実行します。
-    - `code-quality.yml`: コード品質チェック（SwiftFormat, SwiftLint）を実行します。
-    - `test-reporter.yml`: テスト結果のレポートを作成し、PRにコメントします。
-    - `pr-reviewer.yml`: PRレビューの自動化を試みます。
-    - `build-for-production.yml`: 本番用（または開発用）のIPAビルドを実行します。
+- **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します。
+- **`build-and-test.yml`**: アプリのビルドとテストを実行します。
+- **`code-quality.yml`**: コード品質チェック（SwiftFormat, SwiftLint）を実行します。
+- **`test-reporter.yml`**: テスト結果のレポートを作成し、PRにコメントします。
+- **`pr-reviewer.yml`**: PRレビューの自動化を試みます。
+- **`build-for-production.yml`**: 本番用（または開発用）のIPAビルドを実行します。
 
 ## 機能詳細
 
 ### `ci-cd-pipeline.yml`
 
-このワークフローが、パイプライン全体の流れを管理します。トリガー（Push, Pull Request, 手動実行）に応じて、以下の呼び出し可能ワークフローを適切な順序と条件で実行します。
+このワークフローが、パイプライン全体の流れを管理します。トリガー（Push, Pull Request, 手動実行）に応じて、以下のワークフローを適切な順序と条件で実行します。
 
 1.  `code-quality.yml` を実行し、コード品質をチェックします。
 2.  `build-and-test.yml` を実行し、ビルドとテストを行います。
@@ -25,21 +24,21 @@
 5.  mainブランチへのPushの場合、`build-for-production.yml` を実行し、本番用ビルドを生成します。
 6.  最後に、パイプライン全体の完了ステータスをPull Requestにコメントします。
 
-### `callable_workflows/build-and-test.yml`
+### `build-and-test.yml`
 
 `ci-cd-pipeline.yml` から呼び出され、主に以下の2つのジョブを実行します:
 
 1. **Build for Testing**: watchOSシミュレータを準備し、テスト用のアプリビルドを実行後、成果物をアップロードします。
 2. **Run Tests**: ビルド成果物をダウンロードし、ユニットテストとUIテストを実行します。テスト結果とコードカバレッジレポートを生成し、アップロードします。
 
-### `callable_workflows/code-quality.yml`
+### `code-quality.yml`
 
 `ci-cd-pipeline.yml` から呼び出され、コード品質に関するチェックを行います:
 
 - Mint経由でSwiftFormatとSwiftLintをインストールし、実行します。
 - フォーマットやLintに違反があれば、ワークフローを失敗させます。
 
-### `callable_workflows/test-reporter.yml`
+### `test-reporter.yml`
 
 `ci-cd-pipeline.yml` から呼び出され、`build-and-test.yml` で生成されたテスト結果ファイルを処理します:
 
@@ -47,14 +46,14 @@
 - JUnit形式のレポートがあれば解析し、GitHub Checks APIを通じて結果を報告します。
 - Pull Requestのコンテキストで実行された場合、テスト結果のサマリー（カバレッジ情報含む）をPRにコメントします。
 
-### `callable_workflows/pr-reviewer.yml`
+### `pr-reviewer.yml`
 
 Pull Request時に `ci-cd-pipeline.yml` から呼び出され、自動コードレビューを開始します:
 
 - レビュー開始を示すコメントをPull Requestに追加します。
 - GitHub Copilotをレビュアーとして追加しようと試みます（利用可能な場合）。
 
-### `callable_workflows/build-for-production.yml`
+### `build-for-production.yml`
 
 mainブランチへのPush時に `ci-cd-pipeline.yml` から呼び出され、本番リリース向けのビルドを実行します:
 
@@ -70,7 +69,7 @@ mainブランチへのPush時に `ci-cd-pipeline.yml` から呼び出され、�
 - **PR作成/更新時**: `main` または `master` ブランチをターゲットとするPull Request
 - **手動実行**: GitHub Actionsタブから `ci-cd-pipeline.yml` を選択して実行可能
 
-個別の呼び出し可能ワークフローは通常、直接実行するのではなく、`ci-cd-pipeline.yml` によって呼び出されます。
+個別のワークフローは通常、直接実行するのではなく、`ci-cd-pipeline.yml` によって呼び出されます。
 
 ## 技術仕様
 
