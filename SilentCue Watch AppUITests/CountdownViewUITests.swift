@@ -5,20 +5,19 @@ final class CountdownViewUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        
+
         // テスト用の環境変数を設定
         TestEnvironment.setupStandardTestEnvironment(for: app)
-        
+
         app.launch()
-        
+
         // 通知許可の確認・実行
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
-        
-        XCTAssertTrue(app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard), "アプリタイトルが表示される")
-    }
-    
-    override func tearDownWithError() throws {
-        try super.tearDownWithError()
+
+        XCTAssertTrue(
+            app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "アプリタイトルが表示される"
+        )
     }
 
     func testNavigateToCountdown() throws {
@@ -45,7 +44,8 @@ final class CountdownViewUITests: XCTestCase {
 
         // カウントダウン画面の要素が表示されるか確認
         XCTAssertTrue(
-            app.staticTexts.matching(identifier: "TimeFormatLabel").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app.staticTexts.matching(identifier: "TimeFormatLabel").firstMatch
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "時間をフォーマットしたラベルが表示される"
         )
 

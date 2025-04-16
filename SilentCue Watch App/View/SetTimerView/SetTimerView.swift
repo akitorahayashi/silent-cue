@@ -29,7 +29,7 @@ struct SetTimerView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
+
                     Spacer(minLength: 10)
 
                     // 時間選択エリア
@@ -60,9 +60,9 @@ struct SetTimerView: View {
                     }
                     .padding(.horizontal)
                     .animation(.easeInOut(duration: 0.3), value: viewStore.timerMode)
-                    
+
                     Spacer(minLength: 16)
-                    
+
                     // 開始ボタン
                     StartButton {
                         viewStore.send(.startTimer)

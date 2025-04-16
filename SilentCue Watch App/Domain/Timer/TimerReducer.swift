@@ -157,7 +157,7 @@ struct TimerReducer: Reducer {
 
         // 拡張ランタイムセッションを停止
         ExtendedRuntimeManager.shared.stopSession()
-        
+
         // 通知をキャンセル
         NotificationManager.shared.cancelTimerCompletionNotification()
 
@@ -188,7 +188,7 @@ struct TimerReducer: Reducer {
 
         // 拡張ランタイムセッションを停止
         ExtendedRuntimeManager.shared.stopSession()
-        
+
         // タイマー完了時は通知をキャンセル（すでにアプリ内にいるため）
         NotificationManager.shared.cancelTimerCompletionNotification()
 

@@ -96,7 +96,7 @@ struct HapticsReducer: Reducer {
                 }
             )
         }
-        
+
         // プレビュー中フラグを設定
         state.isPreviewingHaptic = true
 

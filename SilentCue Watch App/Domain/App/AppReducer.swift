@@ -35,12 +35,13 @@ struct AppReducer: Reducer {
                         if state.path.last == .countdown {
                             return .send(.timer(.updateTimerDisplay))
                         }
-                        
+
                         // バックグラウンドでタイマーが完了していたかチェック
-                        let wasCompletedInBackground = ExtendedRuntimeManager.shared.checkAndClearBackgroundCompletionFlag()
-                        
+                        let wasCompletedInBackground = ExtendedRuntimeManager.shared
+                            .checkAndClearBackgroundCompletionFlag()
+
                         // バックグラウンドで完了していた場合、通知から来た可能性が高いので振動なしで完了画面に遷移
-                        if wasCompletedInBackground && state.timer.completionDate != nil {
+                        if wasCompletedInBackground, state.timer.completionDate != nil {
                             return .send(.pushScreen(.completion))
                         }
                     }
@@ -84,7 +85,7 @@ struct AppReducer: Reducer {
                         .send(.haptics(.startHaptic(state.settings.selectedHapticType))),
                         .send(.pushScreen(.completion)) // pathにcompletionを追加
                     )
-                    
+
                 case .timer(.backgroundTimerFinished):
                     // バックグラウンドでタイマーが完了した場合は振動なしで完了画面へ遷移
                     return .send(.pushScreen(.completion))

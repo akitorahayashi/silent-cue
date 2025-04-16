@@ -8,7 +8,7 @@ struct TimerCompletionView: View {
 
     // アニメーション用の状態変数
     @State private var appearAnimation = false
-    
+
     // 通知許可状態
     @State private var isNotificationAuthorized = false
     @State private var showingNotificationInstructionAlert = false
@@ -40,16 +40,15 @@ struct TimerCompletionView: View {
                             timerDurationMinutes: viewStore.timerDurationMinutes,
                             appearAnimation: $appearAnimation
                         )
-                        
+
                         // 通知が許可されていない場合は通知許可ボタンを表示
                         if !isNotificationAuthorized {
-                            
                             Spacer(minLength: 20)
 
                             Button {
                                 // まず通知設定方法のアラートを表示
                                 showingNotificationInstructionAlert = true
-                                
+
                                 // 同時に通知許可もリクエスト（初回のみ表示される）
                                 requestNotificationAuthorization()
                             } label: {
@@ -93,14 +92,14 @@ struct TimerCompletionView: View {
             }
         })
     }
-    
+
     // 通知許可状態を確認
     private func checkNotificationAuthorizationStatus() {
         NotificationManager.shared.checkAuthorizationStatus { isAuthorized in
             isNotificationAuthorized = isAuthorized
         }
     }
-    
+
     // 通知許可をリクエスト
     private func requestNotificationAuthorization(completion: @escaping (Bool) -> Void = { _ in }) {
         NotificationManager.shared.requestAuthorization { granted in
@@ -109,4 +108,3 @@ struct TimerCompletionView: View {
         }
     }
 }
-

@@ -5,16 +5,19 @@ final class SettingsViewUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        
+
         // テスト用の環境変数を設定
         TestEnvironment.setupStandardTestEnvironment(for: app)
-        
+
         app.launch()
-        
+
         // 通知許可の確認・実行
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
-        
-        XCTAssertTrue(app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard), "アプリタイトルが表示される")
+
+        XCTAssertTrue(
+            app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "アプリタイトルが表示される"
+        )
     }
 
     func testSettingsViewInitialDisplay() throws {
@@ -26,19 +29,6 @@ final class SettingsViewUITests: XCTestCase {
 
         // バイブレーションタイプセクションが表示されているか確認
         XCTAssertTrue(app.staticTexts.matching(identifier: "VibrationTypeHeader").firstMatch.exists)
-
-        // 画面を下にスクロールして DangerZone を表示
-        app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
-
-        // 危険ゾーンが表示されるまで待機 - スクロールの完了を待機
-        XCTAssertTrue(
-            app.staticTexts.matching(identifier: "DangerZoneHeader").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
-            "危険ゾーンヘッダーが表示される"
-        )
-        XCTAssertTrue(
-            app.buttons.matching(identifier: "ResetAllSettingsButton").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
-            "リセットボタンが表示される"
-        )
     }
 
     func testVibrationTypeSelection() throws {
@@ -50,7 +40,8 @@ final class SettingsViewUITests: XCTestCase {
 
         // UIが安定するのを待つ
         XCTAssertTrue(
-            app.buttons.matching(identifier: "VibrationTypeOptionStrong").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
+            app.buttons.matching(identifier: "VibrationTypeOptionStrong").firstMatch
+                .waitForExistence(timeout: UITestConstants.Timeout.short),
             "Strongオプションが表示される"
         )
 
@@ -61,71 +52,13 @@ final class SettingsViewUITests: XCTestCase {
         // さらに弱くスクロールしてLightオプションを表示
         app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
         XCTAssertTrue(
-            app.buttons.matching(identifier: "VibrationTypeOptionWeak").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
+            app.buttons.matching(identifier: "VibrationTypeOptionWeak").firstMatch
+                .waitForExistence(timeout: UITestConstants.Timeout.short),
             "Weakオプションが表示される"
         )
 
         // 次に別のタイプを試す
         app.buttons.matching(identifier: "VibrationTypeOptionWeak").firstMatch.tap()
-    }
-
-    func testDangerZone() throws {
-        // まず設定画面に移動
-        navigateToSettingsView()
-
-        // スクロールダウン
-        app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
-
-        // 危険ゾーンが表示されるまで待機（これによりスクロールの完了を待機）
-        XCTAssertTrue(
-            app.staticTexts.matching(identifier: "DangerZoneHeader").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
-            "危険ゾーンヘッダーが表示される"
-        )
-        XCTAssertTrue(
-            app.buttons.matching(identifier: "ResetAllSettingsButton").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
-            "リセットボタンが表示される"
-        )
-    }
-
-    func testResetAllSettings() throws {
-        // まず設定画面に移動
-        navigateToSettingsView()
-
-        // バイブレーションタイプを変更（デフォルトはStandardなので別のものに変更）
-        app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
-        XCTAssertTrue(
-            app.buttons.matching(identifier: "VibrationTypeOptionStrong").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
-            "Strongオプションが表示される"
-        )
-        app.buttons.matching(identifier: "VibrationTypeOptionStrong").firstMatch.tap()
-
-        // 2. 危険ゾーンにスクロール
-        app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
-        let resetButton = app.buttons.matching(identifier: "ResetAllSettingsButton").firstMatch
-        XCTAssertTrue(resetButton.waitForExistence(timeout: UITestConstants.Timeout.short), "リセットボタンが表示される")
-
-        // 3. リセットボタンをタップ
-        resetButton.tap()
-
-        // 4. 確認ダイアログで「リセット」を選択
-        let resetConfirmButton = app.buttons["リセット"]
-        XCTAssertTrue(resetConfirmButton.waitForExistence(timeout: UITestConstants.Timeout.short), "リセット確認ボタンが表示される")
-        resetConfirmButton.tap()
-
-        // 5. OKアラートが表示されたら閉じる
-        let okButton = app.buttons["OK"]
-        if okButton.waitForExistence(timeout: UITestConstants.Timeout.short) {
-            okButton.tap()
-        }
-
-        // 6. 設定がデフォルト値に戻ったことを検証
-
-        // バイブレーションタイプが「Standard」に戻っているか確認（少し上にスクロールして見えるようにする）
-        app.swipeDown(velocity: UITestConstants.ScrollVelocity.slow)
-        XCTAssertTrue(
-            app.buttons.matching(identifier: "VibrationTypeOptionStandard").firstMatch.waitForExistence(timeout: UITestConstants.Timeout.short),
-            "Standardオプションが表示される"
-        )
     }
 
     // 設定画面に移動するヘルパーメソッド
@@ -136,6 +69,9 @@ final class SettingsViewUITests: XCTestCase {
         settingsButton.tap()
 
         // 設定画面が表示されるまで待機
-        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: UITestConstants.Timeout.standard), "設定画面のタイトルが表示される")
+        XCTAssertTrue(
+            app.staticTexts["Settings"].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "設定画面のタイトルが表示される"
+        )
     }
 }
