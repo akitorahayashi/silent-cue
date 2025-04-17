@@ -3,11 +3,11 @@
 # コマンドが失敗したらすぐに終了する
 set -e
 
-# 利用可能な最初の 'Apple Watch Series' シミュレーターを見つける
-SIMULATOR_INFO=$(xcrun simctl list devices available | grep 'Apple Watch Series' | head -1)
+# 利用可能な 'Apple Watch Ultra' シミュレーターを見つける
+SIMULATOR_INFO=$(xcrun simctl list devices available | grep 'Apple Watch Ultra' | head -1)
 
 if [ -z "$SIMULATOR_INFO" ]; then
-  echo "エラー: 'Apple Watch Series' シミュレーターが見つかりません。" >&2
+  echo "エラー: 'Apple Watch Ultra' シミュレーターが見つかりません。" >&2
   exit 1
 fi
 

@@ -96,6 +96,7 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
+            SKIP_MACRO_VALIDATION=YES \
             archive
       
       # ===== App Store リリース時はこちらを使用 (上記の無署名ビルドはコメントアウト) =====
