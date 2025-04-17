@@ -53,7 +53,8 @@ jobs:
           -derivedDataPath ./xcbuild \
           -configuration Debug \
           -enableCodeCoverage YES \
-          CODE_SIGNING_ALLOWED=NO
+          CODE_SIGNING_ALLOWED=NO \
+          | xcpretty
       
     - name: Run Unit Tests
       id: unit_tests
@@ -63,13 +64,13 @@ jobs:
           -scheme "SilentCue Watch AppTests" \
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
-          -configuration Debug \
           -resultBundlePath ./test-results/unit/TestResults.xcresult \
-          -enableCodeCoverage YES
+          -enableCodeCoverage YES \
+          | xcbeautify --report junit --report-path ./test-results/unit/junit.xml
         
         echo "UNIT_TEST_STATUS=$?" >> $GITHUB_ENV
       continue-on-error: false
-      
+          
     - name: Run UI Tests
       id: ui_tests
       run: |
@@ -78,88 +79,61 @@ jobs:
           -scheme "SilentCue Watch AppUITests" \
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
-          -configuration Debug \
           -resultBundlePath ./test-results/ui/TestResults.xcresult \
-          -enableCodeCoverage YES
+          -enableCodeCoverage YES \
+          | xcbeautify --report junit --report-path ./test-results/ui/junit.xml
           
         echo "UI_TEST_STATUS=$?" >> $GITHUB_ENV
       continue-on-error: false
       
     - name: Generate Code Coverage Reports
       run: |
-        echo "Checking for result bundles..."
-        UNIT_RESULT_BUNDLE="./test-results/unit/TestResults.xcresult"
-        UI_RESULT_BUNDLE="./test-results/ui/TestResults.xcresult"
-        COMBINED_DIR="./test-results/combined"
-        MERGED_RESULT_BUNDLE="$COMBINED_DIR/TestResults.xcresult"
-        COMBINED_COVERAGE_JSON="$COMBINED_DIR/coverage.json"
+        #!/bin/bash
+        set -e # Exit immediately if a command exits with a non-zero status.
 
-        # --- CI Diagnosis: Check individual bundles BEFORE merge ---
-        echo "--- Diagnosing Unit Test Bundle ---"
-        if [ -d "$UNIT_RESULT_BUNDLE" ]; then
-          echo "Attempting to view coverage from Unit bundle:"
-          xcrun xccov view "$UNIT_RESULT_BUNDLE" || echo "Warning: Could not view Unit coverage data"
-          echo "Attempting to generate JSON from Unit bundle (temporary):"
-          xcrun xccov view --report --json "$UNIT_RESULT_BUNDLE" > ./test-results/unit/coverage_diag.json || echo "Warning: Failed to generate JSON from Unit bundle"
-          ls -l ./test-results/unit/coverage_diag.json
-        else
-          echo "Warning: Unit test result bundle not found at $UNIT_RESULT_BUNDLE"
-        fi
+        # --- Configuration ---\n        
+        UNIT_RESULT_BUNDLE=\"./test-results/unit/TestResults.xcresult\"
+        UI_RESULT_BUNDLE=\"./test-results/ui/TestResults.xcresult\"
+        COMBINED_DIR=\"./test-results/combined\"
+        MERGED_RESULT_BUNDLE=\"$COMBINED_DIR/TestResults.xcresult\"
+        COMBINED_COVERAGE_JSON=\"$COMBINED_DIR/coverage.json\"
 
-        echo "--- Diagnosing UI Test Bundle ---"
-        if [ -d "$UI_RESULT_BUNDLE" ]; then
-          echo "Attempting to view coverage from UI bundle:"
-          xcrun xccov view "$UI_RESULT_BUNDLE" || echo "Warning: Could not view UI coverage data"
-          echo "Attempting to generate JSON from UI bundle (temporary):"
-          xcrun xccov view --report --json "$UI_RESULT_BUNDLE" > ./test-results/ui/coverage_diag.json || echo "Warning: Failed to generate JSON from UI bundle"
-          ls -l ./test-results/ui/coverage_diag.json
-        else
-          echo "Warning: UI test result bundle not found at $UI_RESULT_BUNDLE"
-        fi
-        echo "--- End Diagnosis ---"
-        # --- End CI Diagnosis ---
+        echo "Starting Code Coverage Report Generation..."
 
-        if [ ! -d "$UNIT_RESULT_BUNDLE" ]; then
-          echo "Error: Unit test result bundle not found at $UNIT_RESULT_BUNDLE"
-          exit 1 # Exit if essential bundle is missing
-        fi
-        if [ ! -d "$UI_RESULT_BUNDLE" ]; then
-          echo "Error: UI test result bundle not found at $UI_RESULT_BUNDLE"
-          exit 1 # Exit if essential bundle is missing
-        fi
-
-        # Only proceed if both bundles exist (redundant check removed for brevity, added exit above)
-        echo "Merging result bundles..."
+        # 1. Prepare Merge Directory
+        echo "Preparing merge directory: $COMBINED_DIR"
         mkdir -p "$COMBINED_DIR"
-        # Ensure clean merge target
-        rm -rf "$MERGED_RESULT_BUNDLE"
-        rm -f "$COMBINED_COVERAGE_JSON"
 
-        if xcrun xcresulttool merge "$UNIT_RESULT_BUNDLE" "$UI_RESULT_BUNDLE" --output-path "$MERGED_RESULT_BUNDLE"; then
-          echo "Result bundles merged successfully to $MERGED_RESULT_BUNDLE"
-
-          if [ -d "$MERGED_RESULT_BUNDLE" ]; then
-            echo "Generating combined coverage report..."
-            if xcrun xccov view --report --json "$MERGED_RESULT_BUNDLE" > "$COMBINED_COVERAGE_JSON"; then
-              echo "Combined coverage report generated at $COMBINED_COVERAGE_JSON"
-              ls -l "$COMBINED_COVERAGE_JSON" # Check size
-              if [ ! -s "$COMBINED_COVERAGE_JSON" ]; then
-                  echo "Warning: Generated combined coverage.json file is empty."
-              fi
-            else
-              echo "Error: Failed to generate coverage report from merged bundle."
-              # Optionally view non-JSON report for debugging
-              xcrun xccov view "$MERGED_RESULT_BUNDLE" || echo "Warning: Could not view merged coverage data"
-              exit 1 # Exit if report generation fails
-            fi
-          else
-            echo "Error: Merged result bundle not found unexpectedly."
-            exit 1
-          fi
-        else
-          echo "Error: Failed to merge result bundles."
+        # 2. テスト結果バンドルのマージ
+        echo "テスト結果のマージを開始: $UNIT_RESULT_BUNDLE と $UI_RESULT_BUNDLE"
+        if ! xcrun xcresulttool merge \
+          "$UNIT_RESULT_BUNDLE" \
+          "$UI_RESULT_BUNDLE" \
+          --output-path "$MERGED_RESULT_BUNDLE"; then
+          echo "エラー: テスト結果のマージに失敗しました。単体テストとUIテストの結果が存在し、有効であることを確認してください。"
           exit 1
         fi
+        echo "テスト結果のマージが成功しました: $MERGED_RESULT_BUNDLE"
+
+        # 3. コードカバレッジレポートの生成
+        echo "結合したカバレッジレポートを生成: $COMBINED_COVERAGE_JSON"
+        if ! xcrun xccov view --report --json "$MERGED_RESULT_BUNDLE" > "$COMBINED_COVERAGE_JSON"; then
+          echo "エラー: マージされたバンドル $MERGED_RESULT_BUNDLE からカバレッジレポート生成に失敗しました。"
+          # JSON生成に失敗した場合、診断表示を試みる
+          echo "マージされたバンドルの診断表示を試みます:"
+          xcrun xccov view "$MERGED_RESULT_BUNDLE" || echo "警告: 診断的にもカバレッジデータを表示できませんでした。"
+          exit 1
+        fi
+        echo "結合カバレッジレポートの生成に成功しました。"
+        ls -l "$COMBINED_COVERAGE_JSON"
+
+        # 4. 生成されたレポートが空ではないか確認
+        if [ ! -s "$COMBINED_COVERAGE_JSON" ]; then
+            echo "エラー: 生成された結合カバレッジJSONファイルが空です。"
+            exit 1
+        fi
+
+        echo "コードカバレッジレポート生成が正常に完了しました。"
       continue-on-error: false
       
     - name: Set Test Status
