@@ -37,6 +37,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spm-
           
+      - name: Install xcpretty
+        run: gem install xcpretty
+          
       # ===== App Store リリース時にコメントを外す =====
       # 事前に以下のGitHub Secretsを設定する必要があります:
       # - BUILD_CERTIFICATE_BASE64: 配布用の証明書を文字列に変換したもの
@@ -87,17 +90,16 @@ jobs:
           mkdir -p ./build
           
           # 署名なしでビルド
-          xcodebuild -project "SilentCue.xcodeproj" \
+          set -o pipefail && xcodebuild \
+            -project "SilentCue.xcodeproj" \
             -scheme "SilentCue Watch App" \
             -configuration Release \
             -destination "generic/platform=watchOS" \
             -archivePath "./build/SilentCue.xcarchive" \
+            -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
-            SKIP_MACRO_VALIDATION=YES \
-            archive
+            archive \
+          | xcpretty -c
       
       # ===== App Store リリース時はこちらを使用 (上記の無署名ビルドはコメントアウト) =====
       # - name: Build for App Store Release
@@ -111,14 +113,18 @@ jobs:
       #     mkdir -p ./build
       #     
       #     # 署名付きビルドの実行
-      #     xcodebuild -project "SilentCue.xcodeproj" \
+      #     set -o pipefail && xcodebuild \
+      #       -project "SilentCue.xcodeproj" \
       #       -scheme "SilentCue Watch App" \
       #       -configuration Release \
       #       -destination "generic/platform=watchOS" \
-      #       clean archive -archivePath "./build/SilentCue.xcarchive" \
+      #       -archivePath "./build/SilentCue.xcarchive" \
       #       CODE_SIGN_STYLE=Manual \
       #       CODE_SIGN_IDENTITY="Apple Distribution" \
-      #       PROVISIONING_PROFILE_SPECIFIER="SilentCue WatchOS App Store Profile"
+      #       PROVISIONING_PROFILE_SPECIFIER="SilentCue WatchOS App Store Profile" \
+      #       clean \
+      #       archive \
+      #     | xcpretty -c
             
       # ===== 現在の無署名エクスポート設定 - App Storeリリース時はコメントアウト =====
       - name: Create IPA Package
@@ -142,11 +148,13 @@ jobs:
           EOL
           
           # IPAの生成 (署名なし)
-          xcodebuild -exportArchive \
+          set -o pipefail && xcodebuild \
+            -exportArchive \
             -archivePath "./build/SilentCue.xcarchive" \
             -exportPath "./build/Export" \
             -exportOptionsPlist exportOptions.plist \
-            -allowProvisioningUpdates
+            -allowProvisioningUpdates \
+          | xcpretty -c
           
           # IPA生成後のチェック
           ls -la ./build/Export
@@ -183,10 +191,12 @@ jobs:
       #     fi
       #     
       #     # App Store用IPAの生成
-      #     xcodebuild -exportArchive \
+      #     set -o pipefail && xcodebuild \
+      #       -exportArchive \
       #       -archivePath "./build/SilentCue.xcarchive" \
       #       -exportPath "./build/Export" \
-      #       -exportOptionsPlist exportOptions.plist
+      #       -exportOptionsPlist exportOptions.plist \
+      #     | xcpretty -c
       #     
       #     # IPA生成後のチェック
       #     ls -la ./build/Export

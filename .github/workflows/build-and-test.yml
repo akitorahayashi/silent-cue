@@ -32,6 +32,7 @@ jobs:
         
     - name: Build for Testing
       run: |
+        set -o pipefail
         SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
         echo "Build for Testing using Simulator ID: $SIMULATOR_ID"
         xcodebuild build-for-testing \
@@ -40,12 +41,14 @@ jobs:
           -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
           -derivedDataPath ./xcbuild \
           -configuration Debug \
+          -skipMacroValidation \
           CODE_SIGNING_ALLOWED=NO \
-          | xcpretty
+          | xcpretty -c
       
     - name: Run Unit Tests
       id: unit_tests
       run: |
+        set -o pipefail
         SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
         echo "Running Unit Tests using Simulator ID: $SIMULATOR_ID"
         xcodebuild test-without-building \
@@ -63,6 +66,7 @@ jobs:
     - name: Run UI Tests
       id: ui_tests
       run: |
+        set -o pipefail
         SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
         echo "Running UI Tests using Simulator ID: $SIMULATOR_ID"
         xcodebuild test-without-building \
