@@ -34,7 +34,7 @@ jobs:
       run: |
         set -o pipefail
         SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
-        echo "Build for Testing using Simulator ID: $SIMULATOR_ID"
+        echo "シミュレータ ID ($SIMULATOR_ID) を使用してテスト用にビルドします"
         xcodebuild build-for-testing \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
@@ -44,18 +44,21 @@ jobs:
           -skipMacroValidation \
           CODE_SIGNING_ALLOWED=NO \
           | xcpretty -c
+        echo "--- build-for-testing 後の xcbuild 内容一覧 ---"
+        ls -R ./xcbuild
       
     - name: Run Unit Tests
       id: unit_tests
       run: |
         set -o pipefail
         SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
-        echo "Running Unit Tests using Simulator ID: $SIMULATOR_ID"
+        echo "シミュレータ ID ($SIMULATOR_ID) を使用してユニットテストを実行します"
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch AppTests" \
           -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
           -derivedDataPath ./xcbuild \
+          -enableCodeCoverage NO \
           -resultBundlePath ./test-results/unit/TestResults.xcresult \
           | xcbeautify --report junit --report-path ./test-results/unit/junit.xml
         
@@ -68,12 +71,13 @@ jobs:
       run: |
         set -o pipefail
         SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
-        echo "Running UI Tests using Simulator ID: $SIMULATOR_ID"
+        echo "シミュレータ ID ($SIMULATOR_ID) を使用して UI テストを実行します"
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch AppUITests" \
           -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
           -derivedDataPath ./xcbuild \
+          -enableCodeCoverage NO \
           -resultBundlePath ./test-results/ui/TestResults.xcresult \
           | xcbeautify --report junit --report-path ./test-results/ui/junit.xml
           
