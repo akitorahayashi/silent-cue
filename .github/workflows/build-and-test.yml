@@ -52,7 +52,6 @@ jobs:
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -configuration Debug \
-          -enableCodeCoverage YES \
           CODE_SIGNING_ALLOWED=NO \
           | xcpretty
       
@@ -65,11 +64,6 @@ jobs:
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -resultBundlePath ./test-results/unit/TestResults.xcresult \
-          -enableCodeCoverage YES \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES \
-          GCC_GENERATE_TEST_COVERAGE_FILES=YES \
           | xcbeautify --report junit --report-path ./test-results/unit/junit.xml
         
         echo "UNIT_TEST_STATUS=$?" >> $GITHUB_ENV
@@ -85,87 +79,10 @@ jobs:
           -destination "platform=watchOS Simulator,id=${{ steps.find-simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -resultBundlePath ./test-results/ui/TestResults.xcresult \
-          -enableCodeCoverage YES \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES \
-          GCC_GENERATE_TEST_COVERAGE_FILES=YES \
           | xcbeautify --report junit --report-path ./test-results/ui/junit.xml
           
         echo "UI_TEST_STATUS=$?" >> $GITHUB_ENV
         ls -la ./test-results/ui/
-      continue-on-error: false
-      
-    - name: Generate Code Coverage Reports
-      run: |
-        #!/bin/bash
-        set -e # Exit immediately if a command exits with a non-zero status.
-
-        # --- Configuration ---\n        
-        UNIT_RESULT_BUNDLE="./test-results/unit/TestResults.xcresult"
-        UI_RESULT_BUNDLE="./test-results/ui/TestResults.xcresult"
-        COMBINED_DIR="./test-results/combined"
-        MERGED_RESULT_BUNDLE="$COMBINED_DIR/TestResults.xcresult"
-        COMBINED_COVERAGE_JSON="$COMBINED_DIR/coverage.json"
-
-        echo "Starting Code Coverage Report Generation..."
-
-        # Debug: Check if test result files exist and show their details
-        echo "確認: テスト結果ファイル"
-        if [ ! -d "$UNIT_RESULT_BUNDLE" ]; then
-          echo "エラー: 単体テスト結果 $UNIT_RESULT_BUNDLE が見つかりません"
-          exit 1
-        fi
-        
-        if [ ! -d "$UI_RESULT_BUNDLE" ]; then
-          echo "エラー: UIテスト結果 $UI_RESULT_BUNDLE が見つかりません"
-          exit 1
-        fi
-        
-        echo "単体テスト結果: $(ls -la $UNIT_RESULT_BUNDLE)"
-        echo "UIテスト結果: $(ls -la $UI_RESULT_BUNDLE)"
-
-        # Check coverage data in result bundles
-        echo "単体テスト結果のカバレッジデータを確認:"
-        xcrun xccov view "$UNIT_RESULT_BUNDLE" || echo "単体テストのカバレッジデータがありません"
-        
-        echo "UIテスト結果のカバレッジデータを確認:"
-        xcrun xccov view "$UI_RESULT_BUNDLE" || echo "UIテストのカバレッジデータがありません"
-
-        # 1. Prepare Merge Directory
-        echo "Preparing merge directory: $COMBINED_DIR"
-        mkdir -p "$COMBINED_DIR"
-
-        # 2. テスト結果バンドルのマージ
-        echo "テスト結果のマージを開始: $UNIT_RESULT_BUNDLE と $UI_RESULT_BUNDLE"
-        if ! xcrun xcresulttool merge \
-          "$UNIT_RESULT_BUNDLE" \
-          "$UI_RESULT_BUNDLE" \
-          --output-path "$MERGED_RESULT_BUNDLE"; then
-          echo "エラー: テスト結果のマージに失敗しました。単体テストとUIテストの結果が存在し、有効であることを確認してください。"
-          exit 1
-        fi
-        echo "テスト結果のマージが成功しました: $MERGED_RESULT_BUNDLE"
-
-        # 3. コードカバレッジレポートの生成
-        echo "結合したカバレッジレポートを生成: $COMBINED_COVERAGE_JSON"
-        if ! xcrun xccov view --report --json "$MERGED_RESULT_BUNDLE" > "$COMBINED_COVERAGE_JSON"; then
-          echo "エラー: マージされたバンドル $MERGED_RESULT_BUNDLE からカバレッジレポート生成に失敗しました。"
-          # JSON生成に失敗した場合、診断表示を試みる
-          echo "マージされたバンドルの診断表示を試みます:"
-          xcrun xccov view "$MERGED_RESULT_BUNDLE" || echo "警告: 診断的にもカバレッジデータを表示できませんでした。"
-          exit 1
-        fi
-        echo "結合カバレッジレポートの生成に成功しました。"
-        ls -l "$COMBINED_COVERAGE_JSON"
-
-        # 4. 生成されたレポートが空ではないか確認
-        if [ ! -s "$COMBINED_COVERAGE_JSON" ]; then
-            echo "エラー: 生成された結合カバレッジJSONファイルが空です。"
-            exit 1
-        fi
-
-        echo "コードカバレッジレポート生成が正常に完了しました。"
       continue-on-error: false
       
     - name: Set Test Status
@@ -182,11 +99,4 @@ jobs:
       with:
         name: test-results
         path: ./test-results
-        retention-days: 7
-
-    - name: Upload Coverage Reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-reports
-        path: ./test-results/**/coverage.json
         retention-days: 7 
