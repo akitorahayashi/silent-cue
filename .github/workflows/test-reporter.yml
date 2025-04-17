@@ -29,18 +29,10 @@ jobs:
           name: test-results # build-and-test.yml でアップロードされたテスト結果のアーティファクト名
           path: ./test-results
 
-      - name: Download coverage reports artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-reports # build-and-test.yml でアップロードされたカバレッジアーティファクト名
-          path: ./coverage-artifact
-
       - name: List downloaded files (for debugging)
         run: |
           echo "--- Test Results ---"
           ls -lR ./test-results
-          echo "--- Coverage Artifact ---"
-          ls -lR ./coverage-artifact
 
       - name: Publish Test Report as Check
         uses: mikepenz/action-junit-report@v4
@@ -53,76 +45,9 @@ jobs:
           require_tests: false # テストがなくてもエラーにしない
           check_name: 'Test Suite Results' # Checksタブに表示される名前
 
-      - name: Parse coverage report
-        id: coverage
-        run: |
-          COVERAGE_FILE="./coverage-artifact/combined/coverage.json" # Correct path based on ls output
-          if [ -f "$COVERAGE_FILE" ]; then
-            # Check if the file is empty before running jq
-            if [ -s "$COVERAGE_FILE" ]; then 
-              COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$COVERAGE_FILE")
-              COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE") # 小数点第一位までフォーマット
-              echo "Overall Line Coverage: ${COVERAGE_FORMATTED}%"
-              echo "percentage=${COVERAGE_FORMATTED}" >> $GITHUB_OUTPUT
-              echo "found=true" >> $GITHUB_OUTPUT
-            else
-              echo "Coverage report file found but is empty: $COVERAGE_FILE"
-              echo "found=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "Coverage report not found at $COVERAGE_FILE"
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Parse unit coverage report
-        id: unit_coverage
-        run: |
-          COVERAGE_FILE="./test-results/unit/TestResults.xcresult"
-          JSON_OUTPUT_TEMP="./test-results/unit/coverage.json" # Temporary file for JSON output
-          if [ -d "$COVERAGE_FILE" ]; then
-            echo "Generating unit test coverage report..."
-            if xcrun xccov view --report --json "$COVERAGE_FILE" > "$JSON_OUTPUT_TEMP"; then
-              COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$JSON_OUTPUT_TEMP")
-              COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE")
-              echo "Unit Test Line Coverage: ${COVERAGE_FORMATTED}%"
-              echo "percentage=${COVERAGE_FORMATTED}" >> $GITHUB_OUTPUT
-              echo "found=true" >> $GITHUB_OUTPUT
-              rm "$JSON_OUTPUT_TEMP" # Clean up temporary file
-            else
-              echo "Error generating unit test coverage report JSON from $COVERAGE_FILE"
-              echo "found=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "Unit test coverage result bundle not found at $COVERAGE_FILE"
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Parse ui coverage report
-        id: ui_coverage
-        run: |
-          COVERAGE_FILE="./test-results/ui/TestResults.xcresult"
-          JSON_OUTPUT_TEMP="./test-results/ui/coverage.json" # Temporary file for JSON output
-          if [ -d "$COVERAGE_FILE" ]; then
-            echo "Generating UI test coverage report..."
-            if xcrun xccov view --report --json "$COVERAGE_FILE" > "$JSON_OUTPUT_TEMP"; then
-              COVERAGE_PERCENTAGE=$(jq '.lineCoverage * 100' "$JSON_OUTPUT_TEMP")
-              COVERAGE_FORMATTED=$(printf "%.1f" "$COVERAGE_PERCENTAGE")
-              echo "UI Test Line Coverage: ${COVERAGE_FORMATTED}%"
-              echo "percentage=${COVERAGE_FORMATTED}" >> $GITHUB_OUTPUT
-              echo "found=true" >> $GITHUB_OUTPUT
-              rm "$JSON_OUTPUT_TEMP" # Clean up temporary file
-            else
-              echo "Error generating UI test coverage report JSON from $COVERAGE_FILE"
-              echo "found=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "UI test coverage result bundle not found at $COVERAGE_FILE"
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create or Update PR Comment
         # Run if test results or any coverage report was found
-        if: ${{ hashFiles('./test-results/**/*.xml') != '' || steps.coverage.outputs.found == 'true' || steps.unit_coverage.outputs.found == 'true' || steps.ui_coverage.outputs.found == 'true' }}
+        if: ${{ hashFiles('./test-results/**/*.xml') != '' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -134,21 +59,9 @@ jobs:
             }
 
             const { owner, repo } = context.repo;
-            // Get step outputs as strings
-            const combinedCoverageFound = '${{ steps.coverage.outputs.found }}' === 'true';
-            const rawCombinedCoverage = '${{ steps.coverage.outputs.percentage }}';
-            const unitCoverageFound = '${{ steps.unit_coverage.outputs.found }}' === 'true';
-            const rawUnitCoverage = '${{ steps.unit_coverage.outputs.percentage }}';
-            const uiCoverageFound = '${{ steps.ui_coverage.outputs.found }}' === 'true';
-            const rawUiCoverage = '${{ steps.ui_coverage.outputs.percentage }}';
-            
-            // Parse percentages, providing null if not found or invalid
-            const combinedCoveragePercentage = combinedCoverageFound && !isNaN(parseFloat(rawCombinedCoverage)) ? parseFloat(rawCombinedCoverage) : null;
-            const unitCoveragePercentage = unitCoverageFound && !isNaN(parseFloat(rawUnitCoverage)) ? parseFloat(rawUnitCoverage) : null;
-            const uiCoveragePercentage = uiCoverageFound && !isNaN(parseFloat(rawUiCoverage)) ? parseFloat(rawUiCoverage) : null;
 
             const commentMarker = '<!-- test-and-coverage-report -->';
-            let commentBody = `${commentMarker}\\n\\n## Test & Coverage Summary\\n\\n`;
+            let commentBody = `${commentMarker}\\n\\n## Test Summary\\n\\n`;
             const fs = require('fs');
 
             // Test Results Summary
@@ -158,25 +71,6 @@ jobs:
                commentBody += `✅ Test Results: Available in Checks tab.\\n`;
             } else {
                commentBody += `ℹ️ Test Results: No JUnit reports found.\\n`;
-            }
-
-            // Coverage Info
-            commentBody += `\\n📊 **Code Coverage:**\\n`; // Section header for coverage
-            let coverageReported = false;
-            if (combinedCoveragePercentage !== null) {
-              commentBody += `- **Overall:** **${combinedCoveragePercentage.toFixed(1)}%**\\n`;
-              coverageReported = true;
-            }
-            if (unitCoveragePercentage !== null) {
-              commentBody += `- Unit Tests: ${unitCoveragePercentage.toFixed(1)}%\\n`;
-              coverageReported = true;
-            }
-            if (uiCoveragePercentage !== null) {
-              commentBody += `- UI Tests: ${uiCoveragePercentage.toFixed(1)}%\\n`;
-              coverageReported = true;
-            }
-            if (!coverageReported) {
-              commentBody += `⚠️ No coverage reports found.\\n`;
             }
 
             // 既存コメントの検索・更新 or 新規作成
