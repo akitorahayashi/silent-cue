@@ -32,13 +32,15 @@ jobs:
       - name: Cache SPM dependencies
         uses: actions/cache@v4
         with:
-          path: ~/Library/Developer/Xcode/DerivedData
+          path: |
+            DerivedData/Build/SourcePackages/checkouts
+            ~/.swiftpm/xcode-package-cache
           key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
           restore-keys: |
             ${{ runner.os }}-spm-
           
       - name: Install xcpretty
-        run: gem install xcpretty
+        run: brew install xcpretty
           
       # ===== App Store リリース時にコメントを外す =====
       # 事前に以下のGitHub Secretsを設定する必要があります:
@@ -81,26 +83,34 @@ jobs:
       # ===== 現在の無署名ビルド - App Storeリリース時はコメントアウト =====
       - name: Build Release Version (Unsigned)
         run: |
-          # バージョン情報の取得
-          VERSION=$(grep -A 1 'MARKETING_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9.]//g')
-          BUILD_NUMBER=$(grep -A 1 'CURRENT_PROJECT_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9]//g')
+          set -euo pipefail
+
+          # バージョン情報の取得 (using agvtool)
+          VERSION=$(agvtool what-marketing-version -terse1)
+          BUILD_NUMBER=$(agvtool what-version -terse)
           echo "Building version $VERSION ($BUILD_NUMBER)"
-          
+
           # ビルドディレクトリ作成
           mkdir -p ./build
-          
+
           # 署名なしでビルド
-          set -o pipefail && xcodebuild \
+          xcodebuild \
             -project "SilentCue.xcodeproj" \
             -scheme "SilentCue Watch App" \
             -configuration Release \
             -destination "generic/platform=watchOS" \
             -archivePath "./build/SilentCue.xcarchive" \
-            -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             archive \
           | xcpretty -c
-      
+
+      - name: Verify Archive Contents
+        run: |
+          set -euo pipefail
+          echo "Checking archive contents..."
+          find ./build/SilentCue.xcarchive -name "*.app" | grep "SilentCue Watch App.app"
+          echo "Archive content verified."
+
       # ===== App Store リリース時はこちらを使用 (上記の無署名ビルドはコメントアウト) =====
       # - name: Build for App Store Release
       #   run: |
@@ -129,6 +139,8 @@ jobs:
       # ===== 現在の無署名エクスポート設定 - App Storeリリース時はコメントアウト =====
       - name: Create IPA Package
         run: |
+          set -euo pipefail
+
           # エクスポートオプション設定の作成
           cat > exportOptions.plist << EOL
           <?xml version="1.0" encoding="UTF-8"?>
@@ -142,13 +154,16 @@ jobs:
               <key>signingStyle</key>
               <string>automatic</string>
               <key>thinning</key>
-              <string><none></string>
+              <string>none</string>
           </dict>
           </plist>
           EOL
-          
+
+          # plist構文チェック
+          plutil -lint exportOptions.plist
+
           # IPAの生成 (署名なし)
-          set -o pipefail && xcodebuild \
+          xcodebuild \
             -exportArchive \
             -archivePath "./build/SilentCue.xcarchive" \
             -exportPath "./build/Export" \
@@ -212,7 +227,7 @@ jobs:
           
       # ===== GitHub Releasesへの自動ドラフト作成 - App Store リリース時は不要ならコメントアウト =====
       - name: Create GitHub Release
-        if: inputs.release_tag != ''
+        if: inputs.release_tag
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ inputs.release_tag }}
