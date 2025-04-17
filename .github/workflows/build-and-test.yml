@@ -69,6 +69,7 @@ jobs:
           | xcbeautify --report junit --report-path ./test-results/unit/junit.xml
         
         echo "UNIT_TEST_STATUS=$?" >> $GITHUB_ENV
+        ls -la ./test-results/unit/
       continue-on-error: false
           
     - name: Run UI Tests
@@ -84,6 +85,7 @@ jobs:
           | xcbeautify --report junit --report-path ./test-results/ui/junit.xml
           
         echo "UI_TEST_STATUS=$?" >> $GITHUB_ENV
+        ls -la ./test-results/ui/
       continue-on-error: false
       
     - name: Generate Code Coverage Reports
@@ -92,13 +94,28 @@ jobs:
         set -e # Exit immediately if a command exits with a non-zero status.
 
         # --- Configuration ---\n        
-        UNIT_RESULT_BUNDLE=\"./test-results/unit/TestResults.xcresult\"
-        UI_RESULT_BUNDLE=\"./test-results/ui/TestResults.xcresult\"
-        COMBINED_DIR=\"./test-results/combined\"
-        MERGED_RESULT_BUNDLE=\"$COMBINED_DIR/TestResults.xcresult\"
-        COMBINED_COVERAGE_JSON=\"$COMBINED_DIR/coverage.json\"
+        UNIT_RESULT_BUNDLE="./test-results/unit/TestResults.xcresult"
+        UI_RESULT_BUNDLE="./test-results/ui/TestResults.xcresult"
+        COMBINED_DIR="./test-results/combined"
+        MERGED_RESULT_BUNDLE="$COMBINED_DIR/TestResults.xcresult"
+        COMBINED_COVERAGE_JSON="$COMBINED_DIR/coverage.json"
 
         echo "Starting Code Coverage Report Generation..."
+
+        # Debug: Check if test result files exist and show their details
+        echo "確認: テスト結果ファイル"
+        if [ ! -d "$UNIT_RESULT_BUNDLE" ]; then
+          echo "エラー: 単体テスト結果 $UNIT_RESULT_BUNDLE が見つかりません"
+          exit 1
+        fi
+        
+        if [ ! -d "$UI_RESULT_BUNDLE" ]; then
+          echo "エラー: UIテスト結果 $UI_RESULT_BUNDLE が見つかりません"
+          exit 1
+        fi
+        
+        echo "単体テスト結果: $(ls -la $UNIT_RESULT_BUNDLE)"
+        echo "UIテスト結果: $(ls -la $UI_RESULT_BUNDLE)"
 
         # 1. Prepare Merge Directory
         echo "Preparing merge directory: $COMBINED_DIR"
