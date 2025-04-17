@@ -29,6 +29,14 @@ jobs:
         with:
           xcode-version: '16.2'
           
+      - name: Cache SPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+          
       # ===== App Store リリース時にコメントを外す =====
       # 事前に以下のGitHub Secretsを設定する必要があります:
       # - BUILD_CERTIFICATE_BASE64: 配布用の証明書を文字列に変換したもの
@@ -87,6 +95,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
+            BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
             archive
       
       # ===== App Store リリース時はこちらを使用 (上記の無署名ビルドはコメントアウト) =====
