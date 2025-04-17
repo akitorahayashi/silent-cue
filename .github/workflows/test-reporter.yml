@@ -15,13 +15,10 @@ permissions:
 
 jobs:
   report:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code # jq を使うためにリポジトリをチェックアウト
         uses: actions/checkout@v4
-
-      - name: Install jq
-        run: brew install jq
 
       - name: Download test results artifact
         uses: actions/download-artifact@v4
