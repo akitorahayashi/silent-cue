@@ -1,7 +1,7 @@
 import ComposableArchitecture
 import Foundation
 import WatchKit
-import XCTestDynamicOverlay // Import for XCTFail
+import XCTestDynamicOverlay
 
 /// バックグラウンド実行をサポートする拡張ランタイムセッション管理クラス (ライブ実装)
 final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelegate, ExtendedRuntimeServiceProtocol {
@@ -41,7 +41,7 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
         // バックグラウンドでの定期チェックを開始
         startBackgroundTimer()
 
-        print("Extended runtime session started")
+        print("拡張ランタイムセッションが開始されました")
     }
 
     /// 拡張ランタイムセッションを停止する
@@ -55,7 +55,7 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
         // フラグをリセット
         isTimerCompletedInBackground = false
 
-        print("Extended runtime session stopped")
+        print("拡張ランタイムセッションが停止されました")
     }
 
     /// バックグラウンドチェックタイマーを開始
@@ -85,7 +85,7 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
 
         // 現在時刻が終了予定時刻を過ぎていたらコールバックを実行
         if Date() >= targetEndTime {
-            print("Timer completed in background")
+            print("タイマーがバックグラウンドで完了しました")
             // バックグラウンド完了フラグを設定
             isTimerCompletedInBackground = true
             completionHandler()
@@ -109,56 +109,51 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
         didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
         error _: Error?
     ) {
-        print("Extended runtime session invalidated with reason: \(reason)")
+        print("拡張ランタイムセッションが無効化されました。理由: \(reason)")
     }
 
     func extendedRuntimeSessionDidStart(_: WKExtendedRuntimeSession) {
-        print("Extended runtime session did start")
+        print("拡張ランタイムセッションが開始されました (Delegate)")
     }
 
     func extendedRuntimeSessionWillExpire(_: WKExtendedRuntimeSession) {
-        print("Extended runtime session will expire")
-    }
-
-    // public init (DependencyKeyで使用)
-    override public init() {
-        super.init()
+        print("拡張ランタイムセッションがまもなく期限切れになります")
     }
 }
 
 // MARK: - TCA Dependency
 
 extension DependencyValues {
-    var extendedRuntimeService: ExtendedRuntimeServiceProtocol { // Rename property, update type and key
+    var extendedRuntimeService: ExtendedRuntimeServiceProtocol { // プロパティ名を変更、型とキーを更新
         get { self[ExtendedRuntimeServiceKey.self] }
         set { self[ExtendedRuntimeServiceKey.self] = newValue }
     }
 }
 
-private enum ExtendedRuntimeServiceKey: DependencyKey { // Rename key enum
-    static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService() // Use new class and protocol
+private enum ExtendedRuntimeServiceKey: DependencyKey { // キーenum名を変更
+    static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService() // 新しいクラスとプロトコルを使用
 
-    // Use Noop for previews
+    // プレビューには Mock を使用
     static let previewValue: ExtendedRuntimeServiceProtocol =
-        NoopExtendedRuntimeService() // Update to use renamed NoopExtendedRuntimeService
+        MockExtendedRuntimeService()
 }
 
 // TestDependencyKey を使用して testValue を定義
-extension LiveExtendedRuntimeService: TestDependencyKey { // Update extension target
-    static let testValue: ExtendedRuntimeServiceProtocol = { // Update protocol type
+extension LiveExtendedRuntimeService: TestDependencyKey { // 拡張ターゲットを更新
+    static let testValue: ExtendedRuntimeServiceProtocol = { // プロトコル型を更新
         struct UnimplementedExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
-            // Rename struct, conform to new protocol
+            // 構造体名を変更、新しいプロトコルに準拠
             func startSession(duration _: TimeInterval, targetEndTime _: Date?, completionHandler _: (() -> Void)?) {
-                XCTFail("\(Self.self).startSession is unimplemented")
+                XCTFail("\(Self.self).startSession は未実装です")
             }
 
             func stopSession() {
-                XCTFail("\(Self.self).stopSession is unimplemented")
+                XCTFail("\(Self.self).stopSession は未実装です")
             }
 
             func checkAndClearBackgroundCompletionFlag() -> Bool {
-                XCTFail("\(Self.self).checkAndClearBackgroundCompletionFlag is unimplemented")
-                return false // Placeholder return
+                XCTFail("\(Self.self).checkAndClearBackgroundCompletionFlag は未実装です")
+                return false // プレースホルダーの戻り値
             }
         }
         return UnimplementedExtendedRuntimeService()

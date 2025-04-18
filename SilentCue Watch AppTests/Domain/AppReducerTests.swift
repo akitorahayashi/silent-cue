@@ -6,7 +6,7 @@ import XCTest
 final class AppReducerTests: XCTestCase {
     func testOnAppearLoadsSettings() async {
         let mockUserDefaults = MockUserDefaultsManager()
-        
+
         // モックに期待される初期値を設定
         mockUserDefaults.set(HapticType.standard.rawValue, forKey: UserDefaultsKeys.hapticType)
 

@@ -2,12 +2,12 @@ import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
 
-// MARK: - UserDefaults Service Implementation
+// MARK: - UserDefaults サービス実装
 
-final class LiveUserDefaultsService: UserDefaultsServiceProtocol { // Rename class, conform to new protocol
+final class LiveUserDefaultsService: UserDefaultsServiceProtocol { // クラス名を変更、新しいプロトコルに準拠
     private let defaults = UserDefaults.standard
 
-    // MARK: - Protocol Methods
+    // MARK: - プロトコルメソッド
 
     func set(_ value: Any?, forKey defaultName: UserDefaultsKeys) {
         defaults.set(value, forKey: defaultName.rawValue)
@@ -26,46 +26,43 @@ final class LiveUserDefaultsService: UserDefaultsServiceProtocol { // Rename cla
             defaults.removeObject(forKey: key.rawValue)
         }
     }
-
-    // TCAのための public init
-    public init() {}
 }
 
-// MARK: - TCA Dependency
+// MARK: - TCA 依存関係
 
 extension DependencyValues {
-    var userDefaultsService: UserDefaultsServiceProtocol { // Rename property, update type and key
+    var userDefaultsService: UserDefaultsServiceProtocol { // プロパティ名を変更、型とキーを更新
         get { self[UserDefaultsServiceKey.self] }
         set { self[UserDefaultsServiceKey.self] = newValue }
     }
 }
 
-private enum UserDefaultsServiceKey: DependencyKey { // Rename key enum
-    static let liveValue: UserDefaultsServiceProtocol = LiveUserDefaultsService() // Use new class and protocol
+private enum UserDefaultsServiceKey: DependencyKey { // キーenum名を変更
+    static let liveValue: UserDefaultsServiceProtocol = LiveUserDefaultsService() // 新しいクラスとプロトコルを使用
 
-    // Use MockUserDefaultsManager for previews (ensure it conforms to new protocol if necessary)
-    // Assuming MockUserDefaultsManager can conform or be adapted to UserDefaultsServiceProtocol
+    // プレビューには MockUserDefaultsManager を使用します (必要に応じて新しいプロトコルに準拠することを確認)
+    // MockUserDefaultsManager が UserDefaultsServiceProtocol に準拠できるか、適合できると仮定します
     static let previewValue: UserDefaultsServiceProtocol = MockUserDefaultsManager()
 }
 
-extension LiveUserDefaultsService: TestDependencyKey { // Update extension target
-    static let testValue: UserDefaultsServiceProtocol = { // Update protocol type
-        struct UnimplementedUserDefaultsService: UserDefaultsServiceProtocol { // Rename struct, conform to new protocol
+extension LiveUserDefaultsService: TestDependencyKey { // 拡張ターゲットを更新
+    static let testValue: UserDefaultsServiceProtocol = { // プロトコル型を更新
+        struct UnimplementedUserDefaultsService: UserDefaultsServiceProtocol { // 構造体名を変更、新しいプロトコルに準拠
             func set(_: Any?, forKey _: UserDefaultsKeys) {
-                XCTFail("\(Self.self).set is unimplemented")
+                XCTFail("\(Self.self).set は未実装です")
             }
 
             func object(forKey _: UserDefaultsKeys) -> Any? {
-                XCTFail("\(Self.self).object is unimplemented")
+                XCTFail("\(Self.self).object は未実装です")
                 return nil
             }
 
             func remove(forKey _: UserDefaultsKeys) {
-                XCTFail("\(Self.self).remove is unimplemented")
+                XCTFail("\(Self.self).remove は未実装です")
             }
 
             func removeAll() {
-                XCTFail("\(Self.self).removeAll is unimplemented")
+                XCTFail("\(Self.self).removeAll は未実装です")
             }
         }
         return UnimplementedUserDefaultsService()

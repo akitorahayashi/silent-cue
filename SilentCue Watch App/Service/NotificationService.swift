@@ -5,7 +5,7 @@ import WatchKit
 import XCTestDynamicOverlay
 
 /// アプリの通知管理を行うクラス (ライブ実装)
-final class LiveNotificationService: NotificationServiceProtocol { // Rename class, conform to new protocol
+final class LiveNotificationService: NotificationServiceProtocol {
     /// 通知カテゴリの識別子
     private enum NotificationCategory: String {
         case timerCompleted = "TIMER_COMPLETED_CATEGORY"
@@ -19,6 +19,10 @@ final class LiveNotificationService: NotificationServiceProtocol { // Rename cla
     /// 通知識別子
     private enum NotificationIdentifier: String {
         case timerCompleted = "TIMER_COMPLETED_NOTIFICATION"
+    }
+
+    init() { // 暗黙の internal init を明示的に定義
+        setupNotificationCategories()
     }
 
     /// 通知カテゴリの設定
@@ -42,7 +46,7 @@ final class LiveNotificationService: NotificationServiceProtocol { // Rename cla
         UNUserNotificationCenter.current().setNotificationCategories([timerCompletedCategory])
     }
 
-    // MARK: - Protocol Methods
+    // MARK: - プロトコルメソッド
 
     func requestAuthorization(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
@@ -112,52 +116,56 @@ final class LiveNotificationService: NotificationServiceProtocol { // Rename cla
             }
         }
     }
-
-    // public init (DependencyKey で使用するため)
-    public init() {
-        setupNotificationCategories()
-    }
 }
 
-// MARK: - TCA Dependency
+// MARK: - TCA 依存関係
 
 extension DependencyValues {
-    var notificationService: NotificationServiceProtocol { // Rename property, update type and key
+    var notificationService: NotificationServiceProtocol { // プロパティ名を変更、型とキーを更新
         get { self[NotificationServiceKey.self] }
         set { self[NotificationServiceKey.self] = newValue }
     }
 }
 
-private enum NotificationServiceKey: DependencyKey { // Rename key enum
+private enum NotificationServiceKey: DependencyKey { // キーenum名を変更
     // ライブ実装を提供
-    static let liveValue: NotificationServiceProtocol = LiveNotificationService() // Use new class and protocol
+    static let liveValue: NotificationServiceProtocol = {
+        let service = LiveNotificationService()
+        // service.setupNotificationCategories() // setupNotificationCategories は private なので直接呼べない
+        // 代わりに、LiveNotificationService の (暗黙的な) init 内で setup を呼ぶか、
+        // setupNotificationCategories を internal にしてここで呼ぶ、
+        // または NotificationServiceProtocol に setup メソッドを追加する必要がある。
+        // ここでは LiveNotificationService の暗黙 init で setup を呼ぶことに期待する。
+        // (setupNotificationCategories を init から独立させるリファクタリングも検討可)
+        return service
+    }() // Use new class and protocol
 
-    // Preview実装を提供 (No-op)
+    // Preview実装を提供 (Mock)
     static let previewValue: NotificationServiceProtocol =
-        NoopNotificationService() // Update to use renamed NoopNotificationService
+        MockNotificationService()
 }
 
 // TestDependencyKey を使用して testValue を定義
-// Note: previewValue takes precedence over testValue in Previews.
-extension LiveNotificationService: TestDependencyKey { // Update extension target
-    static let testValue: NotificationServiceProtocol = { // Update protocol type
-        struct UnimplementedNotificationService: NotificationServiceProtocol { // Rename struct, conform to new protocol
+// 注意: プレビューでは previewValue が testValue よりも優先されます。
+extension LiveNotificationService: TestDependencyKey { // 拡張ターゲットを更新
+    static let testValue: NotificationServiceProtocol = { // プロトコル型を更新
+        struct UnimplementedNotificationService: NotificationServiceProtocol { // 構造体名を変更、新しいプロトコルに準拠
             func requestAuthorization(completion: @escaping (Bool) -> Void) {
-                XCTFail("\(Self.self).requestAuthorization is unimplemented")
+                XCTFail("\(Self.self).requestAuthorization は未実装です")
                 completion(false)
             }
 
             func checkAuthorizationStatus(completion: @escaping (Bool) -> Void) {
-                XCTFail("\(Self.self).checkAuthorizationStatus is unimplemented")
+                XCTFail("\(Self.self).checkAuthorizationStatus は未実装です")
                 completion(false)
             }
 
             func scheduleTimerCompletionNotification(at _: Date, minutes _: Int) {
-                XCTFail("\(Self.self).scheduleTimerCompletionNotification is unimplemented")
+                XCTFail("\(Self.self).scheduleTimerCompletionNotification は未実装です")
             }
 
             func cancelTimerCompletionNotification() {
-                XCTFail("\(Self.self).cancelTimerCompletionNotification is unimplemented")
+                XCTFail("\(Self.self).cancelTimerCompletionNotification は未実装です")
             }
         }
         return UnimplementedNotificationService()
