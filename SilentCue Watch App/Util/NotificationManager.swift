@@ -4,8 +4,11 @@ import WatchKit
 
 /// アプリの通知管理を行うクラス
 class NotificationManager {
-    /// シングルトンインスタンス
     static let shared = NotificationManager()
+    private init() {
+        // 通知カテゴリの設定
+        setupNotificationCategories()
+    }
 
     /// 通知カテゴリの識別子
     private enum NotificationCategory: String {
@@ -26,13 +29,7 @@ class NotificationManager {
     private var isNotificationsDisabled: Bool {
         // ProcessInfo からテスト実行フラグを取得
         ProcessInfo.processInfo
-            .environment[AppEnvironmentConstants.EnvKeys.disableNotifications] == AppEnvironmentConstants.EnvValues.yes
-    }
-
-    /// 初期化処理
-    private init() {
-        // 通知カテゴリの設定
-        setupNotificationCategories()
+            .environment[AppEnvironment.EnvKeys.disableNotificationsForTesting.rawValue] == AppEnvironment.EnvValues.yes.rawValue
     }
 
     /// 通知カテゴリの設定

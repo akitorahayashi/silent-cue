@@ -33,6 +33,16 @@
 		98A0AD852DADF7DD00A0E3BD /* SilentCue Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SilentCue Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		98FEAE9E2DB260F100006FA8 /* Exceptions for "Shared" folder in "SilentCue Watch AppUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppEnvironment.swift,
+			);
+			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -47,6 +57,14 @@
 		98A0AD882DADF7DD00A0E3BD /* SilentCue Watch AppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "SilentCue Watch AppUITests";
+			sourceTree = "<group>";
+		};
+		98FEAE922DB25E7100006FA8 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				98FEAE9E2DB260F100006FA8 /* Exceptions for "Shared" folder in "SilentCue Watch AppUITests" target */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -80,6 +98,7 @@
 		98A0AD5C2DADF7DB00A0E3BD = {
 			isa = PBXGroup;
 			children = (
+				98FEAE922DB25E7100006FA8 /* Shared */,
 				98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */,
 				98A0AD7E2DADF7DD00A0E3BD /* SilentCue Watch AppTests */,
 				98A0AD882DADF7DD00A0E3BD /* SilentCue Watch AppUITests */,
@@ -114,6 +133,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */,
+				98FEAE922DB25E7100006FA8 /* Shared */,
 			);
 			name = "SilentCue Watch App";
 			packageProductDependencies = (

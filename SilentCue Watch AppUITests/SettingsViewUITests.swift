@@ -7,7 +7,7 @@ final class SettingsViewUITests: XCTestCase {
         continueAfterFailure = false
 
         // テスト用の環境変数を設定
-        TestEnvironment.setupStandardTestEnvironment(for: app)
+        AppEnvironment.setupStandardTestEnvironment(for: app)
 
         app.launch()
 

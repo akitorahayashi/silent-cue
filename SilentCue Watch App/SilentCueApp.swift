@@ -24,32 +24,40 @@ struct SilentCueWatchApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // AppStateへの参照を取得 (WindowGroup の内部に移動)
-            WithViewStore(store, observe: { $0 }, content: { viewStore in
-                // NavigationStackのpathをAppStateとバインド
-                NavigationStack(path: viewStore.binding(
-                    get: \.path,
-                    send: AppAction.pathChanged // Pathの変更をReducerに通知
-                )) {
-                    // メイン画面としてタイマー設定画面を表示
-                    SetTimerView(
-                        store: store.scope(
-                            state: \.timer,
-                            action: AppAction.timer
-                        ),
-                        onSettingsButtonTapped: {
-                            // Viewから遷移アクションを発行
-                            viewStore.send(.pushScreen(.settings))
-                        },
-                        onTimerStart: {
-                            // Viewから遷移アクションを発行
-                            viewStore.send(.pushScreen(.countdown))
-                        }
-                    )
-                    .navigationDestination(for: NavigationDestination.self) { destination in
-                        // 各宛先に対応するViewを構築
-                        // case のインデントを修正
-                        switch destination {
+            // TimerCompletionViewのUIテスト用の起動引数を確認
+            if ProcessInfo.processInfo.arguments.contains("-testing-timer-completion-view") {
+                // UIテスト用に TimerCompletionView を直接表示
+                // 注意: テストに適したストアまたはモックデータを提供してください。
+                // この例では簡略化されたバージョンを使用しています。TimerCompletionView の
+                // 要件によっては、より完全なモックストアが必要になる場合があります。
+                TimerCompletionView(
+                    store: Store(initialState: TimerReducer.State()) {
+                        // テストに必要な場合、最小限のリデューサまたはモックアクションを提供
+                        TimerReducer() // または特定のモックリデューサ
+                    }
+                )
+                .accessibilityIdentifier("TimerCompletionView") // 識別子が存在することを確認
+            } else {
+                // 通常のアプリ起動フロー（メインストアを使用）
+                WithViewStore(store, observe: { $0 }, content: { viewStore in
+                    NavigationStack(path: viewStore.binding(
+                        get: \.path,
+                        send: AppAction.pathChanged
+                    )) {
+                        SetTimerView(
+                            store: store.scope(
+                                state: \.timer,
+                                action: AppAction.timer
+                            ),
+                            onSettingsButtonTapped: {
+                                viewStore.send(.pushScreen(.settings))
+                            },
+                            onTimerStart: {
+                                viewStore.send(.pushScreen(.countdown))
+                            }
+                        )
+                        .navigationDestination(for: NavigationDestination.self) { destination in
+                            switch destination {
                             case .countdown:
                                 CountdownView(
                                     store: store.scope(
@@ -58,6 +66,7 @@ struct SilentCueWatchApp: App {
                                     )
                                 )
                             case .completion:
+                                // 通常の完了画面へのナビゲーション
                                 TimerCompletionView(
                                     store: store.scope(
                                         state: \.timer,
@@ -76,40 +85,31 @@ struct SilentCueWatchApp: App {
                                     )
                                 )
                             case .timerStart:
-                                EmptyView() // この場合は使われない
+                                EmptyView()
+                            }
                         }
                     }
-                }
-                .onChange(of: scenePhase) { _, newPhase in
-                    // scenePhaseの変更をAppReducerに通知
-                    viewStore.send(.scenePhaseChanged(newPhase))
-                }
-                .onAppear {
-                    // アプリ起動時の処理をAppReducerに通知
-                    viewStore.send(.onAppear)
-
-                    // 通知デリゲートにストアを設定
-                    notificationDelegate.setStore(store)
-
-                    // 通知許可状態を確認
-                    checkNotificationStatus()
-                }
-                .alert("通知について", isPresented: $showNotificationExplanationAlert) {
-                    Button("許可する") {
-                        // OKボタンを押したらシステムの通知許可ダイアログを表示
-                        requestNotificationPermission()
-
-                        // 初回起動フラグをfalseに設定
-                        markAsLaunched()
+                    .onChange(of: scenePhase) { _, newPhase in
+                        viewStore.send(.scenePhaseChanged(newPhase))
                     }
-                    Button("許可しない", role: .cancel) {
-                        // 初回起動フラグをfalseに設定
-                        markAsLaunched()
+                    .onAppear {
+                        viewStore.send(.onAppear)
+                        notificationDelegate.setStore(store)
+                        checkNotificationStatus()
                     }
-                } message: {
-                    Text("\nタイマー完了時に通知を受け取りますか？\n\n通知を許可すると、アプリが閉じていても完了をお知らせします。\n")
-                }
-            })
+                    .alert("通知について", isPresented: $showNotificationExplanationAlert) {
+                        Button("許可する") {
+                            requestNotificationPermission()
+                            markAsLaunched()
+                        }
+                        Button("許可しない", role: .cancel) {
+                            markAsLaunched()
+                        }
+                    } message: {
+                        Text("\nタイマー完了時に通知を受け取りますか？\n\n通知を許可すると、アプリが閉じていても完了をお知らせします。\n")
+                    }
+                })
+            }
         }
     }
 
