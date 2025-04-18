@@ -24,7 +24,7 @@ jobs:
       run: chmod +x .github/scripts/find_simulator.sh
 
     - name: Install xcpretty
-      run: brew install xcpretty
+      run: gem install xcpretty
         
     - name: Create Test Results Directory
       run: mkdir -p test-results/unit test-results/ui

@@ -40,7 +40,7 @@ jobs:
             ${{ runner.os }}-spm-
           
       - name: Install xcpretty
-        run: brew install xcpretty
+        run: gem install xcpretty
           
       # ===== App Store リリース時にコメントを外す =====
       # 事前に以下のGitHub Secretsを設定する必要があります:
