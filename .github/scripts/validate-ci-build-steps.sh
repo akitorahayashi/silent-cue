@@ -99,7 +99,7 @@ echo "Verifying unit test results bundle..."
 if [ ! -d "$TEST_RESULTS_DIR/unit/TestResults.xcresult" ]; then
   fail "Unit test result bundle not found at $TEST_RESULTS_DIR/unit/TestResults.xcresult"
 fi
-success "Unit test result bundle found."
+success "Unit test result bundle found at $TEST_RESULTS_DIR/unit/TestResults.xcresult"
 
 # Run UI Tests
 echo "Running UI tests..."
@@ -117,7 +117,7 @@ echo "Verifying UI test results bundle..."
 if [ ! -d "$TEST_RESULTS_DIR/ui/TestResults.xcresult" ]; then
   fail "UI test result bundle not found at $TEST_RESULTS_DIR/ui/TestResults.xcresult"
 fi
-success "UI test result bundle found."
+success "UI test result bundle found at $TEST_RESULTS_DIR/ui/TestResults.xcresult"
 
 # --- Build for Production (Archive & Export) ---
 step "Building for Production (Unsigned)"

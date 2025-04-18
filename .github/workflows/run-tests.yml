@@ -79,7 +79,7 @@ jobs:
           echo "❌ Error: Unit test result bundle not found at $RESULT_BUNDLE_PATH"
           exit 1
         fi
-        echo "✅ Unit test result bundle found."
+        echo "✅ Unit test result bundle found at $RESULT_BUNDLE_PATH"
 
     - name: Run UI Tests
       id: ui_tests
@@ -110,7 +110,7 @@ jobs:
           echo "❌ Error: UI test result bundle not found at $RESULT_BUNDLE_PATH"
           exit 1
         fi
-        echo "✅ UI test result bundle found."
+        echo "✅ UI test result bundle found at $RESULT_BUNDLE_PATH"
 
     - name: Set Test Status
       id: test_status
