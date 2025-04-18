@@ -1,6 +1,6 @@
 import CasePaths
 import ComposableArchitecture
-import SwiftUI // ScenePhaseのため
+import SwiftUI
 
 /// アプリ全体のルートReducer
 struct AppReducer: Reducer {
@@ -8,7 +8,7 @@ struct AppReducer: Reducer {
     typealias Action = AppAction
 
     var body: some ReducerOf<Self> {
-        // 各機能ドメインのReducerをScopeで接続 (従来の構文を使用)
+        // 各機能ドメインのReducerをScopeで接続
         Scope(state: \.timer, action: /AppAction.timer) {
             TimerReducer()
         }

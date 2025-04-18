@@ -1,9 +1,8 @@
+import XCTestDynamicOverlay
 import Dependencies
 import WatchKit
-import XCTestDynamicOverlay // For XCTFail
 
-/// 触覚フィードバック機能のライブ実装
-final class LiveHapticsService: HapticsServiceProtocol { // New class conforming to new protocol
+final class LiveHapticsService: HapticsServiceProtocol {
     func play(_ type: WKHapticType) async {
         // WatchKit で必要な場合はメインスレッドで実行されることを保証
         await MainActor.run {

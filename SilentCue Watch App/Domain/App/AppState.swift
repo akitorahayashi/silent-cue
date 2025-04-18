@@ -1,5 +1,13 @@
 import SwiftUI
 
+/// ナビゲーションの宛先を示す型
+enum NavigationDestination: Hashable {
+    case countdown
+    case completion
+    case settings
+    case timerStart // ルート画面
+}
+
 /// アプリ全体のルート状態
 struct AppState: Equatable {
     var path: [NavigationDestination]

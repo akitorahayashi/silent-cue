@@ -1,4 +1,4 @@
-import SwiftUI // ScenePhase, NavigationPath
+import SwiftUI
 
 /// アプリ全体のルートアクション
 enum AppAction: Equatable {

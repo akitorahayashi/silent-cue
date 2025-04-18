@@ -1,4 +1,4 @@
-# SilentCueの依存性注入とテスト設計
+# Dependency Injection Design
 
 このドキュメントは、SilentCue Watchアプリ内で、The Composable Architecture (TCA) を使用して依存関係を管理するための設計と、それが単体テストやUIテストにどのように関連するかを概説します。
 
