@@ -29,7 +29,7 @@ class NotificationManager {
     private var isNotificationsDisabled: Bool {
         // ProcessInfo からテスト実行フラグを取得
         ProcessInfo.processInfo
-            .environment[AppEnvironment.EnvKeys.disableNotificationsForTesting.rawValue] == AppEnvironment.EnvValues.yes.rawValue
+            .environment[SCAppEnvironment.EnvKeys.disableNotificationsForTesting.rawValue] == SCAppEnvironment.EnvValues.yes.rawValue
     }
 
     /// 通知カテゴリの設定

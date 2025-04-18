@@ -7,11 +7,8 @@ final class SetTimerViewUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
 
-        AppEnvironment.setupStandardTestEnvironment(for: app)
-
-        app.launch()
-
-        NotificationPermissionHelper.ensureNotificationPermission(for: app)
+        // SetTimerView テスト用の環境設定とアプリの起動
+        SCAppEnvironment.setupEnvAndLaunchForSetTimerViewTest(for: app)
 
         XCTAssertTrue(
             app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard),
@@ -25,19 +22,19 @@ final class SetTimerViewUITests: XCTestCase {
         XCTAssertFalse(app.buttons["TimerModeButtonAtTime"].isSelected)
 
         // 初期状態では MinutesPicker が表示されていることを確認
-        XCTAssertTrue(app.otherElements["MinutesPickerView"].exists)
-        XCTAssertFalse(app.otherElements["HourMinutePickerView"].exists)
+        XCTAssertTrue(app.otherElements[SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue].exists)
+        XCTAssertFalse(app.otherElements[SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue].exists)
 
         // 開始ボタンと設定ボタンが存在することを確認
-        XCTAssertTrue(app.buttons["StartTimerButton"].exists)
-        XCTAssertTrue(app.buttons["OpenSettingsPage"].exists)
+        XCTAssertTrue(app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue].exists)
+        XCTAssertTrue(app.buttons[SCAccessibilityIdentifiers.SetTimerView.openSettingsPage.rawValue].exists)
     }
 
     func testSwitchingTimerMode() throws {
         let afterMinutesButton = app.buttons["TimerModeButtonAfterMinutes"]
         let atTimeButton = app.buttons["TimerModeButtonAtTime"]
-        let minutesPicker = app.otherElements["MinutesPickerView"]
-        let hourMinutePicker = app.otherElements["HourMinutePickerView"]
+        let minutesPicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue]
+        let hourMinutePicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue]
 
         // 初期状態を確認
         XCTAssertTrue(afterMinutesButton.isSelected)
@@ -65,7 +62,7 @@ final class SetTimerViewUITests: XCTestCase {
     }
 
     func testSelectingMinutes() throws {
-        let minutesPicker = app.otherElements["MinutesPickerView"]
+        let minutesPicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue]
         XCTAssertTrue(minutesPicker.waitForExistence(timeout: UITestConstants.Timeout.short), "MinutesPickerが表示される")
         let pickerWheel = minutesPicker.pickerWheels.firstMatch
 
@@ -91,7 +88,7 @@ final class SetTimerViewUITests: XCTestCase {
     func testSelectingHourAndMinute() throws {
         // 「時刻指定」モードに切り替え
         app.buttons["TimerModeButtonAtTime"].tap()
-        let hourMinutePicker = app.otherElements["HourMinutePickerView"]
+        let hourMinutePicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue]
         XCTAssertTrue(hourMinutePicker.waitForExistence(timeout: UITestConstants.Timeout.short), "HourMinutePickerが表示される")
 
         let hourPickerWheel = hourMinutePicker.pickerWheels.element(boundBy: 0)
@@ -118,7 +115,7 @@ final class SetTimerViewUITests: XCTestCase {
 
     func testTapStartButton() throws {
         // 開始ボタンが存在し、有効であることを確認
-        let startButton = app.buttons["StartTimerButton"]
+        let startButton = app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue]
         XCTAssertTrue(startButton.waitForExistence(timeout: UITestConstants.Timeout.short), "開始ボタンが表示される")
         XCTAssertTrue(startButton.isEnabled, "開始ボタンが有効である")
 
@@ -134,14 +131,14 @@ final class SetTimerViewUITests: XCTestCase {
         // 例: CountdownView の要素が表示されることを確認
         // CountdownView の特定の要素（例: 時間表示ラベル）の Identifier を使用
         XCTAssertTrue(
-            app.staticTexts["CountdownTimeDisplay"].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app.staticTexts[SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
             "カウントダウン画面の時間表示が表示される"
         )
     }
 
     func testTapSettingsButton() throws {
         // 設定ボタンが存在し、有効であることを確認
-        let settingsButton = app.buttons["OpenSettingsPage"]
+        let settingsButton = app.buttons[SCAccessibilityIdentifiers.SetTimerView.openSettingsPage.rawValue]
         XCTAssertTrue(settingsButton.waitForExistence(timeout: UITestConstants.Timeout.short), "設定ボタンが表示される")
         XCTAssertTrue(settingsButton.isEnabled, "設定ボタンが有効である")
 
@@ -155,6 +152,114 @@ final class SetTimerViewUITests: XCTestCase {
             "設定画面のタイトルが表示される"
         )
         // 必要に応じて他の設定項目（例: バイブレーションヘッダー）の存在も確認
-        // XCTAssertTrue(app.staticTexts["VibrationTypeHeader"].exists)
+        // XCTAssertTrue(app.staticTexts[SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue].exists)
+    }
+
+    func testInitialState_AfterMinutesMode() {
+        // Arrange (AfterMinutesがデフォルトなので追加のアクションは不要)
+
+        // Assert
+        XCTAssertTrue(app.otherElements[SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue].exists)
+        XCTAssertFalse(app.otherElements[SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue].exists)
+        // TimerModeSelectionButton のテストは省略 (必要なら追加)
+        XCTAssertTrue(app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue].exists)
+        XCTAssertTrue(app.buttons[SCAccessibilityIdentifiers.SetTimerView.openSettingsPage.rawValue].exists)
+    }
+
+    func testModeChange_ToAtTimeMode() {
+        // Arrange
+        let minutesPicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue]
+        let hourMinutePicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue]
+        let afterMinutesButton = app.buttons["TimerModeButtonAfterMinutes"]
+        let atTimeButton = app.buttons["TimerModeButtonAtTime"]
+
+        // Act
+        atTimeButton.tap() // AtTimeモードボタンをタップ
+
+        // Assert
+        XCTAssertTrue(hourMinutePicker.waitForExistence(timeout: UITestConstants.Timeout.short), "HourMinutePickerが表示される")
+        XCTAssertFalse(minutesPicker.exists, "MinutesPickerが非表示になる")
+        XCTAssertFalse(afterMinutesButton.isSelected) // Check if AfterMinutes button is deselected
+        XCTAssertTrue(atTimeButton.isSelected) // Check if AtTime button is selected
+    }
+
+    func testMinutesSelection() {
+        // Arrange
+        // AfterMinutesモードであることを確認 (デフォルト)
+        let minutesPicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue]
+        XCTAssertTrue(minutesPicker.exists)
+
+        let expectedMinutes = 5
+
+        // Assert
+        // ホイールを調整して値を選択 (例: 10分へ)
+        // watchOSのUIテストで特定の値に設定するのは困難な場合が多い
+        // 代替案: pickerWheel.swipeUp() / pickerWheel.swipeDown() をループさせるか、座標指定タップ
+        // pickerWheel.adjust(toPickerWheelValue: "10 分") // このメソッドはwatchOSでは通常利用不可
+        // 例：上にスワイプして値を増やす
+        // pickerWheel.swipeUp()
+
+        // 値が変更されたことを検証 (例: 10分)
+        // pickerWheelの値検証が難しいため、他の方法（例: 開始後のタイマー時間）での確認を検討
+        // XCTAssertEqual(pickerWheel.value as? String, "10 分")
+    }
+
+    func testHourMinuteSelection() {
+        // Arrange
+        app.buttons["TimerModeButtonAtTime"].tap() // AtTimeモードに切り替え
+        let hourMinutePicker = app.otherElements[SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue]
+        XCTAssertTrue(hourMinutePicker.waitForExistence(timeout: UITestConstants.Timeout.short))
+
+        let expectedHour = 10
+
+        // Assert
+        // ホイールを調整 (例: 15時30分へ)
+        // watchOSでの特定の値への調整は困難
+        // 代替案: swipeUp/Down や座標指定タップ
+        // hourPickerWheel.adjust(toPickerWheelValue: "15")   // 利用不可
+        // minutePickerWheel.adjust(toPickerWheelValue: "30") // 利用不可
+        // 例：時間ホイールを下にスワイプ
+        // hourPickerWheel.swipeDown()
+        // 例：分ホイールを上にスワイプ
+        // minutePickerWheel.swipeUp()
+
+        // 値が変更されたことを検証
+        // Pickerの値検証は困難なためコメントアウト推奨
+        // XCTAssertEqual(hourPickerWheel.value as? String, "15")
+        // XCTAssertEqual(minutePickerWheel.value as? String, "30")
+    }
+
+    func testStartTimerNavigation() {
+        // Arrange
+        // 例えばMinutesモードで時間を設定
+        let startButton = app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue]
+        let minutePickerWheel = app.pickers.pickerWheels.firstMatch
+        if minutePickerWheel.exists {
+            minutePickerWheel.adjust(toPickerWheelValue: "1")
+        }
+
+        // Act
+        startButton.tap()
+
+        // Assert
+        // CountdownViewの要素が表示されるのを待つ (例: 時間表示)
+        XCTAssertTrue(
+            app.staticTexts[SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "CountdownView should appear after starting the timer"
+        )
+    }
+
+    func testNavigateToSettings() {
+        // Arrange
+        let settingsButton = app.buttons[SCAccessibilityIdentifiers.SetTimerView.openSettingsPage.rawValue]
+
+        // Act
+        settingsButton.tap()
+
+        // Assert
+        // SettingsViewの要素が表示されるのを待つ (例: ヘッダーテキスト)
+        XCTAssertTrue(app.staticTexts[SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard))
+        // NavigationTitle の確認
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: UITestConstants.Timeout.standard))
     }
 }

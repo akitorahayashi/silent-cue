@@ -33,6 +33,7 @@ struct TimerCompletionView: View {
                             },
                             appearAnimation: $appearAnimation
                         )
+                        .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue)
 
                         Spacer(minLength: 20)
 

@@ -6,13 +6,8 @@ final class SettingsViewUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
 
-        // テスト用の環境変数を設定
-        AppEnvironment.setupStandardTestEnvironment(for: app)
-
-        app.launch()
-
-        // 通知許可の確認・実行
-        NotificationPermissionHelper.ensureNotificationPermission(for: app)
+        // SettingsView テスト用の環境設定とアプリの起動
+        SCAppEnvironment.setupEnvAndLaunchForSettingsViewTest(for: app)
 
         XCTAssertTrue(
             app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard),
@@ -28,50 +23,51 @@ final class SettingsViewUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Settings"].exists)
 
         // バイブレーションタイプセクションが表示されているか確認
-        XCTAssertTrue(app.staticTexts.matching(identifier: "VibrationTypeHeader").firstMatch.exists)
+        XCTAssertTrue(app.staticTexts.matching(identifier: SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue).firstMatch.exists)
     }
 
-    func testVibrationTypeSelection() throws {
-        // まず設定画面に移動
+    func testInitialUIElementsExist() {
+        // Arrange
         navigateToSettingsView()
 
-        // 弱いスワイプでバイブレーションタイプを表示
-        app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
-
-        // UIが安定するのを待つ
-        XCTAssertTrue(
-            app.buttons.matching(identifier: "VibrationTypeOptionStrong").firstMatch
-                .waitForExistence(timeout: UITestConstants.Timeout.short),
-            "Strongオプションが表示される"
-        )
-
-        // 異なるバイブレーションタイプを選択するテスト
-        // まず「Strong」を選択
-        app.buttons.matching(identifier: "VibrationTypeOptionStrong").firstMatch.tap()
-
-        // さらに弱くスクロールしてLightオプションを表示
-        app.swipeUp(velocity: UITestConstants.ScrollVelocity.slow)
-        XCTAssertTrue(
-            app.buttons.matching(identifier: "VibrationTypeOptionWeak").firstMatch
-                .waitForExistence(timeout: UITestConstants.Timeout.short),
-            "Weakオプションが表示される"
-        )
-
-        // 次に別のタイプを試す
-        app.buttons.matching(identifier: "VibrationTypeOptionWeak").firstMatch.tap()
+        // Assert
+        XCTAssertTrue(app.staticTexts.matching(identifier: SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue).firstMatch.exists, "Vibration type header should exist")
+        // デフォルトでStandardが選択されていることを確認
+        let standardOption = app.buttons.matching(identifier: SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue).firstMatch
+        XCTAssertTrue(standardOption.exists, "Standard option should exist")
+        // checkmarkの存在で選択状態を確認するのは難しい場合があるため、別の方法（例: 選択後の動作）を検討
     }
 
-    // 設定画面に移動するヘルパーメソッド
+    func testSelectVibrationType() {
+        // Arrange
+        navigateToSettingsView()
+        let strongOption = app.buttons.matching(identifier: SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStrong.rawValue).firstMatch
+
+        // Act
+        XCTAssertTrue(strongOption.waitForExistence(timeout: UITestConstants.Timeout.short), "Strong option should exist")
+        strongOption.tap()
+
+        // Assert
+        // Strongが選択されたことを確認（UI上での明確な確認は難しい場合がある）
+        // 例: 別のオプションをタップして再度Strongを選択した際の動作を確認するなど
+
+        // Weakを選択
+        let weakOption = app.buttons.matching(identifier: SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionWeak.rawValue).firstMatch
+        XCTAssertTrue(weakOption.waitForExistence(timeout: UITestConstants.Timeout.short), "Weak option should exist")
+        weakOption.tap()
+
+        // Assert
+        // Weakが選択されたことを確認
+    }
+
+    // Helper function to navigate to SettingsView
     private func navigateToSettingsView() {
-        // 設定ページを開くボタンをアクセシビリティ識別子で特定
-        let settingsButton = app.buttons.matching(identifier: "OpenSettingsPage").firstMatch
-        XCTAssertTrue(settingsButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "設定ボタンが表示される")
+        // SetTimerViewから設定ボタンをタップ
+        let settingsButton = app.buttons.matching(identifier: SCAccessibilityIdentifiers.SetTimerView.openSettingsPage.rawValue).firstMatch
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "Settings button should exist on SetTimerView")
         settingsButton.tap()
 
-        // 設定画面が表示されるまで待機
-        XCTAssertTrue(
-            app.staticTexts["Settings"].waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "設定画面のタイトルが表示される"
-        )
+        // SettingsViewが表示されるのを待つ
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: UITestConstants.Timeout.standard), "Settings view navigation bar should appear")
     }
 }

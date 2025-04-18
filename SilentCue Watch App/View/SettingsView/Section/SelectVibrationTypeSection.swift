@@ -9,7 +9,7 @@ struct SelectVibrationTypeSection: View {
         Section(
             header: Text("Vibration Type")
                 .accessibilityLabel("VibrationTypeHeader")
-                .accessibilityIdentifier("VibrationTypeHeader")
+                .accessibilityIdentifier(SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue)
         ) {
             ForEach(hapticTypes) { hapticType in
                 Button(action: {
@@ -27,8 +27,19 @@ struct SelectVibrationTypeSection: View {
                     }
                 })
                 .accessibilityLabel("VibrationTypeOption\(hapticType.rawValue.capitalized)")
-                .accessibilityIdentifier("VibrationTypeOption\(hapticType.rawValue.capitalized)")
+                .accessibilityIdentifier(accessibilityIdentifier(for: hapticType))
             }
+        }
+    }
+
+    private func accessibilityIdentifier(for hapticType: HapticType) -> String {
+        switch hapticType {
+        case .standard:
+            return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue
+        case .strong:
+            return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStrong.rawValue
+        case .weak:
+            return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionWeak.rawValue
         }
     }
 }

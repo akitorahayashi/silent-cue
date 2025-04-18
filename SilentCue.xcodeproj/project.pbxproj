@@ -37,7 +37,8 @@
 		98FEAE9E2DB260F100006FA8 /* Exceptions for "Shared" folder in "SilentCue Watch AppUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				AppEnvironment.swift,
+				SCAccessibilityIdentifiers.swift,
+				SCAppEnvironment.swift,
 			);
 			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
 		};

@@ -40,7 +40,7 @@ struct SetTimerView: View {
                                 get: \.selectedMinutes,
                                 send: TimerAction.minutesSelected
                             ))
-                            .accessibilityIdentifier("MinutesPickerView")
+                            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue)
                             .transition(.opacity)
                         } else {
                             // 時間選択
@@ -54,7 +54,7 @@ struct SetTimerView: View {
                                     send: TimerAction.minuteSelected
                                 )
                             )
-                            .accessibilityIdentifier("HourMinutePickerView")
+                            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue)
                             .transition(.opacity)
                         }
                     }
@@ -69,12 +69,12 @@ struct SetTimerView: View {
                         onTimerStart()
                     }
                     .accessibilityLabel("開始")
-                    .accessibilityIdentifier("StartTimerButton")
+                    .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue)
                 }
                 .padding(.top, 16)
                 .padding(.bottom, 8)
             }
-            .accessibilityIdentifier("SetTimerScrollView")
+            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.setTimerScrollView.rawValue)
             .scrollIndicators(.never)
             .navigationTitle("Silent Cue")
             .toolbar {
@@ -86,7 +86,7 @@ struct SetTimerView: View {
                             .foregroundStyle(.white)
                     }
                     .accessibilityLabel("設定")
-                    .accessibilityIdentifier("OpenSettingsPage")
+                    .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.openSettingsPage.rawValue)
                     .accessibilityAddTraits(.isButton)
                     .padding(.trailing, 5)
                 }

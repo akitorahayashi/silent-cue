@@ -10,13 +10,13 @@ struct TimeDisplayView: View {
                 .font(.system(size: 14, weight: .regular))
                 .foregroundStyle(.secondary)
                 .accessibilityLabel("TimeFormatLabel")
-                .accessibilityIdentifier("TimeFormatLabel")
+                .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.timeFormatLabel.rawValue)
 
             Text(displayTime)
                 .font(.system(size: 40, weight: .semibold, design: .monospaced))
                 .foregroundStyle(.primary)
                 .accessibilityLabel("CountdownTimeDisplay")
-                .accessibilityIdentifier("CountdownTimeDisplay")
+                .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue)
         }
     }
 }

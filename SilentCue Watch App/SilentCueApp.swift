@@ -66,13 +66,14 @@ struct SilentCueWatchApp: App {
                                     )
                                 )
                             case .completion:
-                                // 通常の完了画面へのナビゲーション
                                 TimerCompletionView(
                                     store: store.scope(
                                         state: \.timer,
                                         action: AppAction.timer
                                     )
                                 )
+                                .navigationBarBackButtonHidden(true)
+                                .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.timerCompletionView.rawValue)
                             case .settings:
                                 SettingsView(
                                     store: store.scope(
