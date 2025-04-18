@@ -15,8 +15,8 @@ jobs:
     
   # ビルドとテスト
   build-and-test:
-    name: Build and Test
-    uses: ./.github/workflows/build-and-test.yml
+    name: Run Tests
+    uses: ./.github/workflows/run-tests.yml
     
   # テスト結果レポート生成
   test-report:

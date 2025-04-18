@@ -1,14 +1,14 @@
-name: Build & Test
+name: Run Tests
 
 on:
   workflow_call:
     outputs:
       test_result:
         description: "Test Result"
-        value: ${{ jobs.test.outputs.test_result }}
+        value: ${{ jobs.build-and-test.outputs.test_result }}
 
 jobs:
-  test:
+  build-and-test:
     runs-on: macos-latest
     outputs:
       test_result: ${{ steps.test_status.outputs.result }}

@@ -23,7 +23,7 @@ jobs:
       - name: Download test results artifact
         uses: actions/download-artifact@v4
         with:
-          name: test-results # build-and-test.yml でアップロードされたテスト結果のアーティファクト名
+          name: test-results # run-tests.yml でアップロードされたテスト結果のアーティファクト名
           path: ./test-results
 
       - name: List downloaded files (for debugging)

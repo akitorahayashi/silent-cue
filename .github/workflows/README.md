@@ -5,7 +5,7 @@
 ## ファイル構成
 
 - **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します。
-- **`build-and-test.yml`**: アプリのビルドとテストを実行します。
+- **`run-tests.yml`**: アプリのビルドとテストを実行します。
 - **`code-quality.yml`**: コード品質チェック（SwiftFormat, SwiftLint）を実行します。
 - **`test-reporter.yml`**: テスト結果のレポートを作成し、PRにコメントします。
 - **`copilot-review.yml`**: GitHub CopilotによるPRレビューを自動化します。
@@ -18,13 +18,13 @@
 このワークフローが、パイプライン全体の流れを管理します。トリガー（Push, Pull Request, 手動実行）に応じて、以下のワークフローを適切な順序と条件で実行します。
 
 1.  `code-quality.yml` を実行し、コード品質をチェックします。
-2.  `build-and-test.yml` を実行し、ビルドとテストを行います。
+2.  `run-tests.yml` を実行し、ビルドとテストを行います。
 3.  `test-reporter.yml` を実行し、テスト結果をレポートします。
 4.  Pull Requestの場合、`copilot-review.yml` を実行し、GitHub Copilotによる自動レビューを実施します。
 5.  mainブランチへのPushの場合、`build-for-production.yml` を実行し、本番用ビルドを生成します。
 6.  最後に、パイプライン全体の完了ステータスをPull Requestにコメントします。
 
-### `build-and-test.yml`
+### `run-tests.yml`
 
 `ci-cd-pipeline.yml` から呼び出され、主に以下の3つのステップを実行します:
 
@@ -52,7 +52,7 @@
 
 ### `test-reporter.yml`
 
-`ci-cd-pipeline.yml` から呼び出され、`build-and-test.yml` で生成されたテスト結果ファイルを処理します:
+`ci-cd-pipeline.yml` から呼び出され、`run-tests.yml` で生成されたテスト結果ファイルを処理します:
 
 - テスト結果のアーティファクトをダウンロードします。
 - デバッグ用にダウンロードしたファイルの一覧を表示します。
@@ -89,7 +89,7 @@ mainブランチへのPush時に `ci-cd-pipeline.yml` から呼び出され、�
 
 ビルドやテストに問題が発生した場合、以下の点を確認してください：
 
-- **ビルド成果物の確認**: `build-and-test.yml` のログで `xcbuild` ディレクトリの内容を確認し、`.app` ファイルが正しく生成されているか確認できます
+- **ビルド成果物の確認**: `run-tests.yml` のログで `xcbuild` ディレクトリの内容を確認し、`.app` ファイルが正しく生成されているか確認できます
 - **テスト実行エラー**: テスト実行中に `.app` ファイルが見つからないエラーが発生する場合、`-derivedDataPath` の指定が適切か確認してください
 - **コードカバレッジエラー**: カバレッジ関連のエラーが発生する場合は、`-enableCodeCoverage NO` オプションが正しく設定されているか確認してください
 
