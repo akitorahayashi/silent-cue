@@ -10,28 +10,33 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 
 このアプリは The Composable Architecture をベースに、Presentation Domain Separation の考え方を採用しています。
 
--   **Presentation (プレゼンテーション層)**:
-    -   `SilentCue Watch App/View/` ディレクトリ以下に配置された SwiftUI View で構成されます。
-    -   View は TCA の `ViewStore` を介して状態を監視し、ユーザー操作を `Action` として `Store` に送信します。また、 UI の見た目やインタラクションを担当します。
+### プレゼンテーション層
+- `SilentCue Watch App/View/` ディレクトリ以下に配置された SwiftUI View で構成されます。
+- View は TCA の `ViewStore` を介して状態を監視し、ユーザー操作を`Action` として `Store` に送信します。また、 UI の見た目やインタラクションを担当します。
 
--   **Domain (ドメイン層)**:
-    -   `SilentCue Watch App/Domain/` ディレクトリ以下に配置された TCA のコンポーネント (`State`, `Action`, `Reducer`) で構成されます。
-    -   各機能（`App`, `Timer`, `Settings`, `Haptics`）が独立したドメインとして定義され、それぞれの状態管理、ビジネスロジック、副作用（UserDefaultsへの保存、振動の実行など）を担当します。
-    -   `AppReducer` がルートとなり、各機能ドメインの Reducer を統合し、アプリ全体の状態遷移や機能間の連携（タイマー完了時の振動開始など）を管理します。
-    -   依存性（UserDefaults, Clock など）は `@Dependency` を通じて注入され、テスト時にはモックに差し替えることが可能です。
+### ドメイン層
+- `SilentCue Watch App/Domain/` ディレクトリ以下に配置された TCA のコンポーネント (`State`, `Action`, `Reducer`) で構成されます。
+- 各機能（`App`, `Timer`, `Settings`, `Haptics`）が独立したドメインとして定義され、それぞれの状態管理、ビジネスロジック、副作用（UserDefaultsへの保存、振動の実行など）を担当します。
+- `AppReducer` がルートとなり、各機能ドメインの Reducer を統合し、アプリ全体の状態遷移や機能間の連携（タイマー完了時の振動開始など）を管理します。
+- 依存性（UserDefaults, Clock など）は `@Dependency` を通じて注入され、テスト時にはモックに差し替えることが可能です。
 
 ## ディレクトリ構成
 
 ```
 SilentCue/
-├── .github/workflows/
-│   ├── ci-cd-pipeline.yml
-│   ├── build-and-test.yml
-│   ├── build-for-production.yml
-│   ├── code-quality.yml
-│   ├── copilot-review.yml
-│   └── test-reporter.yml
-│   └── README.md # 各ワークフローの詳細はこちら
+├── .github/
+│   ├── README.md # 各ワークフローの詳細はこちら
+│   ├── scripts/
+│   │   ├── find-simulator.sh
+│   │   └── validate-ci-build-steps.sh
+│   └── workflows/
+│       ├── ci-cd-pipeline.yml
+│       ├── run-tests.yml
+│       ├── build-unsigned-archive.yml
+│       ├── code-quality.yml
+│       ├── copilot-review.yml
+│       ├── test-reporter.yml
+│       └── release.yml
 ├── SilentCue Watch App/
 │   ├── Assets.xcassets/
 │   ├── Domain/
@@ -67,11 +72,12 @@ SilentCue/
 │   └── SilentCueApp.swift
 ├── SilentCue Watch AppTests/
 │   ├── Domain/
-│   ├── Mocks/
+│   ├── Mock/ # Renamed from Mocks/
 │   └── StorageService/
 ├── SilentCue Watch AppUITests/
 │   ├── CountdownViewUITests.swift
-│   └── SettingsViewUITests.swift
+│   ├── SettingsViewUITests.swift
+│   └── Util/
 ├── .gitignore
 ├── .swiftformat
 ├── .swiftlint.yml
@@ -125,10 +131,54 @@ Apple Watchアプリを閉じた後もタイマーが正確に動作し続けま
 
 このプロジェクトでは、GitHub Actions を利用して CI/CD パイプラインを構築しています。`.github/workflows/` ディレクトリ以下に設定ファイルが格納されています。
 
-- **`ci-cd-pipeline.yml`**: メインとなるパイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、他のワークフローを順次実行します。
-- その他の `.yml` ファイル (`run-tests.yml`, `code-quality.yml`, `copilot-review.yml` など): パイプラインの各ステップを実行する、呼び出し可能なワークフローです。`ci-cd-pipeline.yml` から呼び出されます。
+主なパイプライン (`ci-cd-pipeline.yml`) は、Pull Request や `main` ブランチへのプッシュ時に自動実行され、以下の主要な処理を行います:
+- **コード品質チェック:** SwiftFormat と SwiftLint を実行します。
+- **ビルドとテスト:** アプリのビルドとユニット/UIテストを実行します。
+- **リリース準備:** `main` ブランチへのプッシュ時には、署名なしの `.xcarchive` を作成し、アーティファクトとして保存します。
 
-詳細なワークフローの説明は `.github/workflows/README.md` を参照してください。
+**リリースのプロセス:**
+- App Store Connect への配布や GitHub Releases への `.ipa` ファイルのアップロードは、**手動トリガー**によるワークフロー (`sign-and-distribute.yml`) で行います。
+- この手動ワークフローは、保存された署名なし `.xcarchive` をダウンロードし、必要な証明書とプロファイルで署名した後、配布を実行します。
+
+**主な機能:**
+- **Pull Request:** PR作成・更新時に、コード品質チェック、ビルド、テストが自動実行されます。
+- **Mainブランチ:** `main` ブランチへのプッシュ時にも同様のチェックが実行されます。
+- **リリース:** `vX.Y.Z` 形式のタグがプッシュされると、リリース用のワークフロー (`release.yml`) が自動実行され、ビルド、署名、App Store Connect へのアップロード、GitHub Release の作成が行われます。
+
+詳細なワークフローの説明は `.github/README.md` を参照してください。
+
+## リリース方法
+
+新しいバージョンをリリースするには、以下の手順を実行します:
+
+1.  リリース対象のコミットを決定します。
+   - 最新の `main` ブランチのコミットをリリースする場合 (通常):
+     ```bash
+     git checkout main
+     git pull origin main
+     ```
+   - 過去の特定のコミットをリリースする場合:
+     リリースしたいコミットのハッシュ値を確認します。`git log` や GitHub の履歴で探します。
+     ```bash
+     git log --oneline --graph
+     ```
+     見つけたコミットハッシュ (例: `a1b2c3d`) を控えておきます。
+
+2. 決定したコミットに対してタグを作成します:
+   - 最新の `main` にいる場合:
+     ```bash
+     git tag v1.0.0
+     ```
+   - 過去のコミット (`a1b2c3d`) に対して直接タグ付けする場合:
+     ```bash
+     git tag v1.0.1 a1b2c3d
+     ```
+
+3. 作成したタグをリモートリポジトリにプッシュします:
+     ```bash
+     git push origin v1.0.0
+     ```
+これにより、GitHub Actions の `release.yml` ワークフローが自動的にトリガーされ、App Store Connect へのアップロードと GitHub Release の作成が行われます。
 
 ## 開発環境
 

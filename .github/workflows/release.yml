@@ -1,0 +1,201 @@
+name: Release SilentCue
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # vX.Y.Z 形式のタグがプッシュされたらトリガー
+
+permissions:
+  contents: write # GitHub Releases への書き込み権限
+
+jobs:
+  release:
+    name: Build, Sign, and Release
+    runs-on: macos-latest
+    env:
+      # Secrets を環境変数として公開
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
+      DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.DISTRIBUTION_CERTIFICATE_BASE64 }}
+      P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+      PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+      TEAM_ID: ${{ secrets.TEAM_ID }}
+      APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+
+    steps:
+      - name: Check for required secrets
+        run: |
+          # (sign-and-distribute.yml と同様の Secrets チェック)
+          if [ -z "$APP_STORE_CONNECT_API_KEY_ID" ] || \
+             [ -z "$APP_STORE_CONNECT_ISSUER_ID" ] || \
+             [ -z "$APP_STORE_CONNECT_API_PRIVATE_KEY" ] || \
+             [ -z "$DISTRIBUTION_CERTIFICATE_BASE64" ] || \
+             [ -z "$P12_PASSWORD" ] || \
+             [ -z "$PROVISIONING_PROFILE_BASE64" ] || \
+             [ -z "$TEAM_ID" ] || \
+             [ -z "$APP_BUNDLE_ID" ]; then
+            echo "Error: One or more required secrets are not set."
+            exit 1
+          fi
+          echo "✅ All required secrets seem to be present."
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # タグ情報を正しく取得するために必要
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
+
+      - name: Cache SPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            DerivedData/Build/SourcePackages/checkouts
+            ~/.swiftpm/xcode-package-cache
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Install xcpretty
+        run: gem install xcpretty
+
+      - name: Build Release Archive (Unsigned)
+        id: archive
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -A 1 'MARKETING_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9.]//g')
+          BUILD_NUMBER=$(grep -A 1 'CURRENT_PROJECT_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9]//g')
+          echo "Building version $VERSION ($BUILD_NUMBER) for tag ${{ github.ref_name }}"
+          ARCHIVE_PATH="./build/SilentCue.xcarchive"
+          mkdir -p "$(dirname "$ARCHIVE_PATH")"
+          set -o pipefail && xcodebuild \
+            -project "SilentCue.xcodeproj" \
+            -scheme "SilentCue Watch App" \
+            -configuration Release \
+            -destination "generic/platform=watchOS" \
+            -archivePath "$ARCHIVE_PATH" \
+            -derivedDataPath "./build/DerivedData" \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            archive \
+          | xcpretty -c
+          echo "archive_path=$ARCHIVE_PATH" >> $GITHUB_OUTPUT
+
+      - name: Verify Archive Contents
+        run: |
+          set -euo pipefail
+          ARCHIVE_APP_PATH="${{ steps.archive.outputs.archive_path }}/Products/Applications/SilentCue Watch App.app"
+          if [ ! -d "$ARCHIVE_APP_PATH" ]; then
+            echo "Error: 'SilentCue Watch App.app' not found in expected archive location ($ARCHIVE_APP_PATH)."
+            exit 1
+          fi
+          echo "✅ Archive content verified."
+
+      # 署名プロセス
+      - name: Create temporary keychain
+        id: keychain
+        run: |
+          KEYCHAIN_NAME="ci_temp_keychain"
+          KEYCHAIN_PATH="$RUNNER_TEMP/$KEYCHAIN_NAME.keychain"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 16)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -s "$KEYCHAIN_PATH" $(security list-keychains | grep -v "$KEYCHAIN_PATH")
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          echo "keychain_path=$KEYCHAIN_PATH" >> $GITHUB_OUTPUT
+          echo "keychain_password=$KEYCHAIN_PASSWORD" >> $GITHUB_OUTPUT
+
+      - name: Decode and import distribution certificate
+        run: |
+          CERTIFICATE_PATH="$RUNNER_TEMP/dist_certificate.p12"
+          echo "$DISTRIBUTION_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          security import "$CERTIFICATE_PATH" -k "${{ steps.keychain.outputs.keychain_path }}" -P "$P12_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple: -s -k "${{ steps.keychain.outputs.keychain_path }}"
+          rm "$CERTIFICATE_PATH"
+
+      - name: Decode and install provisioning profile
+        id: profile
+        run: |
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILE_DIR"
+          PROFILE_PATH="$PROFILE_DIR/$(uuidgen).mobileprovision"
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o "$PROFILE_PATH"
+          PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | plutil -extract provisioningProfile.UUID xml1 -o - - | xmllint --xpath 'string(//string)' -)
+          echo "uuid=$PROFILE_UUID" >> $GITHUB_OUTPUT
+
+      - name: Create ExportOptions.plist
+        run: |
+          EXPORT_OPTIONS_PATH="./ExportOptions.plist"
+          cat << EOF > "$EXPORT_OPTIONS_PATH"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>$APP_BUNDLE_ID</key>
+                  <string>${{ steps.profile.outputs.uuid }}</string>
+              </dict>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>signingCertificate</key>
+              <string>Apple Distribution</string>
+              <key>uploadBitcode</key>
+              <true/>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Export signed IPA
+        id: export_ipa
+        run: |
+          EXPORT_DIR="./ipa_export"
+          mkdir -p "$EXPORT_DIR"
+          xcodebuild -exportArchive \
+            -archivePath "${{ steps.archive.outputs.archive_path }}" \
+            -exportPath "$EXPORT_DIR" \
+            -exportOptionsPlist ./ExportOptions.plist \
+            -allowProvisioningUpdates
+          IPA_PATH=$(find "$EXPORT_DIR" -name "*.ipa" -print -quit)
+          if [ -z "$IPA_PATH" ]; then exit 1; fi
+          echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
+
+      - name: Validate and upload IPA to App Store Connect
+        if: success()
+        run: |
+          xcrun altool --validate-app -f "${{ steps.export_ipa.outputs.ipa_path }}" --type watchos --apiKey "$APP_STORE_CONNECT_API_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" --apiPrivateKey <(echo "$APP_STORE_CONNECT_API_PRIVATE_KEY")
+          xcrun altool --upload-app -f "${{ steps.export_ipa.outputs.ipa_path }}" --type watchos --apiKey "$APP_STORE_CONNECT_API_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" --apiPrivateKey <(echo "$APP_STORE_CONNECT_API_PRIVATE_KEY")
+          echo "✅ IPA upload initiated."
+
+      - name: Create/Update GitHub Release and Upload IPA
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }} # トリガーとなったタグ名を使用
+          name: Release ${{ github.ref_name }}
+          # body: "ここにリリースノートを書くか、ファイルから読み込む"
+          draft: false # 正式リリースとして作成 (ドラフトにする場合は true)
+          prerelease: false # プレリリースでない場合は false
+          files: ${{ steps.export_ipa.outputs.ipa_path }} # 生成した IPA を添付
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up keychain
+        if: always()
+        run: |
+          # (sign-and-distribute.yml と同様のキーチェーン削除処理)
+          security delete-keychain "${{ steps.keychain.outputs.keychain_path }}" || echo "Keychain cleanup failed"
+
+      - name: Clean up provisioning profile
+        if: always()
+        run: |
+          # (sign-and-distribute.yml と同様のプロファイル削除処理)
+          find "$HOME/Library/MobileDevice/Provisioning Profiles" -name "${{ steps.profile.outputs.uuid }}.mobileprovision" -delete 

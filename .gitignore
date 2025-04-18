@@ -2,19 +2,10 @@
 xcuserdata/
 
 ## ビルド関連
-build/
 DerivedData/
-xcbuild/
 *.moved-aside
 *.pbxuser
 !default.pbxuser
-
-## テスト結果
-TestResults/
-TestResults.xcresult/
-test-results/
-test-results/unit/
-test-results/ui/
 
 ## Objective-C/Swift固有のファイル
 *.hmap
@@ -37,4 +28,7 @@ test-results/ui/
 *.pem
 *.p12
 *.cer
-*.mobileprovision 
+*.mobileprovision
+
+# CI/CD output directory
+ci-outputs/ 

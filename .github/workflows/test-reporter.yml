@@ -24,19 +24,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-results # run-tests.yml でアップロードされたテスト結果のアーティファクト名
-          path: ./test-results
+          path: ./ci-outputs/test-results
 
       - name: List downloaded files (for debugging)
         run: |
           echo "--- Test Results ---"
-          ls -lR ./test-results
+          ls -lR ./ci-outputs/test-results
 
       - name: Publish Test Report as Check
         uses: mikepenz/action-junit-report@v4
         # JUnitファイルが存在する場合のみ実行
-        if: ${{ hashFiles('./test-results/unit/junit.xml') != '' || hashFiles('./test-results/ui/junit.xml') != '' }}
+        if: ${{ hashFiles('./ci-outputs/test-results/unit/junit.xml') != '' || hashFiles('./ci-outputs/test-results/ui/junit.xml') != '' }}
         with:
-          report_paths: './test-results/unit/junit.xml,./test-results/ui/junit.xml'
+          report_paths: './ci-outputs/test-results/unit/junit.xml,./ci-outputs/test-results/ui/junit.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           fail_on_failure: false # レポートステップ自体は失敗させない
           require_tests: false # テストがなくてもエラーにしない
@@ -44,7 +44,7 @@ jobs:
 
       - name: Create or Update PR Comment
         # Run if test results or any coverage report was found
-        if: ${{ hashFiles('./test-results/**/*.xml') != '' }}
+        if: ${{ hashFiles('./ci-outputs/test-results/**/*.xml') != '' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -62,8 +62,8 @@ jobs:
             const fs = require('fs');
 
             // Test Results Summary
-            const unitTestFile = './test-results/unit/junit.xml';
-            const uiTestFile = './test-results/ui/junit.xml';
+            const unitTestFile = './ci-outputs/test-results/unit/junit.xml';
+            const uiTestFile = './ci-outputs/test-results/ui/junit.xml';
             if (fs.existsSync(unitTestFile) || fs.existsSync(uiTestFile)) {
                commentBody += `✅ Test Results: Available in Checks tab.\\n`;
             } else {
