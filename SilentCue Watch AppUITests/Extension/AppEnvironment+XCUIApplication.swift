@@ -12,39 +12,13 @@ extension SCAppEnvironment {
         }
     }
 
-    // --- 個別のテスト環境を設定し、アプリを起動する ---
-
-    /// SetTimerView テスト用の設定と起動
-    static func setupEnvAndLaunchForSetTimerViewTest(for app: XCUIApplication) {
-        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
-        app.launchArguments = [] // 引数なし
-        app.launch()
-        NotificationPermissionHelper.ensureNotificationPermission(for: app)
+    /// 指定された起動引数でテスト環境をセットアップする
+    static func setupEnvironment(for app: XCUIApplication, launchArgument: LaunchArguments? = nil) {
+        setEnv(.disableNotificationsForTesting, to: .yes, for: app) // 共通の環境変数
+        app.launchArguments = launchArgument != nil ? [launchArgument!.rawValue] : []
     }
 
-    /// SettingsView テスト用の設定と起動
-    static func setupEnvAndLaunchForSettingsViewTest(for app: XCUIApplication) {
-        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
-        app.launchArguments = [] // 引数なし
-        app.launch()
-        NotificationPermissionHelper.ensureNotificationPermission(for: app)
-    }
-
-    /// CountdownView テスト用の設定と起動
-    static func setupEnvAndLaunchForCountdownViewTest(for app: XCUIApplication) {
-        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
-        app.launchArguments = [] // 引数なし
-        app.launch()
-        NotificationPermissionHelper.ensureNotificationPermission(for: app)
-    }
-
-    /// TimerCompletionView テスト用の設定と起動
-    static func setupEnvAndLaunchForTimerCompletionViewTest(for app: XCUIApplication) {
-        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
-        // 固有の起動引数を設定
-        app.launchArguments = [LaunchArguments.testingTimerCompletionView.rawValue]
-        app.launch()
-    }
+    // --- 以前の個別のテスト環境設定メソッドは削除済み ---
 
     // setupStandardTestEnvironment は削除
     // static func setupStandardTestEnvironment(for app: XCUIApplication) {

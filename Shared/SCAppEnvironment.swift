@@ -14,7 +14,9 @@ enum SCAppEnvironment {
 
     /// UIテストなどで使用する起動引数
     enum LaunchArguments: String {
-        /// TimerCompletionView を直接表示する
+        case testingSetTimerView = "-testing-set-timer-view"
         case testingTimerCompletionView = "-testing-timer-completion-view"
+        case testingSettingsView = "-testing-settings-view"
+        case testingCountdownView = "-testing-countdown-view"
     }
 }

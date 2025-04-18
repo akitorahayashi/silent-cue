@@ -1,17 +1,26 @@
 import XCTest
 
 final class TimerCompletionViewUITests: XCTestCase {
-    var app: XCUIApplication!
+    var app: XCUIApplication?
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication()
-        // TimerCompletionView テスト用の環境設定とアプリの起動
-        SCAppEnvironment.setupEnvAndLaunchForTimerCompletionViewTest(for: app)
+        let application = XCUIApplication()
+        SCAppEnvironment.setupEnvironment(for: application, launchArgument: .testingTimerCompletionView)
+        application.launch()
+        XCTAssertNotNil(application, "XCUIApplication should be initialized")
+        self.app = application // プロパティに代入
+
+        // アンラップしてアクセス
+        guard let currentApp = app else {
+            XCTFail("app should not be nil after setup")
+            return
+        }
+
         XCTAssertTrue(
-            app.buttons[SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue]
+            currentApp.buttons[SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue]
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "TimerCompletionView (OK button) should appear on launch with argument"
+            "TimerCompletionView (閉じるボタン) が表示される"
         )
     }
 
@@ -20,44 +29,66 @@ final class TimerCompletionViewUITests: XCTestCase {
     }
 
     func testViewElements() throws {
-        // Arrange: setUpWithError で TimerCompletionView は表示されているはず
+        // アンラップ
+        guard let app = app else {
+            XCTFail("app should not be nil")
+            return
+        }
 
-        // Assert: Check for expected elements in TimerCompletionView
-        // Note: Specific text might depend on the mock data provided in SilentCueApp.swift for this launch argument.
-        //       Adjust the mock store in SilentCueApp.swift if needed.
+        // --- Assert: TimerCompletionView の要素確認 ---
 
-        // "OK" ボタンが存在するか確認
-        let okButton = app.buttons[SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue]
-        XCTAssertTrue(okButton.exists, "OK button should exist")
-        XCTAssertTrue(okButton.isEnabled, "OK button should be enabled")
+        // 1. 閉じるボタン (Identifier: "closeTimeCompletionViewButton")
+        let closeButton = app.buttons[SCAccessibilityIdentifiers.TimerCompletionView.closeTimeCompletionViewButton.rawValue]
+        XCTAssertTrue(closeButton.exists, "閉じるボタンが存在する")
+        XCTAssertTrue(closeButton.isEnabled, "閉じるボタンが有効である")
 
-        // Example: Check if some static text exists.
-        //          This might fail if the mock store doesn't provide the necessary data (e.g., completionDate)
-        // XCTAssertTrue(app.staticTexts["予定時刻"].exists) // Replace with actual text or identifier if needed
+        // 2. NotifyEndTimeView 関連 (例: 完了時刻)
+        // TODO: モックデータに基づいたアサーションを追加
+
+        // 3. TimerSummaryView 関連 (例: 開始時刻, タイマー時間)
+        // TODO: モックデータに基づいたアサーションを追加
+
+        // 4. 通知許可ボタン (通知未許可の場合)
+        //    SCAppEnvironment が通知未許可状態を設定している前提
+        let enableNotificationButton = app.buttons.containing(.staticText, identifier: "通知を有効にする").firstMatch
+        let notificationText = enableNotificationButton.staticTexts["通知を有効にする"]
+
+        // テスト環境が通知無効で始まる場合
+        XCTAssertTrue(enableNotificationButton.exists, "通知許可ボタンが存在する (通知未許可時)")
+        XCTAssertTrue(notificationText.exists, "'通知を有効にする' テキストが存在する")
+
+        // TODO: テスト環境が最初に通知を許可している場合、通知ボタンが存在しないことを確認
     }
 
-    func testTapOKButton() throws {
-        // Arrange: setUpWithError で TimerCompletionView は表示されているはず
-        let okButton = app.buttons[SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue]
-        XCTAssertTrue(okButton.exists, "OK button should exist before tapping")
+    func testTapCloseButton() throws {
+        // メソッド名を testTapCloseButton に変更する方が良いかもしれないが、一旦このまま
+        guard let app = app else {
+            XCTFail("app should not be nil")
+            return
+        }
+        // Arrange: TimerCompletionView 表示済み
+        let closeButton = app.buttons[SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue]
+        XCTAssertTrue(closeButton.exists, "タップ前に 閉じるボタンが存在する")
 
-        // Act: Tap the OK button
-        okButton.tap()
+        // Act: 閉じるボタンをタップ
+        closeButton.tap()
 
-        // Assert: Check if returned to SetTimerView
-        //         (The app should transition back to the normal flow after dismissing the test view)
+        // Assert: SetTimerView に戻るか確認
         XCTAssertTrue(
             app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue]
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "Should return to SetTimerView after tapping OK button"
+            "閉じるボタンタップ後に SetTimerView に戻る"
         )
-        // Check that the completion view elements are gone
-        XCTAssertFalse(okButton.exists, "OK button should not exist after returning to SetTimerView")
+        // 完了ビューの要素が消えているか確認
+        XCTAssertFalse(closeButton.exists, "SetTimerView に戻った後、閉じるボタンは存在しない")
 
-        // Check if the ScrollView of SetTimerView exists as well (using the identifier from the previous test)
+        // SetTimerView の ScrollView が存在するか確認
         XCTAssertTrue(
             app.otherElements[SCAccessibilityIdentifiers.SetTimerView.setTimerScrollView.rawValue].exists,
-            "SetTimerScrollView should exist after returning"
+            "戻った後に SetTimerScrollView が存在する"
         )
     }
+
+    // TODO: 必要なら "通知を有効にする" ボタンタップのテストを追加
+    // func testTapEnableNotificationsButton() throws { ... }
 }

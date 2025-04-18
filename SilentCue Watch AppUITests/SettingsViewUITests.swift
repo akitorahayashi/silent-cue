@@ -6,8 +6,10 @@ final class SettingsViewUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
 
-        // SettingsView テスト用の環境設定とアプリの起動
-        SCAppEnvironment.setupEnvAndLaunchForSettingsViewTest(for: app)
+        // 環境設定を行い、アプリを起動する
+        SCAppEnvironment.setupEnvironment(for: app, launchArgument: .testingSettingsView)
+        app.launch()
+        NotificationPermissionHelper.ensureNotificationPermission(for: app)
 
         XCTAssertTrue(
             app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard),

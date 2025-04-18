@@ -24,96 +24,80 @@ struct SilentCueWatchApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // TimerCompletionViewのUIテスト用の起動引数を確認
-            if ProcessInfo.processInfo.arguments.contains("-testing-timer-completion-view") {
-                // UIテスト用に TimerCompletionView を直接表示
-                // 注意: テストに適したストアまたはモックデータを提供してください。
-                // この例では簡略化されたバージョンを使用しています。TimerCompletionView の
-                // 要件によっては、より完全なモックストアが必要になる場合があります。
-                TimerCompletionView(
-                    store: Store(initialState: TimerReducer.State()) {
-                        // テストに必要な場合、最小限のリデューサまたはモックアクションを提供
-                        TimerReducer() // または特定のモックリデューサ
-                    }
-                )
-                .accessibilityIdentifier("TimerCompletionView") // 識別子が存在することを確認
-            } else {
-                // 通常のアプリ起動フロー（メインストアを使用）
-                WithViewStore(store, observe: { $0 }, content: { viewStore in
-                    NavigationStack(path: viewStore.binding(
-                        get: \.path,
-                        send: AppAction.pathChanged
-                    )) {
-                        SetTimerView(
-                            store: store.scope(
-                                state: \.timer,
-                                action: AppAction.timer
-                            ),
-                            onSettingsButtonTapped: {
-                                viewStore.send(.pushScreen(.settings))
-                            },
-                            onTimerStart: {
-                                viewStore.send(.pushScreen(.countdown))
-                            }
-                        )
-                        .navigationDestination(for: NavigationDestination.self) { destination in
-                            switch destination {
-                                case .countdown:
-                                    CountdownView(
-                                        store: store.scope(
-                                            state: \.timer,
-                                            action: AppAction.timer
-                                        )
+            WithViewStore(store, observe: { $0 }, content: { viewStore in
+                NavigationStack(path: viewStore.binding(
+                    get: \.path,
+                    send: AppAction.pathChanged
+                )) {
+                    SetTimerView(
+                        store: store.scope(
+                            state: \.timer,
+                            action: AppAction.timer
+                        ),
+                        onSettingsButtonTapped: {
+                            viewStore.send(.pushScreen(.settings))
+                        },
+                        onTimerStart: {
+                            viewStore.send(.pushScreen(.countdown))
+                        }
+                    )
+                    .navigationDestination(for: NavigationDestination.self) { destination in
+                        switch destination {
+                            case .countdown:
+                                CountdownView(
+                                    store: store.scope(
+                                        state: \.timer,
+                                        action: AppAction.timer
                                     )
-                                case .completion:
-                                    TimerCompletionView(
-                                        store: store.scope(
-                                            state: \.timer,
-                                            action: AppAction.timer
-                                        )
+                                )
+                            case .completion:
+                                TimerCompletionView(
+                                    store: store.scope(
+                                        state: \.timer,
+                                        action: AppAction.timer
                                     )
-                                    .navigationBarBackButtonHidden(true)
-                                    .accessibilityIdentifier(
-                                        SCAccessibilityIdentifiers.TimerCompletionView
-                                            .timerCompletionView.rawValue
+                                )
+                                .navigationBarBackButtonHidden(true)
+                                .accessibilityIdentifier(
+                                    SCAccessibilityIdentifiers.TimerCompletionView
+                                        .timerCompletionView.rawValue
+                                )
+                            case .settings:
+                                SettingsView(
+                                    store: store.scope(
+                                        state: \.settings,
+                                        action: AppAction.settings
+                                    ),
+                                    hapticsStore: store.scope(
+                                        state: \.haptics,
+                                        action: AppAction.haptics
                                     )
-                                case .settings:
-                                    SettingsView(
-                                        store: store.scope(
-                                            state: \.settings,
-                                            action: AppAction.settings
-                                        ),
-                                        hapticsStore: store.scope(
-                                            state: \.haptics,
-                                            action: AppAction.haptics
-                                        )
-                                    )
-                                case .timerStart:
-                                    EmptyView()
-                            }
+                                )
+                            case .timerStart:
+                                EmptyView()
                         }
                     }
-                    .onChange(of: scenePhase) { _, newPhase in
-                        viewStore.send(.scenePhaseChanged(newPhase))
+                }
+                .onChange(of: scenePhase) { _, newPhase in
+                    viewStore.send(.scenePhaseChanged(newPhase))
+                }
+                .onAppear {
+                    viewStore.send(.onAppear)
+                    notificationDelegate.setStore(store)
+                    checkNotificationStatus() // 通常フローでのみ実行したい場合、条件分岐が必要かも
+                }
+                .alert("通知について", isPresented: $showNotificationExplanationAlert) {
+                    Button("許可する") {
+                        requestNotificationPermission()
+                        markAsLaunched()
                     }
-                    .onAppear {
-                        viewStore.send(.onAppear)
-                        notificationDelegate.setStore(store)
-                        checkNotificationStatus()
+                    Button("許可しない", role: .cancel) {
+                        markAsLaunched()
                     }
-                    .alert("通知について", isPresented: $showNotificationExplanationAlert) {
-                        Button("許可する") {
-                            requestNotificationPermission()
-                            markAsLaunched()
-                        }
-                        Button("許可しない", role: .cancel) {
-                            markAsLaunched()
-                        }
-                    } message: {
-                        Text("\nタイマー完了時に通知を受け取りますか？\n\n通知を許可すると、アプリが閉じていても完了をお知らせします。\n")
-                    }
-                })
-            }
+                } message: {
+                    Text("\nタイマー完了時に通知を受け取りますか？\n\n通知を許可すると、アプリが閉じていても完了をお知らせします。\n")
+                }
+            })
         }
     }
 

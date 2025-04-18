@@ -6,8 +6,10 @@ final class CountdownViewUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
 
-        // CountdownView テスト用の環境設定とアプリの起動
-        SCAppEnvironment.setupEnvAndLaunchForCountdownViewTest(for: app)
+        // 環境設定を行い、アプリを起動する
+        SCAppEnvironment.setupEnvironment(for: app, launchArgument: .testingCountdownView)
+        app.launch()
+        NotificationPermissionHelper.ensureNotificationPermission(for: app)
 
         XCTAssertTrue(
             app.staticTexts["Silent Cue"].waitForExistence(timeout: UITestConstants.Timeout.standard),
@@ -16,10 +18,8 @@ final class CountdownViewUITests: XCTestCase {
     }
 
     func testInitialUIElementsExist() {
-        // Arrange
         navigateToCountdownView()
 
-        // Assert
         let timeFormatExists = app.staticTexts
             .matching(identifier: SCAccessibilityIdentifiers.CountdownView.timeFormatLabel.rawValue).firstMatch
         XCTAssertTrue(timeFormatExists.exists, "時間フォーマットラベルが存在する")
@@ -34,32 +34,25 @@ final class CountdownViewUITests: XCTestCase {
     }
 
     func testTimerUpdatesTimeDisplay() {
-        // Arrange
         navigateToCountdownView()
 
         let initialTimeDisplay = app.staticTexts
             .matching(identifier: SCAccessibilityIdentifiers.CountdownView.timeFormatLabel.rawValue).firstMatch.label
 
-        // Act
-        // 1秒待機して時間が更新されることを確認
         sleep(1)
 
-        // Assert
         let updatedTimeDisplay = app.staticTexts
             .matching(identifier: SCAccessibilityIdentifiers.CountdownView.timeFormatLabel.rawValue).firstMatch.label
         XCTAssertNotEqual(initialTimeDisplay, updatedTimeDisplay, "1秒後に時間表示が更新される")
     }
 
     func testCancelButtonReturnsToSetTimerView() {
-        // Arrange
         navigateToCountdownView()
         let cancelButton = app.buttons
             .matching(identifier: SCAccessibilityIdentifiers.CountdownView.cancelTimerButton.rawValue).firstMatch
 
-        // Act
         cancelButton.tap()
 
-        // Assert
         // SetTimerViewに戻ったことを確認 (例: Startボタンの存在)
         XCTAssertTrue(
             app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue]
@@ -73,7 +66,7 @@ final class CountdownViewUITests: XCTestCase {
         // SetTimerView でタイマーを設定して開始
         let minutePickerWheel = app.pickers.pickerWheels.firstMatch
         if minutePickerWheel.waitForExistence(timeout: UITestConstants.Timeout.short) {
-            minutePickerWheel.adjust(toPickerWheelValue: "\(minutes)")
+            minutePickerWheel.adjust(toPickerWheelValue: CGFloat(minutes))
         }
         // StartTimerButtonを見つけてタップ
         let startButton = app.buttons

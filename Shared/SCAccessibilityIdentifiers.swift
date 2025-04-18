@@ -24,6 +24,6 @@ enum SCAccessibilityIdentifiers {
 
     enum TimerCompletionView: String {
         case timerCompletionView
-        case okButton
+        case closeTimeCompletionViewButton
     }
 }
