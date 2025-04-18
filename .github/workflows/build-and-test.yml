@@ -43,8 +43,6 @@ jobs:
           -skipMacroValidation \
           CODE_SIGNING_ALLOWED=NO \
           | xcpretty -c
-        echo "--- build-for-testing 後の xcbuild 内容一覧 ---"
-        ls -R ./xcbuild
       
     - name: Run Unit Tests
       id: unit_tests

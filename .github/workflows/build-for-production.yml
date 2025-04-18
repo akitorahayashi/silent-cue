@@ -81,25 +81,27 @@ jobs:
       #     echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o "$PROFILE_PATH"
         
       # ===== 現在の無署名ビルド - App Storeリリース時はコメントアウト =====
+
       - name: Build Release Version (Unsigned)
         run: |
           set -euo pipefail
 
-          # バージョン情報の取得 (using agvtool)
-          VERSION=$(agvtool what-marketing-version -terse1)
-          BUILD_NUMBER=$(agvtool what-version -terse)
+          # バージョン情報の取得
+          VERSION=$(grep -A 1 'MARKETING_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9.]//g')
+          BUILD_NUMBER=$(grep -A 1 'CURRENT_PROJECT_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9]//g')
           echo "Building version $VERSION ($BUILD_NUMBER)"
-
+          
           # ビルドディレクトリ作成
           mkdir -p ./build
-
+          
           # 署名なしでビルド
-          xcodebuild \
+          set -o pipefail && xcodebuild \
             -project "SilentCue.xcodeproj" \
             -scheme "SilentCue Watch App" \
             -configuration Release \
             -destination "generic/platform=watchOS" \
             -archivePath "./build/SilentCue.xcarchive" \
+            -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             archive \
           | xcpretty -c
