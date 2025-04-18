@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CloseButtonView: View {
+struct CloseTimeCompletionViewButton: View {
     let action: () -> Void
     @Binding var appearAnimation: Bool
 
@@ -9,7 +9,7 @@ struct CloseButtonView: View {
             Text("閉じる")
                 .font(.system(size: 16, weight: .medium))
                 .frame(maxWidth: .infinity)
-                .padding()
+                .padding(.vertical, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color.secondary.opacity(0.3))
@@ -25,4 +25,8 @@ struct CloseButtonView: View {
         .opacity(appearAnimation ? 1.0 : 0.0)
         .animation(.easeInOut(duration: 0.4), value: appearAnimation)
     }
+}
+
+#Preview {
+    CloseTimeCompletionViewButton(action: {}, appearAnimation: .constant(true))
 }

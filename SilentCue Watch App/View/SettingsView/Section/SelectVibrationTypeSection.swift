@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct VibrationTypeSectionView: View {
+struct SelectVibrationTypeSection: View {
     let hapticTypes: [HapticType]
     let selectedHapticType: HapticType
     let onSelect: (HapticType) -> Void

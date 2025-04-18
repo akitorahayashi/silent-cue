@@ -13,7 +13,7 @@ struct SettingsView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }, content: { viewStore in
             List {
-                VibrationTypeSectionView(
+                SelectVibrationTypeSection(
                     hapticTypes: HapticType.allCases,
                     selectedHapticType: viewStore.selectedHapticType,
                     onSelect: { hapticType in

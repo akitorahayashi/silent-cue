@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CompletionDetailsView: View {
+struct NotifyEndTimeView: View {
     let completionDate: Date?
     @Binding var appearAnimation: Bool
 
@@ -9,8 +9,9 @@ struct CompletionDetailsView: View {
             Image(systemName: "bell.and.waves.left.and.right")
                 .font(.system(size: 40))
                 .foregroundStyle(.primary)
-
-            Spacer(minLength: 8)
+            
+            Spacer()
+                .frame(height: 8)
 
             // キャプション
             Text("終了時刻")
@@ -19,7 +20,7 @@ struct CompletionDetailsView: View {
 
             if let completionDate {
                 Text(SCTimeFormatter.formatToHoursAndMinutes(completionDate))
-                    .font(.system(size: 24, weight: .medium, design: .rounded))
+                    .font(.system(size: 24))
                     .foregroundStyle(.primary)
             }
         }
@@ -27,4 +28,12 @@ struct CompletionDetailsView: View {
         .offset(y: appearAnimation ? 0 : 20)
         .animation(.easeInOut(duration: 0.5).delay(0.2), value: appearAnimation)
     }
+}
+
+#Preview {
+    @Previewable @State var appearAnimation = true
+    return NotifyEndTimeView(
+        completionDate: Date(),
+        appearAnimation: $appearAnimation
+    )
 }

@@ -145,7 +145,7 @@ Apple Watchアプリを閉じた後もタイマーが正確に動作し続けま
 - **Mainブランチ** `main` ブランチへのプッシュ時にも同様のチェックが実行されます。
 - **リリース** `vX.Y.Z` 形式のタグがプッシュされると、リリース用のワークフロー (`release.yml`) が自動実行され、ビルド、署名、App Store Connect へのアップロード、GitHub Release の作成が行われます。
 
-詳細なワークフローの説明は `.github/README.md` を参照してください。
+詳細なワークフローの説明は [CI_CD_WORKFLOWS.md](./CI_CD_WORKFLOWS.md) を参照してください。
 
 ## リリース方法
 

@@ -18,18 +18,19 @@ struct TimerCompletionView: View {
             ZStack {
                 ScrollView {
                     VStack {
-                        CloseButtonView(
+
+                        NotifyEndTimeView(
+                            completionDate: viewStore.completionDate,
+                            appearAnimation: $appearAnimation
+                        )
+                        
+                        Spacer(minLength: 16)
+                        
+                        CloseTimeCompletionViewButton(
                             action: {
                                 // TimerReducerにdismissアクションを送信するだけ
                                 viewStore.send(.dismissCompletionView)
                             },
-                            appearAnimation: $appearAnimation
-                        )
-
-                        Spacer(minLength: 20)
-
-                        CompletionDetailsView(
-                            completionDate: viewStore.completionDate,
                             appearAnimation: $appearAnimation
                         )
 
@@ -40,6 +41,7 @@ struct TimerCompletionView: View {
                             timerDurationMinutes: viewStore.timerDurationMinutes,
                             appearAnimation: $appearAnimation
                         )
+
 
                         // 通知が許可されていない場合は通知許可ボタンを表示
                         if !isNotificationAuthorized {
@@ -107,4 +109,28 @@ struct TimerCompletionView: View {
             completion(granted)
         }
     }
+}
+
+// MARK: - Preview
+
+#Preview {
+    TimerCompletionView(
+        store: Store(
+            initialState: {
+                var state = AppState() // Initialize AppState with defaults
+                var timerState = TimerState() // Initialize TimerState with defaults
+                // Set properties on the timerState instance
+                timerState.timerDurationMinutes = 15
+                timerState.startDate = Date().addingTimeInterval(-15 * 60)
+                timerState.completionDate = Date()
+                // Assign the configured timerState to the app state
+                state.timer = timerState
+                return state
+            }()
+        ) {
+            AppReducer()
+                ._printChanges()
+        }
+        .scope(state: \AppState.timer, action: AppAction.timer)
+    )
 }
