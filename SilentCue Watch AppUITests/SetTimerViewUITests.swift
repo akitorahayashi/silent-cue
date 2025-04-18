@@ -7,7 +7,7 @@ final class SetTimerViewUITests: XCTestCase {
         continueAfterFailure = false
 
         // 環境設定を行い、アプリを起動する
-        SCAppEnvironment.setupEnvironment(for: app, launchArgument: .testingSetTimerView)
+        SCAppEnvironment.setupEnvironment(for: app, initialView: .setTimerView)
         app.launch()
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
 

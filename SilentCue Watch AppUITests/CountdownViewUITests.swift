@@ -7,7 +7,7 @@ final class CountdownViewUITests: XCTestCase {
         continueAfterFailure = false
 
         // 環境設定を行い、アプリを起動する
-        SCAppEnvironment.setupEnvironment(for: app, launchArgument: .testingCountdownView)
+        SCAppEnvironment.setupEnvironment(for: app, initialView: .countdownView)
         app.launch()
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
 

@@ -12,11 +12,17 @@ enum SCAppEnvironment {
         case no = "NO"
     }
 
-    /// UIテストなどで使用する起動引数
+    /// UIテストで初期表示する画面を指定する起動引数
+    enum InitialViewOption: String {
+        case setTimerView
+        case settingsView
+        case countdownView
+        case timerCompletionView
+    }
+
+    /// その他のUIテスト用起動引数 (現在は空)
     enum LaunchArguments: String {
-        case testingSetTimerView = "-testing-set-timer-view"
-        case testingTimerCompletionView = "-testing-timer-completion-view"
-        case testingSettingsView = "-testing-settings-view"
-        case testingCountdownView = "-testing-countdown-view"
+        // 例: case enableDebugMenu = "-enable-debug-menu"
+        // 将来的に必要であればここに追加
     }
 }

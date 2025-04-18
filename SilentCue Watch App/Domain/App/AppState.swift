@@ -15,23 +15,22 @@ struct AppState: Equatable {
 
         // 起動引数に基づいて path 配列を初期化
         let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains(SCAppEnvironment.LaunchArguments.testingCountdownView.rawValue) {
+        if arguments.contains(SCAppEnvironment.InitialViewOption.countdownView.rawValue) {
             self.path = [.countdown]
-        } else if arguments.contains(SCAppEnvironment.LaunchArguments.testingSettingsView.rawValue) {
+        } else if arguments.contains(SCAppEnvironment.InitialViewOption.settingsView.rawValue) {
             self.path = [.settings]
-        } else if arguments.contains(SCAppEnvironment.LaunchArguments.testingTimerCompletionView.rawValue) {
+        } else if arguments.contains(SCAppEnvironment.InitialViewOption.timerCompletionView.rawValue) {
             self.path = [.completion]
-        } else if arguments.contains(SCAppEnvironment.LaunchArguments.testingSetTimerView.rawValue) {
-            // SetTimerView の場合は初期パスは空
+        } else if arguments.contains(SCAppEnvironment.InitialViewOption.setTimerView.rawValue) {
             self.path = []
         } else {
-            // 通常起動時も初期パスは空
+            // 通常起動時
             self.path = []
         }
     }
 
     // ナビゲーションの現在の画面を判断する
     var currentDestination: NavigationDestination? {
-        path.last // シンプルな実装に戻す
+        path.last
     }
 }

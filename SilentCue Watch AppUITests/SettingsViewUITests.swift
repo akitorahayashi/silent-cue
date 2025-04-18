@@ -7,7 +7,7 @@ final class SettingsViewUITests: XCTestCase {
         continueAfterFailure = false
 
         // 環境設定を行い、アプリを起動する
-        SCAppEnvironment.setupEnvironment(for: app, launchArgument: .testingSettingsView)
+        SCAppEnvironment.setupEnvironment(for: app, initialView: .settingsView)
         app.launch()
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
 

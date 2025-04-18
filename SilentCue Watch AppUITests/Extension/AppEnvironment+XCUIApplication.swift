@@ -12,10 +12,21 @@ extension SCAppEnvironment {
         }
     }
 
-    /// 指定された起動引数でテスト環境をセットアップする
-    static func setupEnvironment(for app: XCUIApplication, launchArgument: LaunchArguments? = nil) {
+    /// 指定された初期画面と追加引数でテスト環境をセットアップする
+    static func setupEnvironment(
+        for app: XCUIApplication,
+        initialView: InitialViewOption? = nil,
+        otherArguments: [LaunchArguments] = []
+    ) {
         setEnv(.disableNotificationsForTesting, to: .yes, for: app) // 共通の環境変数
-        app.launchArguments = launchArgument != nil ? [launchArgument!.rawValue] : []
+
+        var arguments: [String] = []
+        if let initialViewRawValue = initialView?.rawValue {
+            arguments.append(initialViewRawValue)
+        }
+        arguments.append(contentsOf: otherArguments.map { $0.rawValue })
+
+        app.launchArguments = arguments
     }
 
     // --- 以前の個別のテスト環境設定メソッドは削除済み ---
