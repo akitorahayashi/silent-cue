@@ -20,22 +20,22 @@ jobs:
       with:
         xcode-version: '16.2'
 
-    - name: Make find_simulator script executable
-      run: chmod +x .github/scripts/find_simulator.sh
-
-    - name: Select Simulator
-      id: select_simulator
-      run: |
-        SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
-        echo "シミュレータ ID ($SIMULATOR_ID) が選択されました"
-        echo "simulator_id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
-
     - name: Install xcpretty
       run: gem install xcpretty
         
     - name: Create Test Results Directory
       run: mkdir -p test-results/unit test-results/ui
         
+    - name: Make find-simulator script executable
+      run: chmod +x .github/scripts/find-simulator.sh
+
+    - name: Select Simulator
+      id: select_simulator
+      run: |
+        SIMULATOR_ID=$(./.github/scripts/find-simulator.sh)
+        echo "シミュレータ ID ($SIMULATOR_ID) が選択されました"
+        echo "simulator_id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
+
     - name: Build for Testing
       run: |
         set -o pipefail

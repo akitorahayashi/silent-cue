@@ -91,8 +91,8 @@ jobs:
           BUILD_NUMBER=$(grep -A 1 'CURRENT_PROJECT_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9]//g')
           echo "Building version $VERSION ($BUILD_NUMBER)"
           
-          # ビルドディレクトリ作成
-          mkdir -p ./build
+          # ビルドディレクトリ作成 (アーカイブ用サブディレクトリも含む)
+          mkdir -p ./build/archives
           
           # 署名なしでビルド
           set -o pipefail && xcodebuild \
@@ -100,17 +100,25 @@ jobs:
             -scheme "SilentCue Watch App" \
             -configuration Release \
             -destination "generic/platform=watchOS" \
-            -archivePath "./build/SilentCue.xcarchive" \
+            -archivePath "./build/archives/SilentCue.xcarchive" \
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             archive \
           | xcpretty -c
-
+          
       - name: Verify Archive Contents
         run: |
           set -euo pipefail
           echo "Checking archive contents..."
-          find ./build/SilentCue.xcarchive -name "*.app" | grep "SilentCue Watch App.app"
+          # Check if the specific .app directory exists within the archive's Products/Applications path
+          ARCHIVE_APP_PATH="./build/archives/SilentCue.xcarchive/Products/Applications/SilentCue Watch App.app"
+          if [ ! -d "$ARCHIVE_APP_PATH" ]; then
+            echo "Error: 'SilentCue Watch App.app' not found in expected archive location ($ARCHIVE_APP_PATH)."
+            # Optionally list contents again on error
+            echo "--- Archive Contents (on error) ---"
+            ls -lR ./build/archives/SilentCue.xcarchive || echo "Archive directory not found or empty."
+            exit 1
+          fi
           echo "Archive content verified."
 
       # ===== App Store リリース時はこちらを使用 (上記の無署名ビルドはコメントアウト) =====
@@ -122,7 +130,7 @@ jobs:
       #     echo "Building version $VERSION ($BUILD_NUMBER) for App Store"
       #     
       #     # ビルドディレクトリ作成
-      #     mkdir -p ./build
+      #     mkdir -p ./build/archives
       #     
       #     # 署名付きビルドの実行
       #     set -o pipefail && xcodebuild \
@@ -130,7 +138,7 @@ jobs:
       #       -scheme "SilentCue Watch App" \
       #       -configuration Release \
       #       -destination "generic/platform=watchOS" \
-      #       -archivePath "./build/SilentCue.xcarchive" \
+      #       -archivePath "./build/archives/SilentCue.xcarchive" \
       #       CODE_SIGN_STYLE=Manual \
       #       CODE_SIGN_IDENTITY="Apple Distribution" \
       #       PROVISIONING_PROFILE_SPECIFIER="SilentCue WatchOS App Store Profile" \
@@ -167,7 +175,7 @@ jobs:
           # IPAの生成 (署名なし)
           xcodebuild \
             -exportArchive \
-            -archivePath "./build/SilentCue.xcarchive" \
+            -archivePath "./build/archives/SilentCue.xcarchive" \
             -exportPath "./build/Export" \
             -exportOptionsPlist exportOptions.plist \
             -allowProvisioningUpdates \
@@ -210,7 +218,7 @@ jobs:
       #     # App Store用IPAの生成
       #     set -o pipefail && xcodebuild \
       #       -exportArchive \
-      #       -archivePath "./build/SilentCue.xcarchive" \
+      #       -archivePath "./build/archives/SilentCue.xcarchive" \
       #       -exportPath "./build/Export" \
       #       -exportOptionsPlist exportOptions.plist \
       #     | xcpretty -c
@@ -222,9 +230,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: production-build
-          path: |
+          path: |-
             ./build/Export
-            ./build/SilentCue.xcarchive
+            ./build/archives/SilentCue.xcarchive
           retention-days: 7
           
       # ===== GitHub Releasesへの自動ドラフト作成 - App Store リリース時は不要ならコメントアウト =====
