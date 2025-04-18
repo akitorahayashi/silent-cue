@@ -23,6 +23,13 @@ jobs:
     - name: Make find_simulator script executable
       run: chmod +x .github/scripts/find_simulator.sh
 
+    - name: Select Simulator
+      id: select_simulator
+      run: |
+        SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
+        echo "シミュレータ ID ($SIMULATOR_ID) が選択されました"
+        echo "simulator_id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
+
     - name: Install xcpretty
       run: gem install xcpretty
         
@@ -32,12 +39,11 @@ jobs:
     - name: Build for Testing
       run: |
         set -o pipefail
-        SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
-        echo "シミュレータ ID ($SIMULATOR_ID) を使用してテスト用にビルドします"
+        echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用してテスト用にビルドします"
         xcodebuild build-for-testing \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
+          -destination "platform=watchOS Simulator,id=${{ steps.select_simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -configuration Debug \
           -skipMacroValidation \
@@ -48,12 +54,11 @@ jobs:
       id: unit_tests
       run: |
         set -o pipefail
-        SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
-        echo "シミュレータ ID ($SIMULATOR_ID) を使用してユニットテストを実行します"
+        echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用してユニットテストを実行します"
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch AppTests" \
-          -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
+          -destination "platform=watchOS Simulator,id=${{ steps.select_simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -enableCodeCoverage NO \
           -resultBundlePath ./test-results/unit/TestResults.xcresult \
@@ -67,12 +72,11 @@ jobs:
       id: ui_tests
       run: |
         set -o pipefail
-        SIMULATOR_ID=$(./.github/scripts/find_simulator.sh)
-        echo "シミュレータ ID ($SIMULATOR_ID) を使用して UI テストを実行します"
+        echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用して UI テストを実行します"
         xcodebuild test-without-building \
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch AppUITests" \
-          -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
+          -destination "platform=watchOS Simulator,id=${{ steps.select_simulator.outputs.simulator_id }}" \
           -derivedDataPath ./xcbuild \
           -enableCodeCoverage NO \
           -resultBundlePath ./test-results/ui/TestResults.xcresult \
