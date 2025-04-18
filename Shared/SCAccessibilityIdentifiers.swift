@@ -7,6 +7,7 @@ enum SCAccessibilityIdentifiers {
         case startTimerButton
         case setTimerScrollView
         case openSettingsPage
+        case navigationBarTitle = "Silent Cue"
     }
 
     enum SettingsView: String {
@@ -14,6 +15,7 @@ enum SCAccessibilityIdentifiers {
         case vibrationTypeOptionStandard
         case vibrationTypeOptionStrong
         case vibrationTypeOptionWeak
+        case navigationBarTitle = "Settings"
     }
 
     enum CountdownView: String {

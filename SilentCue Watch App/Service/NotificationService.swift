@@ -1,15 +1,11 @@
+import ComposableArchitecture
 import Foundation
 import UserNotifications
 import WatchKit
+import XCTestDynamicOverlay
 
-/// アプリの通知管理を行うクラス
-class NotificationManager {
-    static let shared = NotificationManager()
-    private init() {
-        // 通知カテゴリの設定
-        setupNotificationCategories()
-    }
-
+/// アプリの通知管理を行うクラス (ライブ実装)
+final class LiveNotificationService: NotificationServiceProtocol { // Rename class, conform to new protocol
     /// 通知カテゴリの識別子
     private enum NotificationCategory: String {
         case timerCompleted = "TIMER_COMPLETED_CATEGORY"
@@ -23,14 +19,6 @@ class NotificationManager {
     /// 通知識別子
     private enum NotificationIdentifier: String {
         case timerCompleted = "TIMER_COMPLETED_NOTIFICATION"
-    }
-
-    /// UIテスト実行中かどうかのフラグ
-    private var isNotificationsDisabled: Bool {
-        // ProcessInfo からテスト実行フラグを取得
-        ProcessInfo.processInfo
-            .environment[SCAppEnvironment.EnvKeys.disableNotificationsForTesting.rawValue] == SCAppEnvironment.EnvValues
-            .yes.rawValue
     }
 
     /// 通知カテゴリの設定
@@ -54,7 +42,8 @@ class NotificationManager {
         UNUserNotificationCenter.current().setNotificationCategories([timerCompletedCategory])
     }
 
-    /// 通知許可をリクエスト
+    // MARK: - Protocol Methods
+
     func requestAuthorization(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
             DispatchQueue.main.async {
@@ -69,7 +58,6 @@ class NotificationManager {
         }
     }
 
-    /// 通知許可状態を確認
     func checkAuthorizationStatus(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
@@ -79,17 +67,7 @@ class NotificationManager {
         }
     }
 
-    /// タイマー完了通知をスケジュール
-    /// - Parameters:
-    ///   - targetDate: タイマー完了予定時刻
-    ///   - minutes: タイマー設定分数
     func scheduleTimerCompletionNotification(at targetDate: Date, minutes: Int) {
-        // UIテスト実行中は通知をスケジュールしない
-        if isNotificationsDisabled {
-            print("通知はテスト中のため無効化されています")
-            return
-        }
-
         // 通知内容の設定
         let content = UNMutableNotificationContent()
         content.title = "タイマー完了"
@@ -105,7 +83,6 @@ class NotificationManager {
         )
     }
 
-    /// 予定済みの通知をキャンセル
     func cancelTimerCompletionNotification() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: [NotificationIdentifier.timerCompleted.rawValue]
@@ -114,11 +91,6 @@ class NotificationManager {
 
     /// 通知をスケジュール
     private func scheduleNotification(with content: UNNotificationContent, identifier: String, triggerDate: Date) {
-        // UIテスト実行中は通知をスケジュールしない（冗長なチェックだが安全のため）
-        if isNotificationsDisabled {
-            return
-        }
-
         // 日付トリガーの作成
         let triggerComponents = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute, .second],
@@ -140,4 +112,54 @@ class NotificationManager {
             }
         }
     }
+
+    // public init (DependencyKey で使用するため)
+    public init() {
+        setupNotificationCategories()
+    }
+}
+
+// MARK: - TCA Dependency
+
+extension DependencyValues {
+    var notificationService: NotificationServiceProtocol { // Rename property, update type and key
+        get { self[NotificationServiceKey.self] }
+        set { self[NotificationServiceKey.self] = newValue }
+    }
+}
+
+private enum NotificationServiceKey: DependencyKey { // Rename key enum
+    // ライブ実装を提供
+    static let liveValue: NotificationServiceProtocol = LiveNotificationService() // Use new class and protocol
+
+    // Preview実装を提供 (No-op)
+    static let previewValue: NotificationServiceProtocol =
+        NoopNotificationService() // Update to use renamed NoopNotificationService
+}
+
+// TestDependencyKey を使用して testValue を定義
+// Note: previewValue takes precedence over testValue in Previews.
+extension LiveNotificationService: TestDependencyKey { // Update extension target
+    static let testValue: NotificationServiceProtocol = { // Update protocol type
+        struct UnimplementedNotificationService: NotificationServiceProtocol { // Rename struct, conform to new protocol
+            func requestAuthorization(completion: @escaping (Bool) -> Void) {
+                XCTFail("\(Self.self).requestAuthorization is unimplemented")
+                completion(false)
+            }
+
+            func checkAuthorizationStatus(completion: @escaping (Bool) -> Void) {
+                XCTFail("\(Self.self).checkAuthorizationStatus is unimplemented")
+                completion(false)
+            }
+
+            func scheduleTimerCompletionNotification(at _: Date, minutes _: Int) {
+                XCTFail("\(Self.self).scheduleTimerCompletionNotification is unimplemented")
+            }
+
+            func cancelTimerCompletionNotification() {
+                XCTFail("\(Self.self).cancelTimerCompletionNotification is unimplemented")
+            }
+        }
+        return UnimplementedNotificationService()
+    }()
 }

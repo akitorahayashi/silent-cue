@@ -6,8 +6,6 @@ struct TimerReducer: Reducer {
     typealias State = TimerState
     typealias Action = TimerAction
 
-    @Dependency(\.continuousClock) var clock
-
     private enum CancelID { case timer }
 
     // バックグラウンドコールバック用の静的変数
@@ -17,6 +15,10 @@ struct TimerReducer: Reducer {
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
+            @Dependency(\.continuousClock) var clock
+            @Dependency(\.notificationService) var notificationService
+            @Dependency(\.extendedRuntimeService) var extendedRuntimeService
+
             switch action {
                 // タイマー設定のアクション
                 case let .timerModeSelected(mode):
@@ -91,6 +93,10 @@ struct TimerReducer: Reducer {
     // MARK: - アクション処理メソッド - タイマー操作
 
     private func handleStartTimer(_ state: inout State) -> Effect<Action> {
+        @Dependency(\.notificationService) var notificationService
+        @Dependency(\.extendedRuntimeService) var extendedRuntimeService
+        @Dependency(\.continuousClock) var clock
+
         // 開始時間と終了時間を設定
         let now = Date()
         state.totalSeconds = state.calculatedTotalSeconds
@@ -110,7 +116,7 @@ struct TimerReducer: Reducer {
 
         // タイマー完了通知をスケジュール
         if let targetDate = targetEndDate {
-            NotificationManager.shared.scheduleTimerCompletionNotification(
+            notificationService.scheduleTimerCompletionNotification(
                 at: targetDate,
                 minutes: durationMinutes
             )
@@ -127,7 +133,7 @@ struct TimerReducer: Reducer {
             }
 
             // バックグラウンド処理のコールバックを設定
-            ExtendedRuntimeManager.shared.startSession(
+            extendedRuntimeService.startSession(
                 duration: TimeInterval(totalSeconds + 10),
                 targetEndTime: targetEndDate,
                 completionHandler: {
@@ -147,6 +153,9 @@ struct TimerReducer: Reducer {
     }
 
     private func handleCancelTimer(_ state: inout State) -> Effect<Action> {
+        @Dependency(\.notificationService) var notificationService
+        @Dependency(\.extendedRuntimeService) var extendedRuntimeService
+
         state.isRunning = false
         state.startDate = nil
         state.targetEndDate = nil
@@ -156,10 +165,10 @@ struct TimerReducer: Reducer {
         Self.backgroundTimerCallback = nil
 
         // 拡張ランタイムセッションを停止
-        ExtendedRuntimeManager.shared.stopSession()
+        extendedRuntimeService.stopSession()
 
         // 通知をキャンセル
-        NotificationManager.shared.cancelTimerCompletionNotification()
+        notificationService.cancelTimerCompletionNotification()
 
         return .cancel(id: CancelID.timer)
     }
@@ -178,6 +187,9 @@ struct TimerReducer: Reducer {
     }
 
     private func handleTimerFinished(_ state: inout State) -> Effect<Action> {
+        @Dependency(\.notificationService) var notificationService
+        @Dependency(\.extendedRuntimeService) var extendedRuntimeService
+
         state.isRunning = false
 
         // 完了情報を保存
@@ -187,15 +199,17 @@ struct TimerReducer: Reducer {
         Self.backgroundTimerCallback = nil
 
         // 拡張ランタイムセッションを停止
-        ExtendedRuntimeManager.shared.stopSession()
+        extendedRuntimeService.stopSession()
 
         // タイマー完了時は通知をキャンセル（すでにアプリ内にいるため）
-        NotificationManager.shared.cancelTimerCompletionNotification()
+        notificationService.cancelTimerCompletionNotification()
 
         return .none
     }
 
     private func handleBackgroundTimerFinished(_ state: inout State) -> Effect<Action> {
+        @Dependency(\.extendedRuntimeService) var extendedRuntimeService
+
         // バックグラウンドでタイマーが完了した時
         if !state.isRunning {
             return .none
@@ -208,7 +222,7 @@ struct TimerReducer: Reducer {
         Self.backgroundTimerCallback = nil
 
         // 拡張ランタイムセッションを停止
-        ExtendedRuntimeManager.shared.stopSession()
+        extendedRuntimeService.stopSession()
 
         return .none
     }

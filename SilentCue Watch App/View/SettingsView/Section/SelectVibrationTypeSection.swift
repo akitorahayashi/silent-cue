@@ -28,6 +28,7 @@ struct SelectVibrationTypeSection: View {
                 })
                 .accessibilityLabel("VibrationTypeOption\(hapticType.rawValue.capitalized)")
                 .accessibilityIdentifier(accessibilityIdentifier(for: hapticType))
+                .accessibilityAddTraits(hapticType == selectedHapticType ? .isSelected : [])
             }
         }
     }

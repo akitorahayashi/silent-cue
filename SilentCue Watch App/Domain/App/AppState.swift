@@ -8,24 +8,19 @@ struct AppState: Equatable {
     var haptics: HapticsState = .init()
 
     init() {
-        // 他の State の初期化 ...
-        self.timer = TimerState()
-        self.settings = SettingsState()
-        self.haptics = HapticsState()
-
         // 起動引数に基づいて path 配列を初期化
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains(SCAppEnvironment.InitialViewOption.countdownView.rawValue) {
-            self.path = [.countdown]
+            path = [.countdown]
         } else if arguments.contains(SCAppEnvironment.InitialViewOption.settingsView.rawValue) {
-            self.path = [.settings]
+            path = [.settings]
         } else if arguments.contains(SCAppEnvironment.InitialViewOption.timerCompletionView.rawValue) {
-            self.path = [.completion]
+            path = [.completion]
         } else if arguments.contains(SCAppEnvironment.InitialViewOption.setTimerView.rawValue) {
-            self.path = []
+            path = []
         } else {
             // 通常起動時
-            self.path = []
+            path = []
         }
     }
 

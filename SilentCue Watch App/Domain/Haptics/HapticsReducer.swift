@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import Dependencies
 import Foundation
 import WatchKit
 
@@ -9,157 +10,77 @@ struct HapticsReducer: Reducer {
 
     private enum CancelID { case haptic, preview }
 
-    // 実行中のタスクを追跡するための変数
-    private static var activeHapticTask: Task<Void, Error>?
-
     var body: some ReducerOf<Self> {
         Reduce { state, action in
+            @Dependency(\.hapticsService) var hapticsService
+
             switch action {
                 case let .startHaptic(type):
-                    return handleStartHaptic(&state, type: type)
+                    var effect = Effect<Action>.none
+                    if state.isActive {
+                        effect = .cancel(id: CancelID.haptic)
+                    }
+                    state.isActive = true
+                    state.hapticType = type
+
+                    return .merge(
+                        effect,
+                        .run { [type = state.hapticType] _ in
+                            let startTime = Date()
+                            let endTime = startTime.addingTimeInterval(3.0)
+
+                            while Date() < endTime {
+                                await hapticsService.play(type.wkHapticType)
+                                try? await Task.sleep(for: .seconds(type.interval))
+                                if Task.isCancelled {
+                                    print("Haptic task cancelled in run loop")
+                                    break
+                                }
+                            }
+                        }
+                        .cancellable(id: CancelID.haptic)
+                    )
 
                 case .stopHaptic:
-                    return handleStopHaptic(&state)
+                    state.isActive = false
+                    return .cancel(id: CancelID.haptic)
 
                 case let .updateHapticSettings(type):
-                    return handleUpdateHapticSettings(&state, type: type)
+                    state.hapticType = type
+                    return .none
 
                 case let .previewHaptic(type):
-                    return handlePreviewHaptic(&state, type: type)
+                    if state.isPreviewingHaptic {
+                        return .merge(
+                            .cancel(id: CancelID.preview),
+                            .run { send in
+                                try? await Task.sleep(for: .milliseconds(50))
+                                await send(.previewHaptic(type))
+                            }
+                        )
+                    }
+                    state.isPreviewingHaptic = true
+
+                    return .run { [type] send in
+                        let startTime = Date()
+                        let endTime = startTime.addingTimeInterval(3.0)
+
+                        while Date() < endTime {
+                            await hapticsService.play(type.wkHapticType)
+                            try? await Task.sleep(for: .seconds(type.interval))
+                            if Task.isCancelled {
+                                print("Haptic preview task cancelled in run loop")
+                                break
+                            }
+                        }
+                        await send(.previewHapticCompleted)
+                    }
+                    .cancellable(id: CancelID.preview)
 
                 case .previewHapticCompleted:
-                    return handlePreviewHapticCompleted(&state)
+                    state.isPreviewingHaptic = false
+                    return .none
             }
         }
-    }
-
-    // MARK: - 振動制御
-
-    private func handleStartHaptic(_ state: inout State, type: HapticType) -> Effect<Action> {
-        // 既に実行中なら停止
-        if state.isActive {
-            stopAllHapticFeedback()
-        }
-
-        state.isActive = true
-        state.hapticType = type
-
-        return .run { _ in
-            // 既存のタスクを確実にキャンセル
-            Self.activeHapticTask?.cancel()
-
-            // 新しいタスクを作成して保存
-            Self.activeHapticTask = Task {
-                // ハプティックフィードバックを再生 (常に3秒後に自動停止)
-                await playHapticFeedback(type: type)
-            }
-
-            // タスクが完了するまで待機
-            do {
-                try await Self.activeHapticTask?.value
-            } catch {
-                print("Haptic task was cancelled or failed: \(error)")
-            }
-        }
-        .cancellable(id: CancelID.haptic)
-    }
-
-    private func handleStopHaptic(_ state: inout State) -> Effect<Action> {
-        state.isActive = false
-        stopAllHapticFeedback()
-
-        return .cancel(id: CancelID.haptic)
-    }
-
-    // MARK: - 設定
-
-    private func handleUpdateHapticSettings(
-        _ state: inout State,
-        type: HapticType
-    ) -> Effect<Action> {
-        state.hapticType = type
-        return .none
-    }
-
-    // MARK: - プレビュー
-
-    private func handlePreviewHaptic(_ state: inout State, type: HapticType) -> Effect<Action> {
-        // プレビュー中なら先に既存のプレビューを停止
-        if state.isPreviewingHaptic {
-            // プレビューをキャンセル
-            return .merge(
-                .cancel(id: CancelID.preview),
-                .run { send in
-                    // 短い遅延を入れて確実に前のタスクが終了してから新しいタスクを開始
-                    try? await Task.sleep(for: .milliseconds(50))
-                    await send(.previewHaptic(type))
-                }
-            )
-        }
-
-        // プレビュー中フラグを設定
-        state.isPreviewingHaptic = true
-
-        return .run { send in
-            // プレビュー用の振動を再生
-            let device = WKInterfaceDevice.current()
-
-            // 3秒間繰り返し振動を再生
-            let startTime = Date()
-            let endTime = startTime.addingTimeInterval(3.0)
-
-            while Date() < endTime {
-                // 選択された振動パターンを再生
-                device.play(type.wkHapticType)
-
-                // 次の振動までの間隔を待機
-                try? await Task.sleep(for: .seconds(type.interval))
-
-                // タスクがキャンセルされたかチェック
-                if Task.isCancelled {
-                    break
-                }
-            }
-
-            await send(.previewHapticCompleted)
-        }
-        .cancellable(id: CancelID.preview)
-    }
-
-    private func handlePreviewHapticCompleted(_ state: inout State) -> Effect<Action> {
-        state.isPreviewingHaptic = false
-        return .none
-    }
-
-    // MARK: - ユーティリティメソッド
-
-    // ハプティックフィードバックを再生する関数 (常に3秒後に自動停止)
-    private func playHapticFeedback(type: HapticType) async {
-        let device = WKInterfaceDevice.current()
-
-        // 3秒間繰り返し振動を再生
-        let startTime = Date()
-        let endTime = startTime.addingTimeInterval(3.0)
-
-        while Date() < endTime {
-            // 選択された振動パターンを再生
-            device.play(type.wkHapticType)
-
-            // 次の振動までの間隔を待機
-            try? await Task.sleep(for: .seconds(type.interval))
-
-            // タスクがキャンセルされたかチェック
-            if Task.isCancelled {
-                print("Haptic feedback task was cancelled")
-                return
-            }
-        }
-    }
-
-    // 振動を完全に停止する関数
-    private func stopAllHapticFeedback() {
-        // 既存のタスクをキャンセル
-        Self.activeHapticTask?.cancel()
-        Self.activeHapticTask = nil
     }
 }

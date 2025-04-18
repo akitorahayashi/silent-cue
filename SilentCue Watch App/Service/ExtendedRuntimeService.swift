@@ -1,11 +1,10 @@
+import ComposableArchitecture
 import Foundation
 import WatchKit
+import XCTestDynamicOverlay // Import for XCTFail
 
-/// バックグラウンド実行をサポートする拡張ランタイムセッション管理クラス
-class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
-    /// シングルトンインスタンス
-    static let shared = ExtendedRuntimeManager()
-
+/// バックグラウンド実行をサポートする拡張ランタイムセッション管理クラス (ライブ実装)
+final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelegate, ExtendedRuntimeServiceProtocol {
     /// 現在のセッション
     private var session: WKExtendedRuntimeSession?
 
@@ -22,10 +21,6 @@ class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
     private var backgroundTimer: Timer?
 
     /// 拡張ランタイムセッションを開始する
-    /// - Parameters:
-    ///   - duration: 予想される実行時間（秒）
-    ///   - targetEndTime: タイマー終了予定時刻
-    ///   - completionHandler: タイマー完了時に実行するコールバック
     func startSession(duration _: TimeInterval, targetEndTime: Date? = nil, completionHandler: (() -> Void)? = nil) {
         // 既存のセッションを終了
         stopSession()
@@ -101,7 +96,6 @@ class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
     }
 
     /// アプリがフォアグラウンドに戻ったときに呼び出して、バックグラウンドでタイマーが完了していたかを確認
-    /// - Returns: バックグラウンドでタイマーが完了していたらtrue
     func checkAndClearBackgroundCompletionFlag() -> Bool {
         let wasCompleted = isTimerCompletedInBackground
         isTimerCompletedInBackground = false
@@ -125,4 +119,48 @@ class ExtendedRuntimeManager: NSObject, WKExtendedRuntimeSessionDelegate {
     func extendedRuntimeSessionWillExpire(_: WKExtendedRuntimeSession) {
         print("Extended runtime session will expire")
     }
+
+    // public init (DependencyKeyで使用)
+    override public init() {
+        super.init()
+    }
+}
+
+// MARK: - TCA Dependency
+
+extension DependencyValues {
+    var extendedRuntimeService: ExtendedRuntimeServiceProtocol { // Rename property, update type and key
+        get { self[ExtendedRuntimeServiceKey.self] }
+        set { self[ExtendedRuntimeServiceKey.self] = newValue }
+    }
+}
+
+private enum ExtendedRuntimeServiceKey: DependencyKey { // Rename key enum
+    static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService() // Use new class and protocol
+
+    // Use Noop for previews
+    static let previewValue: ExtendedRuntimeServiceProtocol =
+        NoopExtendedRuntimeService() // Update to use renamed NoopExtendedRuntimeService
+}
+
+// TestDependencyKey を使用して testValue を定義
+extension LiveExtendedRuntimeService: TestDependencyKey { // Update extension target
+    static let testValue: ExtendedRuntimeServiceProtocol = { // Update protocol type
+        struct UnimplementedExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
+            // Rename struct, conform to new protocol
+            func startSession(duration _: TimeInterval, targetEndTime _: Date?, completionHandler _: (() -> Void)?) {
+                XCTFail("\(Self.self).startSession is unimplemented")
+            }
+
+            func stopSession() {
+                XCTFail("\(Self.self).stopSession is unimplemented")
+            }
+
+            func checkAndClearBackgroundCompletionFlag() -> Bool {
+                XCTFail("\(Self.self).checkAndClearBackgroundCompletionFlag is unimplemented")
+                return false // Placeholder return
+            }
+        }
+        return UnimplementedExtendedRuntimeService()
+    }()
 }

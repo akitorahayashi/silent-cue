@@ -10,8 +10,10 @@ struct TimerCompletionView: View {
     @State private var appearAnimation = false
 
     // 通知許可状態
-    @State private var isNotificationAuthorized = false
+    @State private var isNotificationAuthorized: Bool?
     @State private var showingNotificationInstructionAlert = false
+
+    @Dependency(\.notificationService) var notificationService // Update Dependency
 
     var body: some View {
         WithViewStore(store, observe: { $0 }, content: { viewStore in
@@ -32,7 +34,10 @@ struct TimerCompletionView: View {
                             },
                             appearAnimation: $appearAnimation
                         )
-                        .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.closeTimeCompletionViewButton.rawValue)
+                        .accessibilityIdentifier(
+                            SCAccessibilityIdentifiers.TimerCompletionView
+                                .closeTimeCompletionViewButton.rawValue
+                        )
 
                         Spacer(minLength: 20)
 
@@ -43,7 +48,7 @@ struct TimerCompletionView: View {
                         )
 
                         // 通知が許可されていない場合は通知許可ボタンを表示
-                        if !isNotificationAuthorized {
+                        if isNotificationAuthorized == nil {
                             Spacer(minLength: 20)
 
                             Button {
@@ -96,14 +101,14 @@ struct TimerCompletionView: View {
 
     // 通知許可状態を確認
     private func checkNotificationAuthorizationStatus() {
-        NotificationManager.shared.checkAuthorizationStatus { isAuthorized in
+        notificationService.checkAuthorizationStatus { isAuthorized in
             isNotificationAuthorized = isAuthorized
         }
     }
 
     // 通知許可をリクエスト
     private func requestNotificationAuthorization(completion: @escaping (Bool) -> Void = { _ in }) {
-        NotificationManager.shared.requestAuthorization { granted in
+        notificationService.requestAuthorization { granted in
             isNotificationAuthorized = granted
             completion(granted)
         }

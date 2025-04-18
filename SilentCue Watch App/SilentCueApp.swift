@@ -4,23 +4,54 @@ import UserNotifications
 
 @main
 struct SilentCueWatchApp: App {
-    // AppScreen enum は NavigationDestination.swift に移動
-
     // アプリ全体のストア
-    let store = Store(initialState: AppState()) {
-        AppReducer()
-    }
+    let store: StoreOf<AppReducer>
 
-    // @State private var navPath = NavigationPath() // AppStateで管理
+    // 依存関係
+    @Dependency(\.userDefaultsService) var userDefaultsService
+    @Dependency(\.notificationService) var notificationService
 
     // バックグラウンド/フォアグラウンド遷移を監視
     @Environment(\.scenePhase) private var scenePhase
 
-    // アプリデリゲート
     @StateObject private var notificationDelegate = NotificationDelegate()
-
-    // 通知説明アラート表示フラグ
     @State private var showNotificationExplanationAlert = false
+
+    init() {
+        // Storeの初期化
+        #if DEBUG
+            if CommandLine.arguments.contains(SCAppEnvironment.LaunchArguments.uiTesting.rawValue) {
+                // --- UIテスト: ストアの依存関係をオーバーライド ---
+                print("--- UI Testing: Initializing Store with overridden dependencies (DEBUG build) ---")
+                store = Store(initialState: AppState()) {
+                    AppReducer()
+                } withDependencies: { // このストアインスタンスに特化した依存関係をオーバーライド
+                    $0.userDefaultsService = MockUserDefaultsManager()
+                    // MockUserDefaultsManager が UserDefaultsServiceProtocol に準拠していることを確認
+
+                    // UIテストに必要な他のオーバーライドを追加:
+                    // $0.notificationService = MockNotificationService()
+                    // $0.extendedRuntimeManager = MockExtendedRuntimeManager()
+                    // $0.hapticClient = .noop // または特定のモック
+                    // $0.continuousClock = ImmediateClock() // テストには即時クロックを使用
+                }
+            } else {
+                // --- 通常のデバッグビルド: デフォルトの依存関係でストアを初期化 ---
+                store = Store(initialState: AppState()) {
+                    AppReducer() // 設定されたライブ/プレビュー/テスト値を使用
+                }
+            }
+        #else
+            // --- リリースビルド: デフォルトの依存関係でストアを初期化 ---
+            store = Store(initialState: AppState()) {
+                AppReducer() // ライブ値を使用
+            }
+        #endif
+        // --- アプリレベルの依存関係 (@Dependency プロパティ) はデフォルトの解決を使用 ---
+        // 上記のストアのオーバーライドは主にリデューサに影響します。
+        // UIテスト中に isFirstLaunch のようなアプリメソッドがモックを必要とする場合、
+        // 代替アプローチを検討するか、DEBUG で MockUserDefaultsManager がグローバルに動作することを確認してください。
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -84,7 +115,7 @@ struct SilentCueWatchApp: App {
                 .onAppear {
                     viewStore.send(.onAppear)
                     notificationDelegate.setStore(store)
-                    checkNotificationStatus() // 通常フローでのみ実行したい場合、条件分岐が必要かも
+                    checkNotificationStatus() // Check if this needs conditional execution
                 }
                 .alert("通知について", isPresented: $showNotificationExplanationAlert) {
                     Button("許可する") {
@@ -105,7 +136,7 @@ struct SilentCueWatchApp: App {
     private func checkNotificationStatus() {
         // 初回起動かどうかを確認
         if isFirstLaunch() {
-            NotificationManager.shared.checkAuthorizationStatus { isAuthorized in
+            notificationService.checkAuthorizationStatus { isAuthorized in
                 // まだ通知許可の選択をしていない場合
                 if !isAuthorized {
                     // 説明アラートを表示
@@ -123,17 +154,18 @@ struct SilentCueWatchApp: App {
     // 初回起動かどうかを確認
     private func isFirstLaunch() -> Bool {
         // isFirstLaunchの値を取得、デフォルトはtrue
-        UserDefaultsManager.shared.object(forKey: .isFirstLaunch) as? Bool ?? true
+        userDefaultsService.object(forKey: .isFirstLaunch) as? Bool ?? true
     }
 
     // 初回起動フラグをfalseに設定
     private func markAsLaunched() {
-        UserDefaultsManager.shared.set(false, forKey: .isFirstLaunch)
+        // userDefaultsService を使用するように変更
+        userDefaultsService.set(false, forKey: .isFirstLaunch)
     }
 
     // 通知許可をリクエストする
     private func requestNotificationPermission() {
-        NotificationManager.shared.requestAuthorization { granted in
+        notificationService.requestAuthorization { granted in
             print("通知許可: \(granted)")
         }
     }

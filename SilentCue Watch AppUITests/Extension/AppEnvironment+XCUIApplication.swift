@@ -1,38 +1,35 @@
 import XCTest
 
-// SCAppEnvironment の拡張として、UIテストでの環境変数/引数設定メソッドを定義
 extension SCAppEnvironment {
-    private static func setEnv(_ key: EnvKeys, to value: EnvValues, for app: XCUIApplication) {
-        app.launchEnvironment[key.rawValue] = value.rawValue
+    private static func setEnv(_ key: LaunchArguments, to value: String, for app: XCUIApplication) {
+        guard key == .disableNotificationsForTesting else {
+            print("Warning: Trying to set non-env key \(key.rawValue) as environment variable.")
+            return
+        }
+        app.launchEnvironment[key.rawValue] = value
     }
 
-    static func setMultipleEnv(_ values: [EnvKeys: EnvValues], for app: XCUIApplication) {
+    static func setMultipleEnv(_ values: [LaunchArguments: String], for app: XCUIApplication) {
         for (key, value) in values {
-            app.launchEnvironment[key.rawValue] = value.rawValue
+            setEnv(key, to: value, for: app)
         }
     }
 
-    /// 指定された初期画面と追加引数でテスト環境をセットアップする
-    static func setupEnvironment(
+    /// 指定された初期画面と追加引数でUIテスト環境をセットアップする
+    static func setupUITestEnv(
         for app: XCUIApplication,
         initialView: InitialViewOption? = nil,
-        otherArguments: [LaunchArguments] = []
+        otherArguments: [SCAppEnvironment.LaunchArguments] = []
     ) {
-        setEnv(.disableNotificationsForTesting, to: .yes, for: app) // 共通の環境変数
+        // UITest環境では通知を無効化
+        setEnv(.disableNotificationsForTesting, to: "YES", for: app)
 
-        var arguments: [String] = []
+        var arguments: [String] = [LaunchArguments.uiTesting.rawValue]
         if let initialViewRawValue = initialView?.rawValue {
             arguments.append(initialViewRawValue)
         }
-        arguments.append(contentsOf: otherArguments.map { $0.rawValue })
+        arguments.append(contentsOf: otherArguments.map(\.rawValue))
 
         app.launchArguments = arguments
     }
-
-    // --- 以前の個別のテスト環境設定メソッドは削除済み ---
-
-    // setupStandardTestEnvironment は削除
-    // static func setupStandardTestEnvironment(for app: XCUIApplication) {
-    //     self.setEnv(.disableNotificationsForTesting, to: .yes, for: app)
-    // }
 }

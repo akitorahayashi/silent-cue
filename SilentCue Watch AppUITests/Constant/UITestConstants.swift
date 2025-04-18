@@ -2,12 +2,7 @@ import XCTest
 
 /// 共通のUI Testing定数を定義する列挙型
 enum UITestConstants {
-    /// スクロール/スワイプの速度関連の定数
-    enum ScrollVelocity {
-        static let standard: XCUIGestureVelocity = 150
-        static let slow: XCUIGestureVelocity = 100
-        static let fast: XCUIGestureVelocity = 300
-    }
+    static let scrollVelocity: XCUIGestureVelocity = 200
 
     /// タイムアウト関連の定数
     enum Timeout {

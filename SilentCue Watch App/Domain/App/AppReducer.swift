@@ -21,6 +21,9 @@ struct AppReducer: Reducer {
 
         // AppReducer自体のロジック (機能間連携、ナビゲーションなど)
         Reduce { state, action in
+            // Access dependencies via the implicit `dependencies` parameter
+            @Dependency(\.extendedRuntimeService) var extendedRuntimeService
+
             switch action {
             // MARK: - アプリライフサイクル
 
@@ -37,7 +40,7 @@ struct AppReducer: Reducer {
                         }
 
                         // バックグラウンドでタイマーが完了していたかチェック
-                        let wasCompletedInBackground = ExtendedRuntimeManager.shared
+                        let wasCompletedInBackground = extendedRuntimeService
                             .checkAndClearBackgroundCompletionFlag()
 
                         // バックグラウンドで完了していた場合、通知から来た可能性が高いので振動なしで完了画面に遷移

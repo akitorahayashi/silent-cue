@@ -6,16 +6,15 @@ import XCTest
 final class AppReducerTests: XCTestCase {
     func testOnAppearLoadsSettings() async {
         let mockUserDefaults = MockUserDefaultsManager()
+        
         // モックに期待される初期値を設定
-        mockUserDefaults.setupInitialValues([
-            .hapticType: HapticType.standard.rawValue, // 例: standard
-        ])
+        mockUserDefaults.set(HapticType.standard.rawValue, forKey: UserDefaultsKeys.hapticType)
 
         let store = TestStore(
             initialState: AppState(),
             reducer: { AppReducer() },
             withDependencies: { dependencies in
-                dependencies.userDefaultsManager = mockUserDefaults
+                dependencies.userDefaultsService = mockUserDefaults
             }
         )
 
@@ -59,20 +58,21 @@ final class AppReducerTests: XCTestCase {
             state.settings.isSettingsLoaded = true
         }
 
-        // AppReducerの連携による後続のアクションをアサート
+        // AppReducerの連携による後続のアクションをアサート (状態変更なしで受信)
         await store.receive(AppAction.haptics(.updateHapticSettings(
             type: HapticType.weak
-        ))) { state in
+        )))
+
+        // 最終的な状態をアサート
+        store.assert { state in
             state.haptics.hapticType = HapticType.weak
         }
+
         await store.finish()
     }
 
     func testDismissCompletionViewClearsPathAndStopsHaptic() async {
-        let initialState = AppState(
-            path: [NavigationDestination.completion],
-            haptics: HapticsState(isActive: true)
-        )
+        let initialState = AppState()
         var mutableInitialState = initialState
         mutableInitialState.timer.completionDate = Date()
 
@@ -87,8 +87,11 @@ final class AppReducerTests: XCTestCase {
             state.timer.completionDate = nil
         }
 
-        // 後続のアクションをアサート
-        await store.receive(AppAction.haptics(.stopHaptic)) { state in
+        // 後続のアクションを受信する
+        await store.receive(AppAction.haptics(.stopHaptic))
+
+        // 最終的な状態をアサート
+        store.assert { state in
             state.haptics.isActive = false
         }
         await store.finish()

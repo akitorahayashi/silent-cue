@@ -8,61 +8,47 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 
 ## アーキテクチャ
 
-このアプリは The Composable Architecture をベースに、Presentation Domain Separation の考え方を採用しています。
+このアプリは The Composable Architecture (TCA) を基盤とし、関心を明確に分離したアーキテクチャを採用しています。具体的には、UIを担当する**プレゼンテーション層**、ビジネスロジックと状態を管理する**ドメイン層**、そして外部依存（システムAPIなど）を抽象化する**サービス層**に分けられます。この構成は、TCAの状態管理と依存性注入の強みを活かし、堅牢で保守性の高いコードベースを実現します。
 
-### プレゼンテーション層
-- `SilentCue Watch App/View/` ディレクトリ以下に配置された SwiftUI View で構成されます。
-- View は TCA の `ViewStore` を介して状態を監視し、ユーザー操作を`Action` として `Store` に送信します。また、 UI の見た目やインタラクションを担当します。
+### プレゼンテーション層 (`View/`)
+SwiftUI View で構成され、ユーザーインターフェースの表示とユーザー操作の受付を担当します。TCA の `ViewStore` を介して状態を監視し、`Action` を `Store` に送信します。
 
-### ドメイン層
-- `SilentCue Watch App/Domain/` ディレクトリ以下に配置された TCA のコンポーネント (`State`, `Action`, `Reducer`) で構成されます。
-- 各機能（`App`, `Timer`, `Settings`, `Haptics`）が独立したドメインとして定義され、それぞれの状態管理、ビジネスロジック、副作用（UserDefaultsへの保存、振動の実行など）を担当します。
-- `AppReducer` がルートとなり、各機能ドメインの Reducer を統合し、アプリ全体の状態遷移や機能間の連携（タイマー完了時の振動開始など）を管理します。
-- 依存性（UserDefaults, Clock など）は `@Dependency` を通じて注入され、テスト時にはモックに差し替えることが可能です。
+### ドメイン層 (`Domain/`)
+TCA の主要コンポーネント (`State`, `Action`, `Reducer`) で構成されます。各機能（`App`, `Timer`, `Settings`, `Haptics`）が独立したドメインとして定義され、それぞれの状態管理とビジネスロジックを担当します。副作用（永続化、通知、触覚フィードバックなど）の実行は、直接行わず、注入された **サービス層** に委譲します。`AppReducer` がルートとなり、各ドメインの Reducer を統合し、アプリ全体の状態遷移や機能間の連携を管理します。
+
+### サービス層 (`Service/`)
+システムAPI（`UserDefaults`, `UNUserNotificationCenter`, `WKExtendedRuntimeSession`, `WKInterfaceDevice` など）や外部依存関係へのアクセスを抽象化する層です。各サービスは `Shared/Protocols/` に定義されたプロトコル (`*ServiceProtocol`) に基づいて実装され、ライブ実装 (`Live*Service`) が `Service/` ディレクトリに配置されます。これにより、ドメイン層は具体的な実装詳細から分離されます。
+
+### 依存性注入 (DI)
+TCA の依存性注入システム (`@Dependency`) を全面的に採用しています。
+*   ドメイン層（主に Reducer）は、必要なサービスをプロトコル経由で注入されます。
+*   各依存関係（サービス）は、TCA の `DependencyKey` を通じて、本番用の `liveValue`、プレビュー用の `previewValue` (No-op 実装など)、テスト用の `testValue` (未実装スタブ) が提供されます。
+*   これにより、コードのモジュール性が高まり、テスト（単体テスト、UIテスト）においてモックやスタブを用いた依存関係の差し替えが容易になり、テスト容易性が大幅に向上しています。
+
+このアーキテクチャにより、関心の分離が促進され、各層が特定の責任を持つことで、コードの理解、保守、テストがしやすくなっています。
 
 ## ディレクトリ構成
 
 ```
 SilentCue/
 ├── .github/
-│   ├── README.md # 各ワークフローの詳細はこちら
+│   ├── README.md
 │   ├── scripts/
-│   │   ├── find-simulator.sh
-│   │   └── validate-ci-build-steps.sh
 │   └── workflows/
-│       ├── ci-cd-pipeline.yml
-│       ├── run-tests.yml
-│       ├── build-unsigned-archive.yml
-│       ├── code-quality.yml
-│       ├── copilot-review.yml
-│       ├── test-reporter.yml
-│       └── release.yml
 ├── SilentCue Watch App/
 │   ├── Assets.xcassets/
 │   ├── Domain/
 │   │   ├── App/
-│   │   │   ├── AppAction.swift
-│   │   │   ├── AppReducer.swift
-│   │   │   ├── AppState.swift
-│   │   │   └── NavigationDestination.swift
 │   │   ├── Settings/
-│   │   │   ├── SettingsAction.swift
-│   │   │   ├── SettingsReducer.swift
-│   │   │   └── SettingsState.swift
 │   │   ├── Timer/
-│   │   │   ├── TimerAction.swift
-│   │   │   ├── TimerReducer.swift
-│   │   │   └── TimerState.swift
 │   │   └── Haptics/
-│   │       ├── HapticsAction.swift
-│   │       ├── HapticsReducer.swift
-│   │       ├── HapticsState.swift
-│   │       └── HapticType.swift
 │   ├── Preview Content/
-│   ├── StorageService/
-│   │   └── UserDefaultsManager.swift
-│   ├── Util/
-│   │   ├── ExtendedRuntimeManager.swift
+│   ├── Service/  # Moved from StorageService and Util
+│   │   ├── UserDefaultsService.swift
+│   │   ├── NotificationService.swift
+│   │   ├── ExtendedRuntimeService.swift
+│   │   └── HapticsService.swift
+│   ├── Util/     # Now contains only pure utility functions
 │   │   └── SCTimeFormatter.swift
 │   ├── View/
 │   │   ├── CountdownView/
@@ -72,12 +58,22 @@ SilentCue/
 │   └── SilentCueApp.swift
 ├── SilentCue Watch AppTests/
 │   ├── Domain/
-│   ├── Mock/ # Renamed from Mocks/
-│   └── StorageService/
+│   ├── Service/  # Renamed from StorageService
+│   │   └── UserDefaultsServiceTests.swift # Renamed and Moved
+│   └── Mock/ # Mock implementations (if any specific to tests)
 ├── SilentCue Watch AppUITests/
 │   ├── CountdownViewUITests.swift
 │   ├── SettingsViewUITests.swift
 │   └── Util/
+├── Shared/ # Shared code between App and Tests
+│   ├── Protocols/ # Protocol definitions for services
+│   │   ├── UserDefaultsServiceProtocol.swift
+│   │   ├── NotificationServiceProtocol.swift
+│   │   ├── ExtendedRuntimeServiceProtocol.swift
+│   │   └── HapticsServiceProtocol.swift
+│   └── TestingSupport/ # Mocks and No-op implementations for testing
+│       ├── MockUserDefaultsManager.swift
+│       └── NoopImplementations.swift
 ├── .gitignore
 ├── .swiftformat
 ├── .swiftlint.yml

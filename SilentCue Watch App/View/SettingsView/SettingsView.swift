@@ -25,7 +25,7 @@ struct SettingsView: View {
                     }
                 )
             }
-            .navigationTitle("Settings")
+            .navigationTitle(SCAccessibilityIdentifiers.SettingsView.navigationBarTitle.rawValue)
             .onAppear {
                 if !viewStore.isSettingsLoaded {
                     viewStore.send(.loadSettings)

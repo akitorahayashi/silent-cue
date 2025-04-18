@@ -3,7 +3,7 @@ import XCTest
 enum NotificationPermissionHelper {
     /// 通知許可のダイアログを処理する関数
     static func ensureNotificationPermission(for app: XCUIApplication) {
-        let velocity = UITestConstants.ScrollVelocity.standard
+        let velocity = UITestConstants.scrollVelocity
 
         // まだ認証していない
         let notificationNotAuthorizedAlertTitle = app.staticTexts["通知について"]

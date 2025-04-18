@@ -79,7 +79,7 @@ struct SetTimerView: View {
             }
             .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.setTimerScrollView.rawValue)
             .scrollIndicators(.never)
-            .navigationTitle("Silent Cue")
+            .navigationTitle(SCAccessibilityIdentifiers.SetTimerView.navigationBarTitle.rawValue)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: onSettingsButtonTapped) {
