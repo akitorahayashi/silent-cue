@@ -34,12 +34,12 @@ struct SelectVibrationTypeSection: View {
 
     private func accessibilityIdentifier(for hapticType: HapticType) -> String {
         switch hapticType {
-        case .standard:
-            return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue
-        case .strong:
-            return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStrong.rawValue
-        case .weak:
-            return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionWeak.rawValue
+            case .standard:
+                return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue
+            case .strong:
+                return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStrong.rawValue
+            case .weak:
+                return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionWeak.rawValue
         }
     }
 }

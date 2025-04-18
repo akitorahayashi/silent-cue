@@ -1,7 +1,6 @@
 import XCTest
 
 final class TimerCompletionViewUITests: XCTestCase {
-
     var app: XCUIApplication!
 
     override func setUpWithError() throws {
@@ -10,7 +9,8 @@ final class TimerCompletionViewUITests: XCTestCase {
         // TimerCompletionView テスト用の環境設定とアプリの起動
         SCAppEnvironment.setupEnvAndLaunchForTimerCompletionViewTest(for: app)
         XCTAssertTrue(
-            app.buttons[SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app.buttons[SCAccessibilityIdentifiers.TimerCompletionView.okButton.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "TimerCompletionView (OK button) should appear on launch with argument"
         )
     }
@@ -47,13 +47,17 @@ final class TimerCompletionViewUITests: XCTestCase {
         // Assert: Check if returned to SetTimerView
         //         (The app should transition back to the normal flow after dismissing the test view)
         XCTAssertTrue(
-            app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "Should return to SetTimerView after tapping OK button"
         )
         // Check that the completion view elements are gone
         XCTAssertFalse(okButton.exists, "OK button should not exist after returning to SetTimerView")
 
         // Check if the ScrollView of SetTimerView exists as well (using the identifier from the previous test)
-        XCTAssertTrue(app.otherElements[SCAccessibilityIdentifiers.SetTimerView.setTimerScrollView.rawValue].exists, "SetTimerScrollView should exist after returning")
+        XCTAssertTrue(
+            app.otherElements[SCAccessibilityIdentifiers.SetTimerView.setTimerScrollView.rawValue].exists,
+            "SetTimerScrollView should exist after returning"
+        )
     }
-} 
+}

@@ -16,7 +16,7 @@ extension SCAppEnvironment {
 
     /// SetTimerView テスト用の設定と起動
     static func setupEnvAndLaunchForSetTimerViewTest(for app: XCUIApplication) {
-        self.setEnv(.disableNotificationsForTesting, to: .yes, for: app)
+        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
         app.launchArguments = [] // 引数なし
         app.launch()
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
@@ -24,7 +24,7 @@ extension SCAppEnvironment {
 
     /// SettingsView テスト用の設定と起動
     static func setupEnvAndLaunchForSettingsViewTest(for app: XCUIApplication) {
-        self.setEnv(.disableNotificationsForTesting, to: .yes, for: app)
+        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
         app.launchArguments = [] // 引数なし
         app.launch()
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
@@ -32,7 +32,7 @@ extension SCAppEnvironment {
 
     /// CountdownView テスト用の設定と起動
     static func setupEnvAndLaunchForCountdownViewTest(for app: XCUIApplication) {
-        self.setEnv(.disableNotificationsForTesting, to: .yes, for: app)
+        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
         app.launchArguments = [] // 引数なし
         app.launch()
         NotificationPermissionHelper.ensureNotificationPermission(for: app)
@@ -40,7 +40,7 @@ extension SCAppEnvironment {
 
     /// TimerCompletionView テスト用の設定と起動
     static func setupEnvAndLaunchForTimerCompletionViewTest(for app: XCUIApplication) {
-        self.setEnv(.disableNotificationsForTesting, to: .yes, for: app)
+        setEnv(.disableNotificationsForTesting, to: .yes, for: app)
         // 固有の起動引数を設定
         app.launchArguments = [LaunchArguments.testingTimerCompletionView.rawValue]
         app.launch()
@@ -50,4 +50,4 @@ extension SCAppEnvironment {
     // static func setupStandardTestEnvironment(for app: XCUIApplication) {
     //     self.setEnv(.disableNotificationsForTesting, to: .yes, for: app)
     // }
-} 
+}

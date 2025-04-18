@@ -18,14 +18,13 @@ struct TimerCompletionView: View {
             ZStack {
                 ScrollView {
                     VStack {
-
                         NotifyEndTimeView(
                             completionDate: viewStore.completionDate,
                             appearAnimation: $appearAnimation
                         )
-                        
+
                         Spacer(minLength: 16)
-                        
+
                         CloseTimeCompletionViewButton(
                             action: {
                                 // TimerReducerにdismissアクションを送信するだけ
@@ -42,7 +41,6 @@ struct TimerCompletionView: View {
                             timerDurationMinutes: viewStore.timerDurationMinutes,
                             appearAnimation: $appearAnimation
                         )
-
 
                         // 通知が許可されていない場合は通知許可ボタンを表示
                         if !isNotificationAuthorized {

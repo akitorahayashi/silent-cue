@@ -9,7 +9,7 @@ struct NotifyEndTimeView: View {
             Image(systemName: "bell.and.waves.left.and.right")
                 .font(.system(size: 40))
                 .foregroundStyle(.primary)
-            
+
             Spacer()
                 .frame(height: 8)
 

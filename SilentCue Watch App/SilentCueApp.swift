@@ -58,35 +58,38 @@ struct SilentCueWatchApp: App {
                         )
                         .navigationDestination(for: NavigationDestination.self) { destination in
                             switch destination {
-                            case .countdown:
-                                CountdownView(
-                                    store: store.scope(
-                                        state: \.timer,
-                                        action: AppAction.timer
+                                case .countdown:
+                                    CountdownView(
+                                        store: store.scope(
+                                            state: \.timer,
+                                            action: AppAction.timer
+                                        )
                                     )
-                                )
-                            case .completion:
-                                TimerCompletionView(
-                                    store: store.scope(
-                                        state: \.timer,
-                                        action: AppAction.timer
+                                case .completion:
+                                    TimerCompletionView(
+                                        store: store.scope(
+                                            state: \.timer,
+                                            action: AppAction.timer
+                                        )
                                     )
-                                )
-                                .navigationBarBackButtonHidden(true)
-                                .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.timerCompletionView.rawValue)
-                            case .settings:
-                                SettingsView(
-                                    store: store.scope(
-                                        state: \.settings,
-                                        action: AppAction.settings
-                                    ),
-                                    hapticsStore: store.scope(
-                                        state: \.haptics,
-                                        action: AppAction.haptics
+                                    .navigationBarBackButtonHidden(true)
+                                    .accessibilityIdentifier(
+                                        SCAccessibilityIdentifiers.TimerCompletionView
+                                            .timerCompletionView.rawValue
                                     )
-                                )
-                            case .timerStart:
-                                EmptyView()
+                                case .settings:
+                                    SettingsView(
+                                        store: store.scope(
+                                            state: \.settings,
+                                            action: AppAction.settings
+                                        ),
+                                        hapticsStore: store.scope(
+                                            state: \.haptics,
+                                            action: AppAction.haptics
+                                        )
+                                    )
+                                case .timerStart:
+                                    EmptyView()
                             }
                         }
                     }

@@ -54,7 +54,10 @@ struct SetTimerView: View {
                                     send: TimerAction.minuteSelected
                                 )
                             )
-                            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView.rawValue)
+                            .accessibilityIdentifier(
+                                SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView
+                                    .rawValue
+                            )
                             .transition(.opacity)
                         }
                     }
