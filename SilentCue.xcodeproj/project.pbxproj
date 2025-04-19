@@ -64,11 +64,26 @@
 			);
 			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
 		};
+		98FEB0612DB37F1500006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Protocol/ExtendedRuntimeServiceProtocol.swift,
+				Protocol/HapticsServiceProtocol.swift,
+				Protocol/NotificationServiceProtocol.swift,
+				Protocol/UserDefaultsServiceProtocol.swift,
+				Shared/SCAccessibilityIdentifiers.swift,
+				Shared/SCAppEnvironment.swift,
+			);
+			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				98FEB0612DB37F1500006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */,
+			);
 			path = "SilentCue Watch App";
 			sourceTree = "<group>";
 		};

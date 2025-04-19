@@ -1,11 +1,11 @@
 /// UserDefaultsのキーを管理する列挙型
-public enum UserDefaultsKeys: String, CaseIterable {
+enum UserDefaultsKeys: String, CaseIterable {
     case hapticType
     case isFirstLaunch
 }
 
 /// UserDefaultsへのアクセスを管理するインターフェース
-public protocol UserDefaultsServiceProtocol { // Rename protocol
+protocol UserDefaultsServiceProtocol { // Rename protocol
     /// 値の保存（任意のオブジェクト型）
     func set(_ value: Any?, forKey defaultName: UserDefaultsKeys)
 

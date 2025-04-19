@@ -1,3 +1,4 @@
+@testable import SilentCue_Watch_App
 import XCTest
 
 extension SCAppEnvironment {

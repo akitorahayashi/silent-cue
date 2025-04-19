@@ -1,5 +1,5 @@
-import ComposableArchitecture
 @testable import SilentCue_Watch_App
+import ComposableArchitecture
 import XCTest
 
 @MainActor

@@ -1,7 +1,7 @@
 import WatchKit // For WKHapticType
 
 /// 触覚フィードバック機能のインターフェース
-public protocol HapticsServiceProtocol {
+protocol HapticsServiceProtocol {
     /// 指定されたタイプの触覚フィードバックを再生します。
     /// - Parameter type: 再生する触覚フィードバックのタイプ (`WKHapticType`)。
     func play(_ type: WKHapticType) async

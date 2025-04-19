@@ -1,5 +1,5 @@
-import ComposableArchitecture
 @testable import SilentCue_Watch_App
+import ComposableArchitecture
 import XCTest
 
 @MainActor
@@ -36,9 +36,7 @@ final class AppReducerTests: XCTestCase {
         // 状態の変更もアサートする
         await store.receive(AppAction.haptics(.updateHapticSettings(
             type: HapticType.standard
-        ))) { state in
-            state.haptics.hapticType = HapticType.standard
-        }
+        )))
 
         // エフェクトが完了したことを確認
         await store.finish()
