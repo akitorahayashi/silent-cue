@@ -26,14 +26,14 @@ jobs:
     - name: Clean Output Directory
       shell: bash
       run: |
-        source .github/scripts/steps/clean-old-output.sh
+        source .github/scripts/build-steps/clean-old-output.sh
         clean_old_output
 
     - name: Select Simulator
       id: select_simulator
       shell: bash
       run: |
-        source .github/scripts/steps/select-simulator.sh
+        source .github/scripts/build-steps/select-simulator.sh
         # select_simulator は成功時にIDを標準出力へ出力、失敗時は非ゼロで終了
         simulator_id=$(select_simulator)
         echo "simulator_id=$simulator_id" >> $GITHUB_OUTPUT
@@ -42,7 +42,7 @@ jobs:
       id: build_for_testing
       shell: bash
       run: |
-        source .github/scripts/steps/build-for-testing.sh
+        source .github/scripts/build-steps/build-for-testing.sh
         build_for_testing ${{ steps.select_simulator.outputs.simulator_id }}
       # このステップは build_for_testing 関数が失敗(非ゼロ終了)したら失敗する
 
@@ -50,7 +50,7 @@ jobs:
       id: run_unit_tests
       shell: bash
       run: |
-        source .github/scripts/steps/run-unit-tests.sh
+        source .github/scripts/build-steps/run-unit-tests.sh
         # 関数の終了コードをキャプチャして exit
         run_unit_tests ${{ steps.select_simulator.outputs.simulator_id }}
         exit $?
@@ -62,7 +62,7 @@ jobs:
       # Runステップが成功した場合のみ実行
       if: steps.run_unit_tests.outcome == 'success'
       run: |
-        source .github/scripts/steps/run-unit-tests.sh
+        source .github/scripts/build-steps/run-unit-tests.sh
         # 引数なしで verify 関数を呼び出す
         verify_unit_test_results
       # このステップは検証失敗時にジョブを失敗させない (後続処理のため)
@@ -72,7 +72,7 @@ jobs:
       id: run_ui_tests
       shell: bash
       run: |
-        source .github/scripts/steps/run-ui-tests.sh
+        source .github/scripts/build-steps/run-ui-tests.sh
         # 関数の終了コードをキャプチャして exit
         run_ui_tests ${{ steps.select_simulator.outputs.simulator_id }}
         exit $?
@@ -84,7 +84,7 @@ jobs:
       # Runステップが成功した場合のみ実行
       if: steps.run_ui_tests.outcome == 'success'
       run: |
-        source .github/scripts/steps/run-ui-tests.sh
+        source .github/scripts/build-steps/run-ui-tests.sh
         # 引数なしで verify 関数を呼び出す
         verify_ui_test_results
       # このステップは検証失敗時にジョブを失敗させない (後続処理のため)

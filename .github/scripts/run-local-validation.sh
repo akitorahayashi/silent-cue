@@ -11,12 +11,12 @@ source "$(dirname "$0")/common/logging.sh"
 source "$(dirname "$0")/common/prerequisites.sh"
 
 # ステップ関数を読み込む
-source "$(dirname "$0")/steps/clean-old-output.sh"
-source "$(dirname "$0")/steps/select-simulator.sh"
-source "$(dirname "$0")/steps/build-for-testing.sh"
-source "$(dirname "$0")/steps/run-unit-tests.sh"
-source "$(dirname "$0")/steps/run-ui-tests.sh"
-source "$(dirname "$0")/steps/build-archive.sh"
+source "$(dirname "$0")/build-steps/clean-old-output.sh"
+source "$(dirname "$0")/build-steps/select-simulator.sh"
+source "$(dirname "$0")/build-steps/build-for-testing.sh"
+source "$(dirname "$0")/build-steps/run-unit-tests.sh"
+source "$(dirname "$0")/build-steps/run-ui-tests.sh"
+source "$(dirname "$0")/build-steps/build-archive.sh"
 
 # --- Argument Parsing --- 
 

@@ -34,7 +34,7 @@ jobs:
         id: build_archive
         shell: bash
         run: |
-          source .github/scripts/steps/build-archive.sh
+          source .github/scripts/build-steps/build-archive.sh
           source .github/scripts/common/prerequisites.sh
           check_xcpretty
           build_archive_step
@@ -46,7 +46,7 @@ jobs:
         shell: bash
         if: steps.build_archive.outcome == 'success'
         run: |
-          source .github/scripts/steps/build-archive.sh
+          source .github/scripts/build-steps/build-archive.sh
           verify_archive_step
 
       - name: Upload Build Artifacts

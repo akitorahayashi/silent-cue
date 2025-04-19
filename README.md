@@ -40,7 +40,7 @@ SilentCue/
 │   │   ├── common/
 │   │   │   ├── logging.sh
 │   │   │   └── prerequisites.sh
-│   │   └── steps/
+│   │   └── build-steps/
 │   │       ├── clean-old-output.sh
 │   │       ├── select-simulator.sh
 │   │       ├── build-for-testing.sh

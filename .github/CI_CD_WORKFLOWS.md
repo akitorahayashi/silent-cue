@@ -16,7 +16,7 @@
 
 ### - モジュラー設計
 メインの`ci-cd-pipeline.yml`が、テスト、コード品質チェック、アーカイブビルドなどの個別の再利用可能ワークフローを呼び出す構造になっています。
-コアなビルド・テスト・アーカイブ処理は、`.github/scripts/steps/` および `.github/scripts/common/` 配下のシェルスクリプトに関数として定義され、各ワークフローが必要に応じてこれらを呼び出します。
+コアなビルド・テスト・アーカイブ処理は、`.github/scripts/build-steps/` および `.github/scripts/common/` 配下のシェルスクリプトに関数として定義され、各ワークフローが必要に応じてこれらを呼び出します。
 
 ### 包括的なビルドプロセスの検証
 Pull Requestや`main`ブランチへのプッシュ時に、以下の自動チェックを実行します。
@@ -65,7 +65,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 **トリガー**:
 - `ci-cd-pipeline.yml` から `workflow_call` で呼び出されます。
 **処理内容**:
-1.  必要な関数定義スクリプト (`.github/scripts/common/*.sh`, `.github/scripts/steps/*.sh`) を `source` します。
+1.  必要な関数定義スクリプト (`.github/scripts/common/*.sh`, `.github/scripts/build-steps/*.sh`) を `source` します。
 2.  `select_simulator` 関数を呼び出し、CI環境に適したwatchOSシミュレータIDを取得します。
 3.  `build_for_testing` 関数を呼び出し、テスト用ビルドを実行します。
 4.  `run_unit_tests` 関数を呼び出し、ユニットテストを実行します。実行後、`verify_unit_test_results` 関数で結果バンドルの存在を確認します（テスト成功時のみ）。
@@ -82,7 +82,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 **トリガー**:
 - `ci-cd-pipeline.yml` から `workflow_call` で呼び出されます。
 **処理内容**:
-1.  必要な関数定義スクリプト (`.github/scripts/common/*.sh`, `.github/scripts/steps/build-archive.sh`) を `source` します。
+1.  必要な関数定義スクリプト (`.github/scripts/common/*.sh`, `.github/scripts/build-steps/build-archive.sh`) を `source` します。
 2.  `build_archive_step` 関数を呼び出し、Release設定での署名なしアーカイブビルド (`.xcarchive`) を作成します。
 3.  ビルド成功後、`verify_archive_step` 関数を呼び出し、アーカイブの内容（`.app`の存在）を検証します。
 4.  作成された `.xcarchive` を `unsigned-archive` という名前のアーティファクトとしてアップロードします。
