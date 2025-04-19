@@ -19,7 +19,7 @@ struct SilentCueWatchApp: App {
     @State private var showNotificationExplanationAlert = false
 
     init() {
-        // Storeの初期化
+        // Storeの初期化を行う
         #if DEBUG
             if CommandLine.arguments.contains(SCAppEnvironment.LaunchArguments.uiTesting.rawValue) {
                 // --- UIテスト: ストアの依存関係をオーバーライド ---
@@ -46,10 +46,6 @@ struct SilentCueWatchApp: App {
                 AppReducer() // ライブ値を使用
             }
         #endif
-        // --- アプリレベルの依存関係 (@Dependency プロパティ) はデフォルトの解決を使用 ---
-        // 上記のストアのオーバーライドは主にリデューサに影響します。
-        // UIテスト中に isFirstLaunch のようなアプリメソッドがモックを必要とする場合、
-        // 代替アプローチを検討するか、DEBUG で MockUserDefaultsManager がグローバルに動作することを確認してください。
     }
 
     var body: some Scene {
