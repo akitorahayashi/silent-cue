@@ -7,12 +7,18 @@ struct SettingsReducer: Reducer {
     typealias State = SettingsState
     typealias Action = SettingsAction
 
-    private enum CancelID { case hapticPreview }
+    // Update CancelIDs
+    private enum CancelID {
+        case saveSettings
+        case hapticPreviewTimer // For the repeating timer
+        case hapticPreviewTimeout // For the 3-second timeout
+    }
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             @Dependency(\.userDefaultsService) var userDefaultsService
             @Dependency(\.hapticsService) var hapticsService
+            @Dependency(\.continuousClock) var clock
 
             switch action {
                 case .loadSettings:
@@ -28,65 +34,88 @@ struct SettingsReducer: Reducer {
                     return .none
 
                 case let .selectHapticType(type):
-                    state.selectedHapticType = type
-                    // タイプを選択したら自動的にプレビューと設定の保存
-                    return .merge(
-                        .run { [selectedType = state.selectedHapticType] _ in
-                            userDefaultsService.set(selectedType.rawValue, forKey: .hapticType)
-                        },
-                        .send(.previewHapticFeedback(type))
-                    )
-
-                case let .previewHapticFeedback(hapticType):
-                    // 既にプレビュー中なら前のプレビューをキャンセル
-                    let cancelEffect: Effect<SettingsAction> = state.isPreviewingHaptic
-                        ? .cancel(id: CancelID.hapticPreview)
+                    // 1. If previewing, stop the current one first.
+                    let stopPreviewEffect: Effect<Action> = state.isPreviewingHaptic
+                        ? .send(.stopHapticPreview)
                         : .none
-
-                    // 状態を更新し、新しいハプティックフィードバックを再生
-                    state.selectedHapticType = hapticType
-
+                    // 2. Update state synchronously.
+                    state.selectedHapticType = type
+                    // 3. Return effects: stop (if needed), save, start new preview.
                     return .merge(
-                        cancelEffect,
-                        .send(.previewingHapticChanged(true)),
-                        .run { send in
-                            // Use injected hapticsService
-                            await hapticsService.play(hapticType.wkHapticType)
-
-                            // 3秒間繰り返し振動を再生
-                            let startTime = Date()
-                            let endTime = startTime.addingTimeInterval(3.0)
-
-                            while Date() < endTime {
-                                // 選択された振動パターンを再生
-                                await hapticsService.play(hapticType.wkHapticType)
-
-                                // 次の振動までの間隔を待機
-                                try await Task.sleep(for: .seconds(hapticType.interval))
-                            }
-
-                            // プレビュー完了アクションを送信
-                            await send(.previewHapticCompleted)
-                        }
-                        .cancellable(id: CancelID.hapticPreview)
+                        stopPreviewEffect,
+                        .send(.internal(.saveSettingsEffect)),
+                        .send(.startHapticPreview(type))
                     )
 
-                case .previewHapticCompleted:
-                    return .send(.previewingHapticChanged(false))
+                // --- New Haptic Preview Flow ---
+                case let .startHapticPreview(hapticType):
+                    // Guard against starting if already previewing (should be stopped by selectHapticType)
+                    guard !state.isPreviewingHaptic else { return .none }
 
-                case let .previewingHapticChanged(isPreviewingHaptic):
-                    state.isPreviewingHaptic = isPreviewingHaptic
-                    return .none
+                    state.isPreviewingHaptic = true
 
-                case .saveSettings:
-                    // This action is now handled inline within .selectHapticType effect
-                    // Or, if called directly, needs access to the dependency
+                    return .merge(
+                        // 1. Play initial haptic immediately
+                        .run { _ in await hapticsService.play(hapticType.wkHapticType) },
+
+                        // 2. Start repeating timer
+                        .run { send in
+                            for await _ in clock.timer(interval: .seconds(hapticType.interval)) {
+                                await send(.hapticPreviewTick)
+                            }
+                        }
+                        .cancellable(id: CancelID.hapticPreviewTimer, cancelInFlight: true),
+
+                        // 3. Start 3-second timeout
+                        .run { send in
+                            try await clock.sleep(for: .seconds(3))
+                            await send(.stopHapticPreview)
+                        }
+                        .cancellable(id: CancelID.hapticPreviewTimeout, cancelInFlight: true)
+                    )
+
+                case .hapticPreviewTick:
+                    // Only play haptic if still in preview mode
+                    guard state.isPreviewingHaptic else { return .none }
+                    // Use the currently selected type from state
                     return .run { [selectedType = state.selectedHapticType] _ in
-                        userDefaultsService.set(selectedType.rawValue, forKey: .hapticType)
+                        await hapticsService.play(selectedType.wkHapticType)
                     }
 
+                case .stopHapticPreview:
+                    guard state.isPreviewingHaptic else { return .none } // Prevent redundant stops
+                    state.isPreviewingHaptic = false
+                    // Cancel both timer and timeout effects
+                    return .merge(
+                        .cancel(id: CancelID.hapticPreviewTimer),
+                        .cancel(id: CancelID.hapticPreviewTimeout)
+                    )
+
+                // --- Deprecated Actions (Redirect or Ignore) ---
+                case let .previewHapticFeedback(type):
+                    // Redirect to new flow
+                    return .send(.startHapticPreview(type))
+                case .previewHapticCompleted:
+                    // Can likely be ignored, or redirect to stop
+                    return .send(.stopHapticPreview) // Or just .none
+                case .saveSettings:
+                    // Redirect to internal effect trigger
+                    return .send(.internal(.saveSettingsEffect))
+
                 case .backButtonTapped:
-                    return .none
+                    // Stop preview if active when navigating back
+                    return state.isPreviewingHaptic ? .send(.stopHapticPreview) : .none
+
+                // --- Internal Actions ---
+                case let .internal(internalAction):
+                    switch internalAction {
+                        case .saveSettingsEffect:
+                            // Save logic remains the same
+                            return .run { [selectedType = state.selectedHapticType] _ in
+                                userDefaultsService.set(selectedType.rawValue, forKey: .hapticType)
+                            }
+                            .cancellable(id: CancelID.saveSettings, cancelInFlight: true)
+                    }
             }
         }
     }

@@ -11,15 +11,18 @@ enum TimerMode: String, Equatable, CaseIterable, Identifiable {
 /// タイマーの状態を管理するクラス
 struct TimerState: Equatable {
     // タイマー設定の状態
-    var timerMode: TimerMode = .afterMinutes
-    var selectedMinutes = 1
-    var selectedHour: Int = Calendar.current.component(.hour, from: Date())
-    var selectedMinute: Int = (Calendar.current.component(.minute, from: Date()) + 5) % 60
+    var timerMode: TimerMode
+    var selectedMinutes: Int
+    var selectedHour: Int
+    var selectedMinute: Int
 
     // カウントダウンの状態
-    var totalSeconds = 0
-    var isRunning = false
-    var displayTime = "00:00"
+    var totalSeconds: Int
+    var currentRemainingSeconds: Int
+    var isRunning: Bool
+    var displayTime: String {
+        SCTimeFormatter.formatSecondsToTimeString(currentRemainingSeconds)
+    }
 
     // バックグラウンド対応のための時間情報
     var startDate: Date?
@@ -27,63 +30,41 @@ struct TimerState: Equatable {
 
     // 完了画面用の情報
     var completionDate: Date?
-    var timerDurationMinutes = 0
+    var timerDurationMinutes: Int
 
-    // remainingSecondsを計算プロパティに変更
-    var remainingSeconds: Int {
-        guard let targetEnd = targetEndDate, isRunning else {
-            // タイマーが実行中でない場合はtotalSecondsを表示
-            return totalSeconds
-        }
-        // timeIntervalSinceの値を切り上げて整数に変換
-        return max(0, Int(ceil(targetEnd.timeIntervalSince(Date()))))
-    }
+    // Reverted initializer: Removed calendar and timerCalculator parameters
+    // Uses Date() and Calendar.current implicitly for defaults
+    init(
+        timerMode: TimerMode = .afterMinutes,
+        selectedMinutes: Int = 1,
+        now: Date = Date(), // Keep explicit now for testability
+        isRunning: Bool = false,
+        startDate: Date? = nil,
+        targetEndDate: Date? = nil,
+        completionDate: Date? = nil
+    ) {
+        self.timerMode = timerMode
+        self.selectedMinutes = selectedMinutes
+        self.isRunning = isRunning
+        self.startDate = startDate
+        self.targetEndDate = targetEndDate
+        self.completionDate = completionDate
 
-    // タイマーの計算された合計秒数
-    var calculatedTotalSeconds: Int {
-        switch timerMode {
-            case .afterMinutes:
-                return selectedMinutes * 60
-            case .atTime:
-                let now = Date()
-                let calendar = Calendar.current
-                let hour = selectedHour
-                let minute = selectedMinute
-
-                var dateComponents = calendar.dateComponents([.year, .month, .day], from: now)
-                dateComponents.hour = hour
-                dateComponents.minute = minute
-                dateComponents.second = 0
-
-                guard let targetDate = calendar.date(from: dateComponents) else {
-                    return 0
-                }
-
-                // 選択された時刻が現在時刻より前の場合は翌日とみなす
-                if targetDate < now {
-                    guard let tomorrowDate = calendar.date(byAdding: .day, value: 1, to: targetDate) else {
-                        return 0
-                    }
-                    return Int(tomorrowDate.timeIntervalSince(now))
-                }
-
-                return Int(targetDate.timeIntervalSince(now))
-        }
-    }
-
-    init() {
-        // 現在時刻を取得して初期値として設定
-        let now = Date()
         let calendar = Calendar.current
-
-        selectedHour = calendar.component(.hour, from: now)
-
-        // 「分後」モードは5分後をデフォルトにするが、
-        // 「時刻」モードの初期値は現在の分をそのまま使用
+        self.selectedHour = calendar.component(.hour, from: now)
         let currentMinute = calendar.component(.minute, from: now)
-        selectedMinute = currentMinute
+        self.selectedMinute = currentMinute
 
-        // 「分後」モードでは初期設定を1分に
-        selectedMinutes = 1
+        // Call the utility function for calculation
+        self.totalSeconds = TimeCalculation.calculateTotalSeconds(
+            mode: timerMode,
+            selectedMinutes: selectedMinutes,
+            selectedHour: self.selectedHour,
+            selectedMinute: self.selectedMinute,
+            now: now,
+            calendar: calendar
+        )
+        self.currentRemainingSeconds = self.totalSeconds
+        self.timerDurationMinutes = self.totalSeconds / 60
     }
 }

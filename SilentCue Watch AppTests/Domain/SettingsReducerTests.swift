@@ -1,159 +1,222 @@
-@testable import SilentCue_Watch_App
 import ComposableArchitecture
+@testable import SilentCue_Watch_App
 import WatchKit
 import XCTest
 
+@MainActor
 final class SettingsReducerTests: XCTestCase {
-    
-    func testLoadSettingsViaAppReducer() async {
-        let mockUserDefaults = MockUserDefaultsManager()
-        // setupInitialValues の代わりに直接値を設定
-        mockUserDefaults.set(HapticType.strong.rawValue, forKey: UserDefaultsKeys.hapticType)
-
-        let store = TestStore(
-            initialState: AppState(),
-            reducer: { AppReducer() },
-            withDependencies: { dependencies in
-                dependencies.userDefaultsService = mockUserDefaults
-            }
-        )
-
-        // 正しいスコープで AppAction.settings を送信
-        await store.send(.settings(.loadSettings))
-
-        await store.receive(.settings(.settingsLoaded(
-            hapticType: HapticType.strong
-        ))) { state in
-            state.settings.selectedHapticType = HapticType.strong
-            state.settings.isSettingsLoaded = true
-        }
-
-        // AppReducer 内で連鎖するアクション
-        await store.receive(.haptics(.updateHapticSettings(
-            type: HapticType.strong
-        ))) { state in
-            state.haptics.hapticType = HapticType.strong
-        }
-        await store.finish()
-    }
-
-    // AppReducer 経由での触覚タイプ選択の統合テスト
-    func testSelectHapticTypeViaAppReducer() async {
-        let mockUserDefaults = MockUserDefaultsManager()
-        let clock = TestClock()
-
-        var initialState = AppState()
-        initialState.settings.selectedHapticType = HapticType.standard
-
+    // SettingsReducer 用の TestStore ヘルパー
+    private func makeTestStore(
+        initialState: SettingsState = SettingsState(),
+        mockUserDefaults: MockUserDefaultsManager = MockUserDefaultsManager(),
+        mockHaptics: MockHapticsService = MockHapticsService(),
+        clock: TestClock<Duration> = TestClock()
+    ) -> (TestStore<SettingsState, SettingsAction>, MockUserDefaultsManager, MockHapticsService, TestClock<Duration>) {
         let store = TestStore(
             initialState: initialState,
-            reducer: { AppReducer() },
+            reducer: { SettingsReducer() },
             withDependencies: { dependencies in
                 dependencies.userDefaultsService = mockUserDefaults
-                dependencies.hapticsService = MockHapticsService() // Use a mock that doesn't fail
-                dependencies.continuousClock = clock // Inject TestClock
+                dependencies.hapticsService = mockHaptics
+                dependencies.continuousClock = clock
             }
         )
-
-        // 正しいスコープで AppAction.settings を送信
-        await store.send(.settings(.selectHapticType(HapticType.weak))) { state in
-            state.settings.selectedHapticType = HapticType.weak
-            // The save effect starts immediately but runs in background
-            // The preview effect also starts immediately
-        }
-
-        // エフェクトによってトリガーされるアクションを期待
-        // 1. Preview starts
-        await store.receive(.settings(.previewHapticFeedback(.weak)))
-        // 2. Previewing state becomes true
-        await store.receive(.settings(.previewingHapticChanged(true))) { state in
-            state.settings.isPreviewingHaptic = true
-        }
-        // 3. Haptics domain updates (AppReducer coordination)
-        await store.receive(.haptics(.updateHapticSettings(type: .weak))) { state in
-            state.haptics.hapticType = .weak
-        }
-
-        // Advance the clock to allow the preview effect to complete
-        await clock.advance(by: .seconds(3))
-
-        // 4. Preview completes
-        await store.receive(.settings(.previewHapticCompleted))
-        // 5. Previewing state becomes false
-        await store.receive(.settings(.previewingHapticChanged(false))) { state in
-            state.settings.isPreviewingHaptic = false
-        }
-
-        // エフェクト完了後に UserDefaults に値が保存されたことをアサート (selectHapticType の .run エフェクト)
-        // Need a slight delay for the background save effect to potentially complete
-        // await clock.advance(by: .milliseconds(1)) // Or check directly if timing isn't critical
-        XCTAssertEqual(mockUserDefaults.object(forKey: .hapticType) as? String, HapticType.weak.rawValue)
-
-        await store.finish()
+        return (store, mockUserDefaults, mockHaptics, clock)
     }
 
-    // AppReducer 経由での設定保存の統合テスト (必要であれば別途テスト)
-    // func testSaveSettingsViaAppReducer() async { ... }
-
-    // SettingsReducer を直接テスト: 値が存在しない場合の loadSettings
-    func testLoadSettings_WhenNoValueExists() async {
-        let mockUserDefaults = MockUserDefaultsManager() // 初期値は未設定
-        let store = TestStore(initialState: SettingsState()) {
-            SettingsReducer() // SettingsReducer を直接テスト
-        } withDependencies: { dependencies in
-            dependencies.userDefaultsService = mockUserDefaults
-        }
-
-        // SettingsAction を直接送信
+    // テスト: UserDefaults に値が存在しない場合に設定をロードする
+    func testLoadSettings_Default() async {
+        let (store, mockUserDefaults, _, _) = makeTestStore()
+        mockUserDefaults.remove(forKey: .hapticType)
         await store.send(SettingsAction.loadSettings)
-
-        // SettingsAction を直接期待
-        await store.receive(SettingsAction.settingsLoaded(hapticType: HapticType.standard)) {
-            $0.selectedHapticType = HapticType.standard
+        await store.receive(SettingsAction.settingsLoaded(hapticType: .standard)) {
+            $0.selectedHapticType = .standard
             $0.isSettingsLoaded = true
         }
-        // No effects expected from loadSettings itself, so finish immediately
         await store.finish()
     }
 
-    // SettingsReducer を直接テスト: selectHapticType によってトリガーされる saveSettings
-    func testSaveSettings() async {
+    // テスト: UserDefaults に値が存在する場合に設定をロードする
+    func testLoadSettings_ExistingValue() async {
         let mockUserDefaults = MockUserDefaultsManager()
+        mockUserDefaults.set(HapticType.strong.rawValue, forKey: .hapticType)
+        let (store, _, _, _) = makeTestStore(mockUserDefaults: mockUserDefaults)
+        await store.send(SettingsAction.loadSettings)
+        await store.receive(SettingsAction.settingsLoaded(hapticType: .strong)) {
+            $0.selectedHapticType = .strong
+            $0.isSettingsLoaded = true
+        }
+        await store.finish()
+    }
+
+    // テスト: ハプティクスタイプを選択すると保存がトリガーされ、プレビューが開始される
+    func testSelectHapticType_TriggersSaveAndStartsPreview() async {
+        let mockUserDefaults = MockUserDefaultsManager()
+        let mockHaptics = MockHapticsService()
         let clock = TestClock()
-        // 変更を確認するために異なる初期状態で開始
-        let store = TestStore(initialState: SettingsState(selectedHapticType: .standard)) {
-            SettingsReducer() // SettingsReducer を直接テスト
-        } withDependencies: { dependencies in
-            dependencies.userDefaultsService = mockUserDefaults
-            dependencies.hapticsService = MockHapticsService() // Use a mock that doesn't fail
-            dependencies.continuousClock = clock // Inject TestClock
+        let (store, _, _, _) = makeTestStore(mockUserDefaults: mockUserDefaults, mockHaptics: mockHaptics, clock: clock)
+        let selectedType = HapticType.weak
+
+        // ハプティクスタイプを選択するアクションを送信
+        await store.send(SettingsAction.selectHapticType(selectedType)) {
+            $0.selectedHapticType = selectedType // 即時の状態更新を期待
         }
 
-        // SettingsAction を直接送信
-        await store.send(SettingsAction.selectHapticType(.weak)) {
-            $0.selectedHapticType = .weak // 状態は即座に更新されるべき
-            // The save effect starts immediately but runs in background
-            // The preview effect also starts immediately
+        // 保存エフェクトアクションを期待
+        await store.receive(SettingsAction.internal(.saveSettingsEffect))
+        // 保存エフェクト（短時間で完了する可能性あり）の実行を許可
+        await Task.yield()
+        XCTAssertEqual(
+            mockUserDefaults.object(forKey: .hapticType) as? String,
+            selectedType.rawValue,
+            "UserDefaults が更新されていること"
+        )
+
+        // プレビューが開始されることを期待
+        await store.receive(SettingsAction.startHapticPreview(selectedType)) {
+            $0.isPreviewingHaptic = true // 状態変化を期待
         }
 
-        // エフェクトによってトリガーされるアクションを期待
-        // 1. Preview starts
-        await store.receive(SettingsAction.previewHapticFeedback(.weak))
-        // 2. Previewing state becomes true
-        await store.receive(SettingsAction.previewingHapticChanged(true)) { $0.isPreviewingHaptic = true }
+        // 即時のハプティクス再生をアサート
+        XCTAssertEqual(mockHaptics.playCallCount, 1, "開始時にハプティクスが1回再生されること")
+        XCTAssertEqual(mockHaptics.lastPlayedHapticType, selectedType.wkHapticType, "正しいハプティクスタイプが再生されること")
 
-        // Advance the clock to allow the preview effect to complete
+        // このテストはプレビューの *開始* に焦点を当てているため、実行中のタイマー/タイムアウトエフェクトはスキップする
+        await store.skipInFlightEffects()
+        await store.finish()
+    }
+
+    // テスト: ハプティクスプレビューのティックとタイムアウトのフロー
+    func testHapticPreview_FlowWithTicksAndTimeout() async {
+        let clock = TestClock()
+        let mockHaptics = MockHapticsService()
+        // 既知の間隔を持つタイプを使用
+        let hapticType = HapticType.standard // interval = 0.5s
+        let interval = hapticType.interval
+        let previewTimeout: Duration = .seconds(3) // タイムアウトはリデューサー内でハードコードされている
+
+        // 期待される再生回数を計算: 1回の初期再生 + 'interval'秒ごとのティック（'previewTimeout'まで）
+        // Duration から合計秒数を取得（除算）
+        let previewTimeoutSeconds = previewTimeout / .seconds(1)
+        // 正しい計算: ティック数はタイムアウト *前* に完了した完全な間隔の数
+        // 浮動小数点数と境界条件を処理するために小さなイプシロンを使用
+        let expectedTickCount =
+            Int(floor(
+                (previewTimeoutSeconds - 0.0001) /
+                    interval
+            )) // floor((3.0 - 0.0001) / 0.5) = floor(5.9998) = 5 ティック
+        let expectedTotalPlays = expectedTickCount + 1 // 1回の初期再生 + 5回のティック = 合計6回の再生
+
+        let (store, _, _, _) = makeTestStore(mockHaptics: mockHaptics, clock: clock)
+
+        // プレビューを開始
+        await store.send(SettingsAction.startHapticPreview(hapticType)) {
+            $0.isPreviewingHaptic = true
+        }
+        XCTAssertEqual(mockHaptics.playCallCount, 1, "初期ハプティクスが即時に再生されること")
+
+        // ティックをシミュレート（修正されたカウントを使用）
+        if expectedTickCount > 0 {
+            for i in 1 ... expectedTickCount {
+                await clock.advance(by: .seconds(interval))
+                await store.receive(.hapticPreviewTick)
+                XCTAssertEqual(mockHaptics.playCallCount, i + 1, "ティック \(i) でハプティクスが再生されること")
+                XCTAssertTrue(store.state.isPreviewingHaptic, "ティック \(i) 後もプレビュー中であること")
+            }
+        } // else: interval > timeout の場合、ティックは期待されない
+
+        // タイムアウトをトリガーするためにクロックを進める
+        // これまでの経過時間 = expectedTickCount * interval
+        let timeElapsed = Double(expectedTickCount) * interval
+        let remainingTime = previewTimeoutSeconds - timeElapsed
+        // remainingTime がゼロまたは負の場合（精度のため）に、少なくともわずかな量を進めることを保証
+        let advanceDuration = max(0.001, remainingTime)
+        await clock.advance(by: .seconds(advanceDuration))
+
+        // タイムアウトによる停止アクションを受信
+        await store.receive(SettingsAction.stopHapticPreview) {
+            $0.isPreviewingHaptic = false // プレビューが停止すること
+        }
+        XCTAssertEqual(mockHaptics.playCallCount, expectedTotalPlays, "タイムアウト後のハプティクス再生回数が合計再生回数と一致すること")
+
+        // さらに時間を進めて、これ以上ティックや再生が発生しないことを確認
+        await clock.advance(by: .seconds(interval * 2))
+        XCTAssertEqual(mockHaptics.playCallCount, expectedTotalPlays, "タイムアウト停止後にハプティクスが再生されないこと")
+
+        await store.finish() // 全てのエフェクト（タイマー、タイムアウト）が完了/キャンセルされたことを保証
+    }
+
+    // テスト: 新しいハプティクスタイプを選択すると、進行中のプレビューがキャンセルされ、新しいプレビューが開始される
+    func testSelectHapticType_CancelsOngoingPreviewAndStartsNew() async {
+        let clock = TestClock()
+        let mockHaptics = MockHapticsService()
+        let initialType = HapticType.standard // interval 0.5
+        let newType = HapticType.strong // interval 0.3
+        var initialState = SettingsState(selectedHapticType: initialType)
+        let (store, _, _, _) = makeTestStore(initialState: initialState, mockHaptics: mockHaptics, clock: clock)
+
+        // 最初のプレビューを開始
+        await store.send(SettingsAction.startHapticPreview(initialType)) { $0.isPreviewingHaptic = true }
+        XCTAssertEqual(mockHaptics.playCallCount, 1, "最初のプレビューが開始されたこと")
+        let countAfterInitialStart = mockHaptics.playCallCount
+
+        // 時間をわずかに進めるが、最初の間隔より短く、まだティックが発生しないようにする
+        await clock.advance(by: .milliseconds(100))
+
+        // 新しいハプティクスタイプを選択するアクションを送信
+        await store.send(SettingsAction.selectHapticType(newType)) {
+            $0.selectedHapticType = newType // 即時の状態更新を期待
+        }
+
+        // 古いプレビューが即座に停止されることを期待（キャンセルエフェクト）
+        await store.receive(SettingsAction.stopHapticPreview) {
+            $0.isPreviewingHaptic = false // 状態が非プレビューに更新されること
+        }
+
+        // 保存エフェクトアクションを期待
+        await store.receive(SettingsAction.internal(.saveSettingsEffect))
+        await Task.yield() // 保存エフェクトの実行を許可
+
+        // 新しいプレビューが開始されることを期待
+        await store.receive(SettingsAction.startHapticPreview(newType)) {
+            $0.isPreviewingHaptic = true // 状態がプレビュー中に戻ること
+        }
+        // 新しいプレビューが開始されるため、再生回数が増加することを期待
+        XCTAssertEqual(mockHaptics.playCallCount, countAfterInitialStart + 1, "新しいプレビュー開始時に再生回数が増加すること")
+        XCTAssertEqual(mockHaptics.lastPlayedHapticType, newType.wkHapticType, "正しい新しいハプティクスタイプが再生されること")
+
+        // 新しいプレビューエフェクトが実行中。キャンセル/再起動をテストしたので、これらはスキップする
+        await store.skipInFlightEffects()
+        await store.finish()
+    }
+
+    // テスト: 戻るボタンをタップすると進行中のプレビューがキャンセルされる
+    func testBackButtonTapped_CancelsOngoingPreview() async {
+        let clock = TestClock()
+        let mockHaptics = MockHapticsService()
+        let hapticType = HapticType.standard // interval 0.5
+        var initialState = SettingsState(selectedHapticType: hapticType)
+        let (store, _, _, _) = makeTestStore(initialState: initialState, mockHaptics: mockHaptics, clock: clock)
+
+        // プレビューを開始
+        await store.send(SettingsAction.startHapticPreview(hapticType)) { $0.isPreviewingHaptic = true }
+        XCTAssertEqual(mockHaptics.playCallCount, 1, "最初のプレビューが開始されたこと")
+        let countAfterStart = mockHaptics.playCallCount
+
+        // 時間をわずかに進める（間隔より短く）
+        await clock.advance(by: .milliseconds(100))
+
+        // 戻るボタンタップアクションを送信
+        await store.send(SettingsAction.backButtonTapped)
+
+        // プレビューが即座に停止されることを期待（キャンセルエフェクト）
+        await store.receive(SettingsAction.stopHapticPreview) { $0.isPreviewingHaptic = false }
+
+        // クロックを大幅に進めて、これ以上再生が発生しないことを確認
         await clock.advance(by: .seconds(3))
+        XCTAssertEqual(mockHaptics.playCallCount, countAfterStart, "戻るボタンによるキャンセル後にハプティクスが再生されないこと")
 
-        // 3. Preview completes
-        await store.receive(SettingsAction.previewHapticCompleted)
-        // 4. Previewing state becomes false
-        await store.receive(SettingsAction.previewingHapticChanged(false)) { $0.isPreviewingHaptic = false }
-
-        // エフェクト完了後に UserDefaults に値が保存されたことをアサート (selectHapticType の .run エフェクト)
-        // await clock.advance(by: .milliseconds(1)) // Or check directly if timing isn't critical
-        XCTAssertEqual(mockUserDefaults.object(forKey: .hapticType) as? String, HapticType.weak.rawValue)
-
+        // finish() はキャンセルされたタイマー/タイムアウトエフェクトが本当に消えたことを保証する
         await store.finish()
     }
 }

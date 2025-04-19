@@ -5,43 +5,27 @@ import XCTestDynamicOverlay
 
 /// バックグラウンド実行をサポートする拡張ランタイムセッション管理クラス (ライブ実装)
 final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelegate, ExtendedRuntimeServiceProtocol {
+    // MARK: - Completion Stream
+
+    private var completionContinuation: AsyncStream<Void>.Continuation?
+    private(set) lazy var completionEvents: AsyncStream<Void> = AsyncStream { continuation in
+        self.completionContinuation = continuation
+    }
+
     /// 現在のセッション
     private var session: WKExtendedRuntimeSession?
 
-    /// タイマー完了時のコールバック
-    private var timerCompletionHandler: (() -> Void)?
-
-    /// バックグラウンドでタイマーが完了したかのフラグ
-    private(set) var isTimerCompletedInBackground = false
-
-    /// 終了予定時間
-    private var targetEndTime: Date?
-
-    /// バックグラウンドチェックタイマー
-    private var backgroundTimer: Timer?
-
-    /// 拡張ランタイムセッションを開始する
-    func startSession(duration _: TimeInterval, targetEndTime: Date? = nil, completionHandler: (() -> Void)? = nil) {
-        // 既存のセッションを終了
-        stopSession()
-
-        // バックグラウンド完了フラグをリセット
-        isTimerCompletedInBackground = false
-
-        // コールバックと終了時間を保存
-        timerCompletionHandler = completionHandler
-        self.targetEndTime = targetEndTime
+    /// 拡張ランタイムセッションを開始する (シグネチャ変更)
+    func startSession(duration _: TimeInterval, targetEndTime _: Date? = nil) { // completionHandler 削除済
+        stopSession() // Ensures any previous session and continuation are cleaned up
 
         // 新しいセッションを開始
         let session = WKExtendedRuntimeSession()
         session.delegate = self
         session.start()
-        self.session = session
+        // self.session は extendedRuntimeSessionDidStart で設定される
 
-        // バックグラウンドでの定期チェックを開始
-        startBackgroundTimer()
-
-        print("拡張ランタイムセッションが開始されました")
+        print("拡張ランタイムセッションの開始を要求しました")
     }
 
     /// 拡張ランタイムセッションを停止する
@@ -49,57 +33,17 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
         session?.invalidate()
         session = nil
 
-        // バックグラウンドタイマーを停止
-        stopBackgroundTimer()
-
-        // フラグをリセット
-        isTimerCompletedInBackground = false
+        // Continuation を終了させる
+        completionContinuation?.finish()
+        completionContinuation = nil
 
         print("拡張ランタイムセッションが停止されました")
     }
 
-    /// バックグラウンドチェックタイマーを開始
-    private func startBackgroundTimer() {
-        // 既存のタイマーを停止
-        stopBackgroundTimer()
-
-        // 1秒ごとに終了時間をチェックするタイマーを設定
-        backgroundTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.checkTimerCompletion()
-        }
-    }
-
-    /// バックグラウンドチェックタイマーを停止
-    private func stopBackgroundTimer() {
-        backgroundTimer?.invalidate()
-        backgroundTimer = nil
-    }
-
-    /// タイマー完了をチェックする
-    private func checkTimerCompletion() {
-        guard let targetEndTime,
-              let completionHandler = timerCompletionHandler
-        else {
-            return
-        }
-
-        // 現在時刻が終了予定時刻を過ぎていたらコールバックを実行
-        if Date() >= targetEndTime {
-            print("タイマーがバックグラウンドで完了しました")
-            // バックグラウンド完了フラグを設定
-            isTimerCompletedInBackground = true
-            completionHandler()
-
-            // 一度だけ実行するように参照をクリア
-            timerCompletionHandler = nil
-        }
-    }
-
-    /// アプリがフォアグラウンドに戻ったときに呼び出して、バックグラウンドでタイマーが完了していたかを確認
+    /// アプリがフォアグラウンドに戻ったときに呼び出して、バックグラウンドでタイマーが完了していたかを確認 (削除検討)
     func checkAndClearBackgroundCompletionFlag() -> Bool {
-        let wasCompleted = isTimerCompletedInBackground
-        isTimerCompletedInBackground = false
-        return wasCompleted
+        print("⚠️ checkAndClearBackgroundCompletionFlag is likely obsolete with AsyncStream.")
+        return false // 削除までの暫定
     }
 
     // MARK: - WKExtendedRuntimeSessionDelegate
@@ -107,52 +51,71 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
     func extendedRuntimeSession(
         _: WKExtendedRuntimeSession,
         didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
-        error _: Error?
+        error: Error?
     ) {
-        print("拡張ランタイムセッションが無効化されました。理由: \(reason)")
+        print("拡張ランタイムセッションが無効化されました。理由: \(reason), エラー: \(String(describing: error))")
+        completionContinuation?.finish() // ストリーム終了
+        completionContinuation = nil
+        session = nil
     }
 
-    func extendedRuntimeSessionDidStart(_: WKExtendedRuntimeSession) {
+    func extendedRuntimeSessionDidStart(_ session: WKExtendedRuntimeSession) {
         print("拡張ランタイムセッションが開始されました (Delegate)")
+        self.session = session
     }
 
     func extendedRuntimeSessionWillExpire(_: WKExtendedRuntimeSession) {
-        print("拡張ランタイムセッションがまもなく期限切れになります")
+        print("拡張ランタイムセッションがまもなく期限切れになります -> 完了イベント発行")
+        completionContinuation?.yield(()) // 完了イベント発行
+        completionContinuation?.finish() // ストリーム終了
+        completionContinuation = nil
+        session = nil
     }
 }
 
 // MARK: - TCA Dependency
 
 extension DependencyValues {
-    var extendedRuntimeService: ExtendedRuntimeServiceProtocol { // プロパティ名を変更、型とキーを更新
+    var extendedRuntimeService: ExtendedRuntimeServiceProtocol {
         get { self[ExtendedRuntimeServiceKey.self] }
         set { self[ExtendedRuntimeServiceKey.self] = newValue }
     }
 }
 
-private enum ExtendedRuntimeServiceKey: DependencyKey { // キーenum名を変更
-    static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService() // 新しいクラスとプロトコルを使用
-
-    // プレビューには liveValue を使用 (モックはテストターゲット専用)
-    static let previewValue: ExtendedRuntimeServiceProtocol = Self.liveValue
+private enum ExtendedRuntimeServiceKey: DependencyKey {
+    static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
+    static let previewValue: ExtendedRuntimeServiceProtocol = PreviewExtendedRuntimeService()
 }
 
 // TestDependencyKey を使用して testValue を定義
-extension LiveExtendedRuntimeService: TestDependencyKey { // 拡張ターゲットを更新
-    static let testValue: ExtendedRuntimeServiceProtocol = { // プロトコル型を更新
+extension LiveExtendedRuntimeService: TestDependencyKey {
+    static let testValue: ExtendedRuntimeServiceProtocol = {
         struct UnimplementedExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
-            // 構造体名を変更、新しいプロトコルに準拠
-            func startSession(duration _: TimeInterval, targetEndTime _: Date?, completionHandler _: (() -> Void)?) {
-                XCTFail("\(Self.self).startSession は未実装です")
+            // unimplemented(_:placeholder:) 形式で修正
+            let completionEvents: AsyncStream<Void> = unimplemented(
+                "\(Self.self).completionEvents",
+                placeholder: .finished // AsyncStream<Void>.finished をプレースホルダーに
+            )
+
+            func startSession(duration _: TimeInterval, targetEndTime _: Date?) {
+                unimplemented(
+                    "\(Self.self).startSession",
+                    placeholder: () // Void のプレースホルダー
+                )
             }
 
             func stopSession() {
-                XCTFail("\(Self.self).stopSession は未実装です")
+                unimplemented(
+                    "\(Self.self).stopSession",
+                    placeholder: () // Void のプレースホルダー
+                )
             }
 
             func checkAndClearBackgroundCompletionFlag() -> Bool {
-                XCTFail("\(Self.self).checkAndClearBackgroundCompletionFlag は未実装です")
-                return false // プレースホルダーの戻り値
+                unimplemented(
+                    "\(Self.self).checkAndClearBackgroundCompletionFlag",
+                    placeholder: false // Bool のプレースホルダー
+                )
             }
         }
         return UnimplementedExtendedRuntimeService()

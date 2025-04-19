@@ -5,16 +5,13 @@ struct CancelButtonView: View {
 
     var body: some View {
         Button(action: action) {
-            Label("Cancel", systemImage: "xmark")
-                .labelStyle(.iconOnly)
-                .foregroundStyle(Color.red)
+            Text("キャンセル")
+                .foregroundStyle(.primary)
+                .font(.system(size: 16))
         }
-        .frame(width: 50, height: 50)
-        .clipShape(Circle())
+        .accessibilityLabel("CancelTimerButton")
+        .accessibilityIdentifier("CancelTimerButton")
         .buttonStyle(.plain)
-        .background(Color.gray.opacity(0.2))
-        .clipShape(Circle())
-        .accessibilityLabel("Cancel Timer")
-        .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.cancelTimerButton.rawValue)
+        .padding(.horizontal)
     }
 }

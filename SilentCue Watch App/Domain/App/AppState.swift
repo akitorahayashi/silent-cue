@@ -1,4 +1,5 @@
 import SwiftUI
+import ComposableArchitecture // Import TCA for @Dependency
 
 /// ナビゲーションの宛先を示す型
 enum NavigationDestination: Hashable {
@@ -11,12 +12,19 @@ enum NavigationDestination: Hashable {
 /// アプリ全体のルート状態
 struct AppState: Equatable {
     var path: [NavigationDestination]
-    var timer: TimerState = .init()
+    var timer: TimerState
     var settings: SettingsState = .init()
     var haptics: HapticsState = .init()
 
-    init() {
-        // 起動引数に基づいて path 配列を初期化
+    // Removed calculator dependency
+    // Uses default Date() and implicit Calendar.current for TimerState
+    init(
+        date: Date = Date() // Can still inject Date if needed
+    ) {
+        // Initialize TimerState - it no longer needs calendar or calculator
+        self.timer = TimerState(now: date)
+
+        // Initialize path based on launch arguments
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains(SCAppEnvironment.InitialViewOption.countdownView.rawValue) {
             path = [.countdown]
@@ -27,7 +35,7 @@ struct AppState: Equatable {
         } else if arguments.contains(SCAppEnvironment.InitialViewOption.setTimerView.rawValue) {
             path = []
         } else {
-            // 通常起動時
+            // Default launch path
             path = []
         }
     }

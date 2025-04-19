@@ -2,7 +2,7 @@
 import WatchKit
 import XCTest
 
-class HapticsServiceTests: XCTestCase {
+final class HapticsServiceTests: XCTestCase {
     var service: MockHapticsService!
 
     override func setUp() {

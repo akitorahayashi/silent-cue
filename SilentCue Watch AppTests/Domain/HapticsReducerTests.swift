@@ -1,5 +1,6 @@
-@testable import SilentCue_Watch_App
 import ComposableArchitecture
+@testable import SilentCue_Watch_App
+import WatchKit
 import XCTest
 
 @MainActor
@@ -24,7 +25,7 @@ final class HapticsReducerTests: XCTestCase {
 
         // No-Op Haptics Service for this test
         struct NoOpHapticsService: HapticsServiceProtocol {
-            func play(_ type: WKHapticType) async {}
+            func play(_: WKHapticType) async {}
         }
 
         let store = TestStore(

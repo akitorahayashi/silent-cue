@@ -82,17 +82,6 @@ struct AppReducer: Reducer {
                         type: state.settings.selectedHapticType
                     )))
 
-                case .timer(.timerFinished):
-                    // Haptics開始と同時に完了画面へ遷移
-                    return .merge(
-                        .send(.haptics(.startHaptic(state.settings.selectedHapticType))),
-                        .send(.pushScreen(.completion)) // pathにcompletionを追加
-                    )
-
-                case .timer(.backgroundTimerFinished):
-                    // バックグラウンドでタイマーが完了した場合は振動なしで完了画面へ遷移
-                    return .send(.pushScreen(.completion))
-
                 case .timer(.cancelTimer):
                     // Haptics停止と同時に前の画面へ
                     state.path.removeLast() // 先にパスを更新
@@ -103,9 +92,24 @@ struct AppReducer: Reducer {
                     state.path.removeAll()
                     return .send(.haptics(.stopHaptic))
 
+                // タイマーアクションを監視
+                case let .timer(timerAction):
+                    // 新しい finalizeTimerCompletion を監視して完了処理を実行
+                    if case .internal(.finalizeTimerCompletion) = timerAction {
+                        // Haptics開始と同時に完了画面へ遷移
+                        // (バックグラウンド完了かどうかの判定はTimerReducer内で行われ、
+                        //  ここでは共通の完了後処理として実行)
+                        return .merge(
+                            .send(.haptics(.startHaptic(state.settings.selectedHapticType))),
+                            .send(.pushScreen(.completion)) // pathにcompletionを追加
+                        )
+                    }
+                    // 他のタイマーアクションはここでは無視
+                    return .none
+
             // MARK: - ドメインアクション（ここでは何もしない）
 
-                case .timer, .settings, .haptics:
+                case .settings, .haptics:
                     return .none
             }
         }

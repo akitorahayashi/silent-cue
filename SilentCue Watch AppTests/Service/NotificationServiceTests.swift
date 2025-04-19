@@ -2,7 +2,7 @@
 import UserNotifications
 import XCTest
 
-class NotificationServiceTests: XCTestCase {
+final class NotificationServiceTests: XCTestCase {
     var service: MockNotificationService!
 
     override func setUp() {

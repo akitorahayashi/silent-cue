@@ -13,7 +13,8 @@ struct TimerCompletionView: View {
     @State private var isNotificationAuthorized: Bool?
     @State private var showingNotificationInstructionAlert = false
 
-    @Dependency(\.notificationService) var notificationService // Update Dependency
+    // ビューで使用される依存関係
+    @Dependency(\.notificationService) var notificationService
 
     var body: some View {
         WithViewStore(store, observe: { $0 }, content: { viewStore in
@@ -120,21 +121,20 @@ struct TimerCompletionView: View {
 #Preview {
     TimerCompletionView(
         store: Store(
-            initialState: {
-                var state = AppState() // Initialize AppState with defaults
-                var timerState = TimerState() // Initialize TimerState with defaults
-                // Set properties on the timerState instance
-                timerState.timerDurationMinutes = 15
-                timerState.startDate = Date().addingTimeInterval(-15 * 60)
-                timerState.completionDate = Date()
-                // Assign the configured timerState to the app state
-                state.timer = timerState
-                return state
-            }()
+            // TimerStateを直接初期化 (ビューに必要な最小限の状態を設定)
+            initialState: TimerReducer.State(
+                now: Date(), // TimerStateのinitに必要
+                isRunning: false,
+                // TimerCompletionView が表示に使う completionDate を設定
+                completionDate: Date()
+                // 他のプロパティ(selectedMinutesなど)はTimerStateのデフォルトを使用
+            )
         ) {
-            AppReducer()
-                ._printChanges()
+            // TimerReducerを直接使用
+            TimerReducer()
+                // 依存関係を直接Reducerに注入
+                .dependency(\.notificationService, PreviewNotificationService())
+            // ★ AppStateやスコープは使用しない
         }
-        .scope(state: \AppState.timer, action: AppAction.timer)
     )
 }

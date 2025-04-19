@@ -1,7 +1,7 @@
 @testable import SilentCue_Watch_App
 import XCTest
 
-class UserDefaultsServiceTests: XCTestCase {
+final class UserDefaultsServiceTests: XCTestCase {
     var userDefaultsService: MockUserDefaultsManager!
 
     override func setUp() {

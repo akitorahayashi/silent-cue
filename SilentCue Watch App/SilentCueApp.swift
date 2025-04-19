@@ -216,12 +216,15 @@ class NotificationDelegate: NSObject, ObservableObject, UNUserNotificationCenter
     private func handleTimerCompletionNotification() {
         guard let store else { return }
 
-        // タイマー完了アクションを送信
-        store.send(.timer(.backgroundTimerFinished))
+        // タイマー完了アクションは不要 (Reducer内で処理される)
+        // store.send(.timer(.backgroundTimerFinished))
 
-        // タイマー完了画面へ遷移
-        store.send(.pushScreen(.completion))
+        // 画面遷移も AppReducer が担当
+        // store.send(.pushScreen(.completion))
 
-        // 通知から起動した場合は振動を開始しない
+        // 通知から起動した場合の特定の処理があればここに記述
+        print("Timer completion notification received.")
+        // 必要であれば、完了状態を再確認するアクションなどを送ることも検討
+        // store.send(.timer(.updateTimerDisplay)) // 例: 状態を最新にする
     }
 }
