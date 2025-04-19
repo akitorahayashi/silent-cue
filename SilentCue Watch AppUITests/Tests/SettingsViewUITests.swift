@@ -2,25 +2,42 @@
 import XCTest
 
 final class SettingsViewUITests: XCTestCase {
-    let app = XCUIApplication()
+    // app プロパティをオプショナルに変更
+    var app: XCUIApplication?
 
     override func setUp() {
         continueAfterFailure = false
 
+        // ローカルでインスタンスを作成
+        let application = XCUIApplication()
         // 環境設定を行い、アプリを起動する (設定画面から開始)
-        // setupUITestEnv内で "uiTesting" が渡され、アプリ側で依存性がTestValueに設定される
-        SCAppEnvironment.setupUITestEnv(for: app, initialView: .settingsView)
-        app.launch()
+        SCAppEnvironment.setupUITestEnv(for: application, initialView: .settingsView)
+        application.launch()
+        // プロパティに代入
+        app = application
 
-        // 設定タイトルが表示されていることを確認して起動を検証
+        // app が nil でないことを確認
+        XCTAssertNotNil(app, "XCUIApplication が初期化されている")
+
+        // 設定タイトルが表示されていることを確認して起動を検証 (app?. を使用)
         XCTAssertTrue(
-            app.navigationBars[SCAccessibilityIdentifiers.SettingsView.navigationBarTitle.rawValue]
-                .waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app?.navigationBars[SCAccessibilityIdentifiers.SettingsView.navigationBarTitle.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard) ?? false,
             "設定画面のナビゲーションバーが表示されている"
         )
 
-        // 初回起動時に対して通知を許可
-        NotificationPermissionHelper.ensureNotificationPermission(for: app)
+        // 初回起動時に対して通知を許可 (安全なアンラップを使用)
+        if let currentApp = app {
+            NotificationPermissionHelper.ensureNotificationPermission(for: currentApp)
+        } else {
+             XCTFail("app インスタンスが nil です")
+        }
+    }
+
+    // tearDown を追加
+    override func tearDown() {
+        app = nil
+        super.tearDown()
     }
 
     // MARK: - Helper Functions
@@ -36,6 +53,7 @@ final class SettingsViewUITests: XCTestCase {
         let startTime = Date()
         var scrollAttempts = 0
 
+        // element の存在チェックはそのまま
         while !element.exists, Date().timeIntervalSince(startTime) < timeout, scrollAttempts < maxScrollAttempts {
             XCUIDevice.shared.rotateDigitalCrown(delta: scrollDelta)
             scrollAttempts += 1
@@ -51,68 +69,75 @@ final class SettingsViewUITests: XCTestCase {
     // MARK: - Tests
 
     func testInitialUIElementsExist() {
-        // 設定画面のナビゲーションバーが表示されていることを確認
+        // 設定画面のナビゲーションバーが表示されていることを確認 (app?. を使用)
         XCTAssertTrue(
-            app.navigationBars[SCAccessibilityIdentifiers.SettingsView.navigationBarTitle.rawValue].exists,
+            app?.navigationBars[SCAccessibilityIdentifiers.SettingsView.navigationBarTitle.rawValue].exists ?? false,
             "設定画面のナビゲーションバーが表示されている"
         )
 
-        app.swipeUp(velocity: UITestConstants.scrollVelocity)
+        // swipeUp はオプショナルチェイニングで呼び出す
+        app?.swipeUp(velocity: UITestConstants.scrollVelocity)
 
-        // 振動タイプのヘッダーが表示されていることを確認
-        let vibrationTypeHeader = app.staticTexts[SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue]
-        XCTAssertTrue(vibrationTypeHeader.exists, "振動タイプを選ぶセクションのヘッダーが表示されている")
+        // 振動タイプのヘッダーが表示されていることを確認 (app?. を使用)
+        let vibrationTypeHeader = app?.staticTexts[SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue]
+        XCTAssertTrue(vibrationTypeHeader?.exists ?? false, "振動タイプを選ぶセクションのヘッダーが表示されている")
 
-        app.swipeUp(velocity: UITestConstants.scrollVelocity)
+        app?.swipeUp(velocity: UITestConstants.scrollVelocity)
 
-        // デフォルトでStandardが表示されていることを確認
-        let standardOption = app.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue]
-        XCTAssertTrue(standardOption.exists, "Standard オプションが表示されている")
+        // デフォルトでStandardが表示されていることを確認 (app?. を使用)
+        let standardOption = app?.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue]
+        XCTAssertTrue(standardOption?.exists ?? false, "Standard オプションが表示されている")
     }
 
     func testSelectVibrationType() {
-        let standardOption = app.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue]
-        let strongOption = app.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStrong.rawValue]
-        let weakOption = app.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionWeak.rawValue]
+        // 各要素の取得に app?. を使用
+        let standardOption = app?.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue]
+        let strongOption = app?.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStrong.rawValue]
+        let weakOption = app?.buttons[SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionWeak.rawValue]
+
+        // 各要素が存在することを確認してからテストを進める (nil チェック兼ねる)
+        guard let standard = standardOption, let strong = strongOption, let weak = weakOption else {
+            XCTFail("必要なオプションボタンが見つかりません")
+            return
+        }
 
         // 初期状態を確認 (Standard がデフォルトと仮定)
-        // Standardは最初から表示されているはずなので、スクロールなしで確認
-        XCTAssertTrue(standardOption.waitForExistence(timeout: UITestConstants.Timeout.short), "Standard オプションが表示されている")
-        XCTAssertTrue(standardOption.isSelected, "Standard が初期選択されている")
-        XCTAssertFalse(strongOption.isSelected, "Strong が初期選択されていない")
-        XCTAssertFalse(weakOption.isSelected, "Weak が初期選択されていない")
+        XCTAssertTrue(standard.waitForExistence(timeout: UITestConstants.Timeout.short), "Standard オプションが表示されている")
+        XCTAssertTrue(standard.isSelected, "Standard が初期選択されている")
+        // isSelected は Bool を返すので ?? false 不要
+        XCTAssertFalse(strong.isSelected, "Strong が初期選択されていない")
+        XCTAssertFalse(weak.isSelected, "Weak が初期選択されていない")
 
         // Strong を選択
-        rotateDigitalCrownToFindElement(strongOption) // Strongが見えるまでスクロール
-        strongOption.tap()
+        rotateDigitalCrownToFindElement(strong) // Strongが見えるまでスクロール
+        strong.tap()
 
         // Assert: Strong が選択され、他が非選択になったことを確認
-        XCTAssertTrue(strongOption.isSelected, "Strong が選択されている")
-        XCTAssertFalse(standardOption.isSelected, "Standard が選択解除されている")
-        // weakOptionが表示されているとは限らないため、状態のみ確認
-        XCTAssertFalse(weakOption.isSelected, "Weak が選択解除されている")
+        XCTAssertTrue(strong.isSelected, "Strong が選択されている")
+        XCTAssertFalse(standard.isSelected, "Standard が選択解除されている")
+        XCTAssertFalse(weak.isSelected, "Weak が選択解除されている")
 
         // Weak を選択
-        rotateDigitalCrownToFindElement(weakOption) // Weakが見えるまでスクロール
-        weakOption.tap()
+        rotateDigitalCrownToFindElement(weak) // Weakが見えるまでスクロール
+        weak.tap()
 
         // Assert: Weak が選択され、他が非選択になったことを確認
-        XCTAssertTrue(weakOption.isSelected, "Weak が選択されている")
-        XCTAssertFalse(standardOption.isSelected, "Standard が選択解除されている")
-        XCTAssertFalse(strongOption.isSelected, "Strong が選択解除されている")
+        XCTAssertTrue(weak.isSelected, "Weak が選択されている")
+        XCTAssertFalse(standard.isSelected, "Standard が選択解除されている")
+        XCTAssertFalse(strong.isSelected, "Strong が選択解除されている")
     }
 
     func testBackButtonNavigatesToSetTimerView() {
-        // 通常、最初のボタンが戻るボタン
-        let backButton = app.navigationBars.buttons.element(boundBy: 0)
-        XCTAssertTrue(backButton.waitForExistence(timeout: UITestConstants.Timeout.short), "戻るボタンが表示されている")
-        backButton.tap()
+        // 通常、最初のボタンが戻るボタン (app?. を使用)
+        let backButton = app?.navigationBars.buttons.element(boundBy: 0)
+        XCTAssertTrue(backButton?.waitForExistence(timeout: UITestConstants.Timeout.short) ?? false, "戻るボタンが表示されている")
+        backButton?.tap()
 
         // Assert
-        // SetTimerViewに戻ったことを確認（アプリタイトルが表示されるはず）
+        // SetTimerViewに戻ったことを確認（アプリタイトルが表示されるはず）(app?. を使用)
         XCTAssertTrue(
-            app.staticTexts[SCAccessibilityIdentifiers.SetTimerView.navigationBarTitle.rawValue]
-                .waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app?.staticTexts[SCAccessibilityIdentifiers.SetTimerView.navigationBarTitle.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard) ?? false,
             "SetTimerView に戻り、アプリタイトルが表示されている"
         )
     }
