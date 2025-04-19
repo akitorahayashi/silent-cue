@@ -2,8 +2,8 @@ import Foundation
 
 /// タイマーのモード（分後か時刻指定か）
 enum TimerMode: String, Equatable, CaseIterable, Identifiable {
-    case afterMinutes = "分数" // 何分後に鳴らすか
-    case atTime = "時刻" // 何時に鳴らすか
+    case minutes = "分数"
+    case time = "時刻"
 
     var id: String { rawValue }
 }
@@ -35,7 +35,7 @@ struct TimerState: Equatable {
     // Reverted initializer: Removed calendar and timerCalculator parameters
     // Uses Date() and Calendar.current implicitly for defaults
     init(
-        timerMode: TimerMode = .afterMinutes,
+        timerMode: TimerMode = .minutes,
         selectedMinutes: Int = 1,
         now: Date = Date(), // Keep explicit now for testability
         isRunning: Bool = false,

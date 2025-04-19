@@ -4,6 +4,9 @@ import XCTest
 
 @MainActor
 final class TimerReducerTests: XCTestCase {
+    // 固定された日付を提供する DateGenerator を定義
+    let dateDependency = DateGenerator { Date(timeIntervalSince1970: 0) } // 例: 1970-01-01 00:00:00 UTC
+
     // Helper function to calculate expected target end date for .atTime mode
     private func calculateExpectedTargetEndDateAtTime(
         selectedHour: Int,
@@ -39,7 +42,7 @@ final class TimerReducerTests: XCTestCase {
     private func createInitialState(
         now: Date,
         selectedMinutes: Int = 1,
-        timerMode: TimerMode = .afterMinutes,
+        timerMode: TimerMode = TimerMode.time,
         selectedHour: Int? = nil,
         selectedMinute: Int? = nil,
         isRunning: Bool = false,
@@ -73,7 +76,7 @@ final class TimerReducerTests: XCTestCase {
         // Recalculate seconds ONLY if hour/minute were overridden or timerMode is .atTime
         // Or if timerMode is .afterMinutes and selectedMinutes is not the default (though initializer handles this)
         // It's safer to recalculate if hour/minute are provided explicitly for the test.
-        if needsRecalculation || timerMode == .atTime {
+        if needsRecalculation || timerMode == .time {
              let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
                  mode: state.timerMode,
                  selectedMinutes: state.selectedMinutes,
@@ -131,7 +134,7 @@ final class TimerReducerTests: XCTestCase {
         let expectedMinute = calendar.component(.minute, from: actionDate)
         // 期待される合計秒数をユーティリティ関数で計算
         let expectedAtTimeSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes, // この値は .atTime では影響しない
             selectedHour: expectedHour,
             selectedMinute: expectedMinute,
@@ -139,8 +142,8 @@ final class TimerReducerTests: XCTestCase {
             calendar: calendar
         )
 
-        await store.send(TimerReducer.Action.timerModeSelected(.atTime)) { /* 状態変更 */
-            $0.timerMode = .atTime
+        await store.send(TimerReducer.Action.timerModeSelected(.time)) { /* 状態変更 */
+            $0.timerMode = .time
             $0.selectedHour = expectedHour
             $0.selectedMinute = expectedMinute
             // totalSeconds/currentRemainingSeconds/duration は Reducer が TimeCalculation を呼び出して計算
@@ -153,7 +156,7 @@ final class TimerReducerTests: XCTestCase {
         // ユーティリティ関数で期待される秒数を計算
         let currentState = store.state // .atTime に切り替えた後の状態を取得
         let expectedAfterMinutesSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .afterMinutes,
+            mode: .minutes,
             selectedMinutes: currentState.selectedMinutes, // 1 であるはず
             selectedHour: currentState.selectedHour,
             selectedMinute: currentState.selectedMinute,
@@ -161,8 +164,8 @@ final class TimerReducerTests: XCTestCase {
             calendar: calendar
         )
 
-        await store.send(TimerReducer.Action.timerModeSelected(.afterMinutes)) { /* 状態変更 */
-            $0.timerMode = .afterMinutes
+        await store.send(TimerReducer.Action.timerModeSelected(.minutes)) { /* 状態変更 */
+            $0.timerMode = .minutes
             $0.totalSeconds = expectedAfterMinutesSeconds
             $0.currentRemainingSeconds = expectedAfterMinutesSeconds
             $0.timerDurationMinutes = expectedAfterMinutesSeconds / 60
@@ -181,10 +184,10 @@ final class TimerReducerTests: XCTestCase {
         let calendar = Calendar.current // Add calendar instance
 
         // 初期状態を作成 (.afterMinutes)
-        let initialState = createInitialState(now: initialDate, selectedMinutes: initialMinutes, timerMode: .afterMinutes)
+        let initialState = createInitialState(now: initialDate, selectedMinutes: initialMinutes, timerMode: .minutes)
         // Pass all required args
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .afterMinutes,
+            mode: .minutes,
             selectedMinutes: initialMinutes,
             selectedHour: initialState.selectedHour, // Pass required arg
             selectedMinute: initialState.selectedMinute, // Pass required arg
@@ -209,7 +212,7 @@ final class TimerReducerTests: XCTestCase {
         // 新しい分数を選択
         // Pass all required args
         let expectedNewSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .afterMinutes,
+            mode: .minutes,
             selectedMinutes: newMinutes,
             selectedHour: initialState.selectedHour, // Pass required arg
             selectedMinute: initialState.selectedMinute, // Pass required arg
@@ -222,7 +225,7 @@ final class TimerReducerTests: XCTestCase {
             state.selectedMinutes = newMinutes
             // Pass all required args for recalculation check
             let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
-                 mode: .afterMinutes,
+                 mode: .minutes,
                  selectedMinutes: newMinutes,
                  selectedHour: state.selectedHour,
                  selectedMinute: state.selectedMinute,
@@ -253,10 +256,10 @@ final class TimerReducerTests: XCTestCase {
         let newMinute = 30
 
         // 初期状態を作成 (.atTime)
-        let initialState = createInitialState(now: initialTime, timerMode: .atTime, selectedHour: initialHour, selectedMinute: initialMinute)
+        let initialState = createInitialState(now: initialTime, timerMode: .time, selectedHour: initialHour, selectedMinute: initialMinute)
         // Pass all required args
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes, // Pass required arg
             selectedHour: initialHour,
             selectedMinute: initialMinute,
@@ -274,7 +277,7 @@ final class TimerReducerTests: XCTestCase {
         }
 
         // 初期状態確認
-        XCTAssertEqual(store.state.timerMode, .atTime)
+        XCTAssertEqual(store.state.timerMode, .time)
         XCTAssertEqual(store.state.selectedHour, initialHour)
         XCTAssertEqual(store.state.selectedMinute, initialMinute)
         XCTAssertEqual(store.state.totalSeconds, expectedInitialSeconds)
@@ -282,7 +285,7 @@ final class TimerReducerTests: XCTestCase {
         // 新しい時を選択
         // Pass all required args
         let expectedSecondsAfterHour = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes, // Pass required arg
             selectedHour: newHour,
             selectedMinute: initialMinute,
@@ -293,7 +296,7 @@ final class TimerReducerTests: XCTestCase {
             state.selectedHour = newHour
             // Pass all required args for recalculation check
             let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
-                 mode: .atTime,
+                 mode: .time,
                  selectedMinutes: state.selectedMinutes, // Pass required arg
                  selectedHour: newHour,
                  selectedMinute: initialMinute,
@@ -309,7 +312,7 @@ final class TimerReducerTests: XCTestCase {
         // 新しい分を選択
         // Pass all required args
         let expectedSecondsAfterMinute = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes, // Pass required arg
             selectedHour: newHour,
             selectedMinute: newMinute,
@@ -320,7 +323,7 @@ final class TimerReducerTests: XCTestCase {
             state.selectedMinute = newMinute
             // Pass all required args for recalculation check
             let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
-                 mode: .atTime,
+                 mode: .time,
                  selectedMinutes: state.selectedMinutes, // Pass required arg
                  selectedHour: newHour,
                  selectedMinute: newMinute,
@@ -690,14 +693,14 @@ final class TimerReducerTests: XCTestCase {
         // 初期状態を作成 (.atTime)
         let initialState = createInitialState(
             now: startDate,
-            timerMode: .atTime,
+            timerMode: .time,
             selectedHour: initialHour,
             selectedMinute: initialMinute
         )
         // ユーティリティで初期秒数を計算 (startDate 時点での 10:01:00 までの秒数)
         // Pass all required args
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes, // Pass required arg
             selectedHour: initialHour,
             selectedMinute: initialMinute,
@@ -743,7 +746,7 @@ final class TimerReducerTests: XCTestCase {
             // 開始時に totalSeconds/currentRemainingSeconds が再計算される
             // Pass all required args
             let secondsOnStart = TimeCalculation.calculateTotalSeconds(
-                mode: .atTime,
+                mode: .time,
                 selectedMinutes: initialState.selectedMinutes, // Pass required arg
                 selectedHour: initialHour,
                 selectedMinute: initialMinute,
@@ -806,14 +809,14 @@ final class TimerReducerTests: XCTestCase {
         // 初期状態を作成 (.atTime)
         let initialState = createInitialState(
             now: startDate,
-            timerMode: .atTime,
+            timerMode: .time,
             selectedHour: targetHour, // ターゲットの時
             selectedMinute: targetMinute // ターゲットの分
         )
         // ユーティリティで初期秒数を計算 (23:59:30 -> 翌 00:01:00)
         // Pass all required args
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes, // Pass required arg
             selectedHour: targetHour,
             selectedMinute: targetMinute,
@@ -844,7 +847,7 @@ final class TimerReducerTests: XCTestCase {
 
             // Pass all required args
             let secondsOnStart = TimeCalculation.calculateTotalSeconds(
-                mode: .atTime,
+                mode: .time,
                 selectedMinutes: initialState.selectedMinutes, // Pass required arg
                 selectedHour: targetHour,
                 selectedMinute: targetMinute,
@@ -889,14 +892,14 @@ final class TimerReducerTests: XCTestCase {
         // 初期状態を作成 (.atTime)
         let initialState = createInitialState(
             now: startDate,
-            timerMode: .atTime,
+            timerMode: .time,
             selectedHour: targetHour,
             selectedMinute: targetMinute
         )
 
         // 期待される初期秒数を計算
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes,
             selectedHour: targetHour,
             selectedMinute: targetMinute,
@@ -946,7 +949,7 @@ final class TimerReducerTests: XCTestCase {
 
             // 秒数も再計算される
              let secondsOnStart = TimeCalculation.calculateTotalSeconds(
-                 mode: .atTime,
+                 mode: .time,
                  selectedMinutes: $0.selectedMinutes,
                  selectedHour: targetHour,
                  selectedMinute: targetMinute,
@@ -972,7 +975,7 @@ final class TimerReducerTests: XCTestCase {
 
         // キャンセル時に再計算される期待秒数 (キャンセル時刻時点でのターゲット時刻までの秒数)
         let expectedSecondsOnCancel = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: store.state.selectedMinutes, // Store の現在の値を使用
             selectedHour: targetHour,
             selectedMinute: targetMinute,
@@ -991,7 +994,7 @@ final class TimerReducerTests: XCTestCase {
 
             // totalSeconds/currentRemainingSeconds は cancelDate 時点での秒数にリセットされる
              let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
-                 mode: .atTime,
+                 mode: .time,
                  selectedMinutes: $0.selectedMinutes,
                  selectedHour: $0.selectedHour, // 維持されているはず
                  selectedMinute: $0.selectedMinute, // 維持されているはず
@@ -1021,14 +1024,14 @@ final class TimerReducerTests: XCTestCase {
         // 初期状態を作成 (.atTime)
         let initialState = createInitialState(
             now: startDate,
-            timerMode: .atTime,
+            timerMode: .time,
             selectedHour: targetHour,
             selectedMinute: targetMinute
         )
 
         // 期待される初期秒数を計算
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
-            mode: .atTime,
+            mode: .time,
             selectedMinutes: initialState.selectedMinutes,
             selectedHour: targetHour,
             selectedMinute: targetMinute,
@@ -1077,7 +1080,7 @@ final class TimerReducerTests: XCTestCase {
             $0.targetEndDate = calculatedTargetEndDate
 
             let secondsOnStart = TimeCalculation.calculateTotalSeconds(
-                mode: .atTime,
+                mode: .time,
                 selectedMinutes: $0.selectedMinutes,
                 selectedHour: targetHour,
                 selectedMinute: targetMinute,
@@ -1105,6 +1108,355 @@ final class TimerReducerTests: XCTestCase {
 
         // エフェクトが終了/キャンセルされたことを確認
         await store.finish()
+    }
+
+    func testTimerModeSelection_ChangesModeAndTime() {
+        let store = TestStore(
+            initialState: TimerReducer.State(timerMode: .minutes),
+            reducer: { TimerReducer() },
+            withDependencies: {
+                $0.date = dateDependency
+            }
+        )
+
+        store.send(.timerModeSelected(.time)) {
+            $0.timerMode = .time
+            let calendar = Calendar.current
+            let now = Date(timeIntervalSince1970: 0)
+            $0.selectedHour = calendar.component(.hour, from: now)
+            $0.selectedMinute = calendar.component(.minute, from: now)
+            // Recalculate totalSeconds and currentRemainingSeconds based on the new time mode and default time
+            $0.totalSeconds = TimeCalculation.calculateTotalSeconds(
+                mode: .time,
+                selectedMinutes: $0.selectedMinutes, // keep previous value
+                selectedHour: $0.selectedHour,
+                selectedMinute: $0.selectedMinute,
+                now: now,
+                calendar: calendar
+            )
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+
+        // 逆方向のテストも追加 (time -> minutes)
+        store.send(.timerModeSelected(.minutes)) {
+            $0.timerMode = .minutes
+            // 時間/分は前の値が保持されることを想定 ( minutes モードでは使われない)
+            // totalSeconds/currentRemainingSeconds を再計算
+            let calendar = Calendar.current
+            let now = Date(timeIntervalSince1970: 0)
+            $0.totalSeconds = TimeCalculation.calculateTotalSeconds(
+                mode: .minutes,
+                selectedMinutes: $0.selectedMinutes,
+                selectedHour: $0.selectedHour, // Not used but keep state consistent
+                selectedMinute: $0.selectedMinute, // Not used but keep state consistent
+                now: now,
+                calendar: calendar
+            )
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+    }
+
+    // MARK: - Timer Configuration Tests
+
+    func testMinutesSelected_UpdatesState() {
+        let store = TestStore(
+            initialState: TimerReducer.State(timerMode: .minutes, selectedMinutes: 1),
+            reducer: { TimerReducer() },
+            withDependencies: {
+                $0.date = dateDependency
+            }
+        )
+        let newMinutes = 15
+
+        store.send(.minutesSelected(newMinutes)) {
+            $0.selectedMinutes = newMinutes
+            $0.totalSeconds = newMinutes * 60
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+    }
+
+    func testMinutesSelected_OnlyEffectiveInMinutesMode() {
+        let store = TestStore(
+            initialState: TimerReducer.State(timerMode: .time, selectedMinutes: 5), // Start in time mode
+            reducer: { TimerReducer() },
+            withDependencies: {
+                $0.date = dateDependency // Use fixed date
+            }
+        )
+        let initialTotalSeconds = store.state.totalSeconds // Capture initial calculation
+
+        store.send(.minutesSelected(30)) {
+            // selectedMinutes updates, but totalSeconds should NOT change in time mode
+            $0.selectedMinutes = 30
+            $0.totalSeconds = initialTotalSeconds // Should remain unchanged
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+    }
+
+    func testHourSelected_UpdatesStateInTimeMode() {
+        let calendar = Calendar.current
+        let now = Date(timeIntervalSince1970: 0)
+        let initialHour = calendar.component(.hour, from: now)
+        let initialMinute = calendar.component(.minute, from: now)
+
+        let store = TestStore(
+            initialState: TimerReducer.State(
+                timerMode: .time, // Ensure time mode
+                selectedMinutes: 5, // This shouldn't matter in time mode for calculation
+                now: now
+            ),
+            reducer: { TimerReducer() },
+            withDependencies: {
+                $0.date = dateDependency
+            }
+        )
+
+        // Assume initial hour is not 15 for the test to be meaningful
+        XCTAssertNotEqual(initialHour, 15)
+
+        let newHour = 15
+        store.send(.hourSelected(newHour)) {
+            $0.selectedHour = newHour
+            // Recalculate totalSeconds based on the new hour
+            $0.totalSeconds = TimeCalculation.calculateTotalSeconds(
+                mode: .time,
+                selectedMinutes: $0.selectedMinutes, // Not used directly
+                selectedHour: newHour,
+                selectedMinute: initialMinute,
+                now: now,
+                calendar: calendar
+            )
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+    }
+
+
+    func testHourSelected_OnlyEffectiveInTimeMode() {
+        let store = TestStore(
+            initialState: TimerReducer.State(
+                timerMode: .minutes, // Start in minutes mode
+                selectedMinutes: 10,
+                now: Date(timeIntervalSince1970: 0)
+            ),
+            reducer: { TimerReducer() },
+            withDependencies: { $0.date = dateDependency }
+        )
+        let initialTotalSeconds = store.state.totalSeconds // Should be 10 * 60 = 600
+
+        store.send(.hourSelected(14)) {
+            // selectedHour updates, but totalSeconds should NOT change in minutes mode
+            $0.selectedHour = 14
+            $0.totalSeconds = initialTotalSeconds // Should remain 600
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+    }
+
+
+    func testMinuteSelected_UpdatesStateInTimeMode() {
+        let calendar = Calendar.current
+        let now = Date(timeIntervalSince1970: 0)
+        let initialHour = calendar.component(.hour, from: now)
+        let initialMinute = calendar.component(.minute, from: now)
+
+        let store = TestStore(
+            initialState: TimerReducer.State(
+                timerMode: .time, // Ensure time mode
+                selectedMinutes: 5, // This shouldn't matter in time mode for calculation
+                now: now
+            ),
+            reducer: { TimerReducer() },
+            withDependencies: {
+                $0.date = dateDependency
+            }
+        )
+
+        // Assume initial minute is not 45 for the test to be meaningful
+        XCTAssertNotEqual(initialMinute, 45)
+
+        let newMinute = 45
+        store.send(.minuteSelected(newMinute)) {
+            $0.selectedMinute = newMinute
+            // Recalculate totalSeconds based on the new minute
+            $0.totalSeconds = TimeCalculation.calculateTotalSeconds(
+                mode: .time,
+                selectedMinutes: $0.selectedMinutes, // Not used directly
+                selectedHour: initialHour,
+                selectedMinute: newMinute,
+                now: now,
+                calendar: calendar
+            )
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+    }
+
+    func testMinuteSelected_OnlyEffectiveInTimeMode() {
+        let store = TestStore(
+            initialState: TimerReducer.State(
+                timerMode: .minutes, // Start in minutes mode
+                selectedMinutes: 10,
+                now: Date(timeIntervalSince1970: 0)
+            ),
+            reducer: { TimerReducer() },
+            withDependencies: { $0.date = dateDependency }
+        )
+        let initialTotalSeconds = store.state.totalSeconds // Should be 10 * 60 = 600
+
+        store.send(.minuteSelected(30)) {
+            // selectedMinute updates, but totalSeconds should NOT change in minutes mode
+            $0.selectedMinute = 30
+            $0.totalSeconds = initialTotalSeconds // Should remain 600
+            $0.currentRemainingSeconds = $0.totalSeconds
+            $0.timerDurationMinutes = $0.totalSeconds / 60
+        }
+    }
+
+    // MARK: - Timer Lifecycle Tests
+
+    func testStartTimer_MinutesMode_StartsTimerAndEffects() async {
+        let testClock = TestClock()
+        let extendedRuntimeService = MockExtendedRuntimeService()
+        let notificationService = MockNotificationService()
+        let minutesToSet = 5
+        let expectedTotalSeconds = minutesToSet * 60
+        let expectedEndDate = Date(timeIntervalSince1970: TimeInterval(expectedTotalSeconds))
+
+        let store = TestStore(
+            initialState: TimerReducer.State(
+                timerMode: .minutes,
+                selectedMinutes: minutesToSet,
+                now: Date(timeIntervalSince1970: 0)
+            ),
+            reducer: { TimerReducer() },
+            withDependencies: {
+                $0.continuousClock = testClock
+                $0.date = dateDependency // Fixed date for start
+                $0.extendedRuntimeService = extendedRuntimeService
+                $0.notificationService = notificationService
+            }
+        )
+
+        // --- Action ---
+        let task = await store.send(.startTimer) {
+            $0.isRunning = true
+            $0.startDate = Date(timeIntervalSince1970: 0)
+            $0.targetEndDate = expectedEndDate
+            $0.totalSeconds = expectedTotalSeconds
+            $0.currentRemainingSeconds = expectedTotalSeconds
+            $0.timerDurationMinutes = minutesToSet
+        }
+
+        // --- Assert Effects ---
+        // 1. Extended Runtime Session Started
+        XCTAssertTrue(extendedRuntimeService.isSessionActive)
+        XCTAssertEqual(extendedRuntimeService.lastTargetEndTime, expectedEndDate)
+
+        // 2. Notification Scheduled
+        XCTAssertTrue(notificationService.isNotificationScheduled)
+        XCTAssertEqual(notificationService.lastScheduledDate, expectedEndDate)
+        XCTAssertEqual(notificationService.lastScheduledMinutes, minutesToSet)
+
+        // 3. Ticker starts
+        await testClock.advance(by: .seconds(1))
+        await store.receive(.tick) {
+            $0.currentRemainingSeconds = expectedTotalSeconds - 1
+        }
+        await testClock.advance(by: .seconds(1))
+        await store.receive(.tick) {
+            $0.currentRemainingSeconds = expectedTotalSeconds - 2
+        }
+
+        // --- Cleanup ---
+        await task.cancel() // Cancel the long-running effects
+        // Simulate cleanup on cancel
+        await store.send(.cancelTimer) {
+             $0.isRunning = false
+             $0.startDate = nil
+             $0.targetEndDate = nil
+             $0.totalSeconds = expectedTotalSeconds // This recalculates based on mode/selection
+             $0.currentRemainingSeconds = $0.totalSeconds
+             $0.timerDurationMinutes = minutesToSet // This recalculates
+         }
+         XCTAssertFalse(extendedRuntimeService.isSessionActive) // Check session stopped
+         XCTAssertFalse(notificationService.isNotificationScheduled) // Check notification cancelled
+    }
+
+    func testStartTimer_TimeMode_StartsTimerAndEffects() async {
+        let testClock = TestClock()
+        let extendedRuntimeService = MockExtendedRuntimeService()
+        let notificationService = MockNotificationService()
+
+        // Set time mode target (e.g., 10 seconds from 'now')
+        let now = Date(timeIntervalSince1970: 0)
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.hour, .minute, .second], from: now)
+        components.second = (components.second ?? 0) + 10 // Target 10 seconds in the future
+        let targetDate = calendar.date(from: components)!
+        let targetHour = calendar.component(.hour, from: targetDate)
+        let targetMinute = calendar.component(.minute, from: targetDate)
+        let expectedTotalSeconds = 10
+        let expectedEndDate = now.addingTimeInterval(TimeInterval(expectedTotalSeconds))
+        let expectedDurationMinutes = 0 // Less than a minute
+
+        let store = TestStore(
+            initialState: TimerReducer.State(
+                timerMode: .time,
+                selectedHour: targetHour,
+                selectedMinute: targetMinute,
+                now: now
+            ),
+            reducer: { TimerReducer() },
+            withDependencies: {
+                $0.continuousClock = testClock
+                $0.date = dateDependency // Fixed date for start
+                $0.extendedRuntimeService = extendedRuntimeService
+                $0.notificationService = notificationService
+            }
+        )
+        // Initial state calculation check (redundant but good practice)
+        XCTAssertEqual(store.state.totalSeconds, expectedTotalSeconds)
+
+        // --- Action ---
+        let task = await store.send(.startTimer) {
+            $0.isRunning = true
+            $0.startDate = now
+            $0.targetEndDate = expectedEndDate
+            // totalSeconds already calculated correctly in init/recalculate
+            $0.currentRemainingSeconds = expectedTotalSeconds
+            $0.timerDurationMinutes = expectedDurationMinutes
+        }
+
+        // --- Assert Effects ---
+        XCTAssertTrue(extendedRuntimeService.isSessionActive)
+        XCTAssertEqual(extendedRuntimeService.lastTargetEndTime, expectedEndDate)
+        XCTAssertTrue(notificationService.isNotificationScheduled)
+        XCTAssertEqual(notificationService.lastScheduledDate, expectedEndDate)
+        XCTAssertEqual(notificationService.lastScheduledMinutes, expectedDurationMinutes)
+
+        // --- Ticker ---
+        await testClock.advance(by: .seconds(1))
+        await store.receive(.tick) {
+            $0.currentRemainingSeconds = expectedTotalSeconds - 1
+        }
+
+        // --- Cleanup ---
+        await task.cancel()
+        await store.send(.cancelTimer) {
+             $0.isRunning = false
+             $0.startDate = nil
+             $0.targetEndDate = nil
+             $0.totalSeconds = expectedTotalSeconds // Recalculates
+             $0.currentRemainingSeconds = $0.totalSeconds
+             $0.timerDurationMinutes = expectedDurationMinutes // Recalculates
+         }
+         XCTAssertFalse(extendedRuntimeService.isSessionActive)
+         XCTAssertFalse(notificationService.isNotificationScheduled)
     }
 }
 

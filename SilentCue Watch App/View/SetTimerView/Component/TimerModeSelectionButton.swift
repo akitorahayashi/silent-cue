@@ -26,6 +26,9 @@ struct TimerModeSelectionButton: View {
                 )
                 .foregroundStyle(Color.primary)
         }
+        .accessibilityIdentifier(mode == TimerMode.minutes ?
+                                 SCAccessibilityIdentifiers.SetTimerView.minutesModeButton.rawValue :
+                                    SCAccessibilityIdentifiers.SetTimerView.timeModeButton.rawValue)
         .buttonStyle(.plain)
     }
 }

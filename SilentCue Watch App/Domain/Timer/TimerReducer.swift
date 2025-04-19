@@ -80,7 +80,7 @@ struct TimerReducer: Reducer {
 
     private func handleTimerModeSelected(_ state: inout State, mode: TimerMode) -> Effect<Action> {
         state.timerMode = mode
-        if mode == .atTime {
+        if mode == .time {
             let now = date()
             let calendar = Calendar.current
             state.selectedHour = calendar.component(.hour, from: now)
