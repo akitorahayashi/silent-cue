@@ -30,10 +30,11 @@ final class HapticsReducerTests: XCTestCase {
 
         let store = TestStore(
             initialState: AppState(),
-            reducer: { AppReducer() }
-        ) {
-            $0.hapticsService = NoOpHapticsService()
-        }
+            reducer: { AppReducer() },
+            withDependencies: {
+                $0.hapticsService = NoOpHapticsService()
+            }
+        )
 
         // Hapticを開始
         await store.send(AppAction.haptics(.startHaptic(HapticType.weak))) { state in

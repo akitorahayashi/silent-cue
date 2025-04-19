@@ -44,11 +44,9 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
         var task: Task<Void, Never>?
         task = Task {
             var yielded = false
-            for await _ in stream {
-                if !yielded {
-                    yieldExpectation.fulfill()
-                    yielded = true
-                }
+            for await _ in stream where !yielded {
+                yieldExpectation.fulfill()
+                yielded = true
             }
             // Stream completed
             if !yielded { yieldExpectation.fulfill() } // Fulfill yield if completes without yielding

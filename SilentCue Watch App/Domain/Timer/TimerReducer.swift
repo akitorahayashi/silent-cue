@@ -18,6 +18,7 @@ struct TimerReducer: Reducer {
     private enum CancelID { case timer, background }
 
     // MARK: - 依存関係
+
     @Dependency(\.continuousClock) var clock
     @Dependency(\.notificationService) var notificationService
     @Dependency(\.extendedRuntimeService) var extendedRuntimeService
@@ -192,10 +193,11 @@ struct TimerReducer: Reducer {
         }
         return .none
     }
+
     // --- 変更終了 ---
 
     // フォアグラウンド完了ロジックに戻す
-    private func handleTimerFinished(_ state: inout State) -> Effect<Action> {
+    private func handleTimerFinished(_: inout State) -> Effect<Action> {
         // バックグラウンドエフェクト（セッション/通知/監視）をキャンセル
         // 通知も明示的にキャンセル
         notificationService.cancelTimerCompletionNotification()
@@ -230,10 +232,10 @@ struct TimerReducer: Reducer {
     // MARK: - アクション処理メソッド - Internal
 
     // バックグラウンド完了ロジックに戻す
-    private func handleBackgroundTimerDidComplete(_ state: inout State) -> Effect<Action> {
+    private func handleBackgroundTimerDidComplete(_: inout State) -> Effect<Action> {
         // バックグラウンドエフェクトが完了を通知。
         // tick タイマーエフェクトをキャンセル。
-        return .concatenate(
+        .concatenate(
             .cancel(id: CancelID.timer),
             .send(.internal(.finalizeTimerCompletion(completionDate: date())))
             // バックグラウンドエフェクトは完了時または finalize 経由で自身をキャンセルする

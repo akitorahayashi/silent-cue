@@ -1,5 +1,5 @@
-import SwiftUI
 import ComposableArchitecture // Import TCA for @Dependency
+import SwiftUI
 
 /// ナビゲーションの宛先を示す型
 enum NavigationDestination: Hashable {
@@ -22,7 +22,7 @@ struct AppState: Equatable {
         date: Date = Date() // Can still inject Date if needed
     ) {
         // Initialize TimerState - it no longer needs calendar or calculator
-        self.timer = TimerState(now: date)
+        timer = TimerState(now: date)
 
         // Initialize path based on launch arguments
         let arguments = ProcessInfo.processInfo.arguments

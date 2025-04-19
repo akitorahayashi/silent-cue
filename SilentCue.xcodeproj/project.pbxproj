@@ -34,36 +34,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		98FEB05D2DB376CA00006FA8 /* Exceptions for "TestSupport" folder in "SilentCue Watch App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Mock/MockExtendedRuntimeService.swift,
-				Mock/MockHapticsService.swift,
-				Mock/MockNotificationService.swift,
-				Mock/MockUserDefaultsManager.swift,
-			);
-			target = 98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */;
-		};
-		98FEB05E2DB376CA00006FA8 /* Exceptions for "TestSupport" folder in "SilentCue Watch AppTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Mock/MockExtendedRuntimeService.swift,
-				Mock/MockHapticsService.swift,
-				Mock/MockNotificationService.swift,
-				Mock/MockUserDefaultsManager.swift,
-			);
-			target = 98A0AD7A2DADF7DD00A0E3BD /* SilentCue Watch AppTests */;
-		};
-		98FEB05F2DB376CA00006FA8 /* Exceptions for "TestSupport" folder in "SilentCue Watch AppUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Mock/MockExtendedRuntimeService.swift,
-				Mock/MockHapticsService.swift,
-				Mock/MockNotificationService.swift,
-				Mock/MockUserDefaultsManager.swift,
-			);
-			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
-		};
 		98FEB0612DB37F1500006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -71,10 +41,24 @@
 				Protocol/HapticsServiceProtocol.swift,
 				Protocol/NotificationServiceProtocol.swift,
 				Protocol/UserDefaultsServiceProtocol.swift,
+				Shared/Mock/MockExtendedRuntimeService.swift,
+				Shared/Mock/MockHapticsService.swift,
+				Shared/Mock/MockNotificationService.swift,
+				Shared/Mock/MockUserDefaultsManager.swift,
 				Shared/SCAccessibilityIdentifiers.swift,
 				Shared/SCAppEnvironment.swift,
 			);
 			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
+		};
+		98FEB14D2DB3BD3400006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/Mock/MockExtendedRuntimeService.swift,
+				Shared/Mock/MockHapticsService.swift,
+				Shared/Mock/MockNotificationService.swift,
+				Shared/Mock/MockUserDefaultsManager.swift,
+			);
+			target = 98A0AD7A2DADF7DD00A0E3BD /* SilentCue Watch AppTests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -82,6 +66,7 @@
 		98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				98FEB14D2DB3BD3400006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppTests" target */,
 				98FEB0612DB37F1500006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */,
 			);
 			path = "SilentCue Watch App";
@@ -95,16 +80,6 @@
 		98A0AD882DADF7DD00A0E3BD /* SilentCue Watch AppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "SilentCue Watch AppUITests";
-			sourceTree = "<group>";
-		};
-		98FEB05C2DB376C500006FA8 /* TestSupport */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				98FEB05D2DB376CA00006FA8 /* Exceptions for "TestSupport" folder in "SilentCue Watch App" target */,
-				98FEB05E2DB376CA00006FA8 /* Exceptions for "TestSupport" folder in "SilentCue Watch AppTests" target */,
-				98FEB05F2DB376CA00006FA8 /* Exceptions for "TestSupport" folder in "SilentCue Watch AppUITests" target */,
-			);
-			path = TestSupport;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -138,7 +113,6 @@
 		98A0AD5C2DADF7DB00A0E3BD = {
 			isa = PBXGroup;
 			children = (
-				98FEB05C2DB376C500006FA8 /* TestSupport */,
 				98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */,
 				98A0AD7E2DADF7DD00A0E3BD /* SilentCue Watch AppTests */,
 				98A0AD882DADF7DD00A0E3BD /* SilentCue Watch AppUITests */,
@@ -173,7 +147,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */,
-				98FEB05C2DB376C500006FA8 /* TestSupport */,
 			);
 			name = "SilentCue Watch App";
 			packageProductDependencies = (

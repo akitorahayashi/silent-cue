@@ -51,20 +51,55 @@ struct TimerState: Equatable {
         self.completionDate = completionDate
 
         let calendar = Calendar.current
-        self.selectedHour = calendar.component(.hour, from: now)
+        selectedHour = calendar.component(.hour, from: now)
         let currentMinute = calendar.component(.minute, from: now)
-        self.selectedMinute = currentMinute
+        selectedMinute = currentMinute
 
         // Call the utility function for calculation
-        self.totalSeconds = TimeCalculation.calculateTotalSeconds(
+        totalSeconds = TimeCalculation.calculateTotalSeconds(
             mode: timerMode,
             selectedMinutes: selectedMinutes,
-            selectedHour: self.selectedHour,
-            selectedMinute: self.selectedMinute,
+            selectedHour: selectedHour,
+            selectedMinute: selectedMinute,
             now: now,
             calendar: calendar
         )
-        self.currentRemainingSeconds = self.totalSeconds
-        self.timerDurationMinutes = self.totalSeconds / 60
+        currentRemainingSeconds = totalSeconds
+        timerDurationMinutes = totalSeconds / 60
+    }
+
+    /// テスト用の便利なイニシャライザ
+    init(
+        testWithNow now: Date,
+        selectedMinutes: Int = 1,
+        timerMode: TimerMode = .afterMinutes,
+        isRunning: Bool = false,
+        startDate: Date? = nil,
+        targetEndDate: Date? = nil,
+        completionDate: Date? = nil
+    ) {
+        self.timerMode = timerMode
+        self.selectedMinutes = selectedMinutes
+        self.isRunning = isRunning
+        self.startDate = startDate
+        self.targetEndDate = targetEndDate
+        self.completionDate = completionDate
+
+        let calendar = Calendar.current
+        selectedHour = calendar.component(.hour, from: now) // Use provided 'now'
+        selectedMinute = calendar.component(.minute, from: now) // Use provided 'now'
+
+        // Calculate totalSeconds based on provided parameters
+        let calculatedTotalSeconds = TimeCalculation.calculateTotalSeconds(
+            mode: timerMode,
+            selectedMinutes: selectedMinutes,
+            selectedHour: selectedHour, // Use calculated hour
+            selectedMinute: selectedMinute, // Use calculated minute
+            now: now, // Use provided 'now'
+            calendar: calendar
+        )
+        totalSeconds = calculatedTotalSeconds
+        currentRemainingSeconds = calculatedTotalSeconds
+        timerDurationMinutes = calculatedTotalSeconds / 60
     }
 }

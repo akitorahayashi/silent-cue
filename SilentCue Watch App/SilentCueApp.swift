@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 import UserNotifications
+@testable import TestSupport // Import TestSupport to access Mocks
 
 @main
 struct SilentCueWatchApp: App {
@@ -25,15 +26,13 @@ struct SilentCueWatchApp: App {
                 print("--- UI Testing: Initializing Store with overridden dependencies (DEBUG build) ---")
                 store = Store(initialState: AppState()) {
                     AppReducer()
-                } withDependencies: { // このストアインスタンスに特化した依存関係をオーバーライド
-                    // Use PreviewUserDefaultsService for UI tests
+                } withDependencies: {
+                    // UIテスト用に、依存関係をテスト用の実装（モック/スタブ）に差し替える
                     $0.userDefaultsService = PreviewUserDefaultsService()
-
-                    // UIテストに必要な他のオーバーライドを追加 (必要に応じて Preview...Service を作成):
-                    // $0.notificationService = PreviewNotificationService()
-                    // $0.extendedRuntimeService = PreviewExtendedRuntimeService()
-                    // $0.hapticsService = PreviewHapticsService()
-                    // $0.continuousClock = ImmediateClock() // テストには即時クロックを使用
+                    $0.notificationService = MockNotificationService()
+                    $0.extendedRuntimeService = MockExtendedRuntimeService()
+                    $0.hapticsService = MockHapticsService()
+                    $0.continuousClock = ImmediateClock() // テストには即時クロックを使用
                 }
             } else {
                 // --- 通常のデバッグビルド: デフォルトの依存関係でストアを初期化 ---
