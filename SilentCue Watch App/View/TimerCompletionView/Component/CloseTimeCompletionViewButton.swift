@@ -9,7 +9,7 @@ struct CloseTimeCompletionViewButton: View {
             Text("閉じる")
                 .font(.system(size: 16, weight: .medium))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 10.5)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color.secondary.opacity(0.3))
@@ -21,6 +21,7 @@ struct CloseTimeCompletionViewButton: View {
                 .foregroundStyle(.primary)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.closeTimeCompletionViewButton.rawValue)
         .padding(.horizontal)
         .opacity(appearAnimation ? 1.0 : 0.0)
         .animation(.easeInOut(duration: 0.4), value: appearAnimation)

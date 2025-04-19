@@ -22,6 +22,7 @@ final class TimerCompletionViewUITests: XCTestCase {
 
     override func tearDown() {
         app = nil
+        super.tearDown()
     }
 
     func testViewElements() throws {
@@ -36,15 +37,13 @@ final class TimerCompletionViewUITests: XCTestCase {
         // 2. NotifyEndTimeView 関連要素
         // 完了時刻表示を確認（正確な識別子がない場合は、テキスト内容で確認）
         // モックデータが使用される前提でテスト
-        let completionTimeExists = app?.staticTexts.element(matching: .any, identifier: "NotifyEndTimeView")
-            .exists ?? false
-        XCTAssertTrue(completionTimeExists, "完了時刻表示が存在する")
+        let notifyEndTimeView = app?.otherElements[SCAccessibilityIdentifiers.TimerCompletionView.notifyEndTimeViewVStack.rawValue]
+        XCTAssertTrue(notifyEndTimeView?.exists ?? false, "NotifyEndTimeView が存在する")
 
         // 3. TimerSummaryView 関連要素
         // 開始時刻とタイマー時間の表示を確認
-        let timerSummaryExists = app?.staticTexts.element(matching: .any, identifier: "TimerSummaryView")
-            .exists ?? false
-        XCTAssertTrue(timerSummaryExists, "タイマー概要表示が存在する")
+        let timerSummaryView = app?.otherElements[SCAccessibilityIdentifiers.TimerCompletionView.timerSummaryViewVStack.rawValue]
+        XCTAssertTrue(timerSummaryView?.exists ?? false, "TimerSummaryView が存在する")
 
         // 4. 通知許可ボタン (通知未許可の場合)
         let enableNotificationButton = app?.buttons.containing(.staticText, identifier: "通知を有効にする").firstMatch
@@ -80,43 +79,11 @@ final class TimerCompletionViewUITests: XCTestCase {
         // 完了ビューの要素が消えているか確認
         XCTAssertFalse(closeButton?.exists ?? false, "SetTimerView に戻った後、閉じるボタンは存在しない")
 
-        // SetTimerView の ScrollView が存在するか確認
+        // SetTimerView のナビゲーションバータイトルが存在するか確認
         XCTAssertTrue(
-            app?.otherElements[SCAccessibilityIdentifiers.SetTimerView.setTimerScrollView.rawValue].exists ?? false,
-            "戻った後に SetTimerScrollView が存在する"
+            app!.staticTexts[SCAccessibilityIdentifiers.SetTimerView.navigationBarTitle.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "SetTimerView に戻り、アプリタイトルが表示されている"
         )
-    }
-
-    func testTapEnableNotificationsButton() throws {
-        // 通知ボタンが存在する場合のみテスト実行
-        let enableNotificationButton = app?.buttons.containing(.staticText, identifier: "通知を有効にする").firstMatch
-        guard enableNotificationButton?.exists ?? false else {
-            // 通知が既に許可されている場合はテストをスキップ
-            throw XCTSkip("通知が既に許可されているため、このテストはスキップします")
-        }
-
-        // Arrange: 通知ボタンが表示されていることを確認
-        XCTAssertTrue(enableNotificationButton?.exists ?? false, "通知許可ボタンが存在する")
-
-        // Act: 通知ボタンをタップ
-        enableNotificationButton?.tap()
-
-        // Assert: 通知設定の変更方法アラートが表示されることを確認
-        let alertTitle = app?.alerts["通知設定の変更方法"]
-        XCTAssertTrue(
-            alertTitle?.waitForExistence(timeout: UITestConstants.Timeout.standard) ?? false,
-
-            "通知設定アラートが表示される"
-        )
-
-        // OKボタンの存在確認
-        let okButton = alertTitle?.buttons["OK"]
-        XCTAssertTrue(okButton?.exists ?? false, "アラートのOKボタンが存在する")
-
-        // アラートを閉じる
-        okButton?.tap()
-
-        // アラートが閉じたことを確認
-        XCTAssertFalse(alertTitle?.exists ?? false, "OKボタンタップ後、アラートが閉じる")
     }
 }

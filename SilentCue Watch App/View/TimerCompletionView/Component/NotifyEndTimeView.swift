@@ -17,13 +17,13 @@ struct NotifyEndTimeView: View {
             Text("終了時刻")
                 .font(.system(size: 14))
                 .foregroundStyle(.secondary)
-
-            if let completionDate {
-                Text(SCTimeFormatter.formatToHoursAndMinutes(completionDate))
-                    .font(.system(size: 24))
-                    .foregroundStyle(.primary)
-            }
+            
+            Text(completionDate != nil ? SCTimeFormatter.formatToHoursAndMinutes(completionDate!) : "00:00")
+                .font(.system(size: 24))
+                .foregroundStyle(.primary)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.notifyEndTimeViewVStack.rawValue)
         .opacity(appearAnimation ? 1.0 : 0.0)
         .offset(y: appearAnimation ? 0 : 20)
         .animation(.easeInOut(duration: 0.5).delay(0.2), value: appearAnimation)

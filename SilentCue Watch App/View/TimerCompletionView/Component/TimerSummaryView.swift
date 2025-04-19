@@ -51,6 +51,8 @@ struct TimerSummaryView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.timerSummaryViewVStack.rawValue)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.secondary.opacity(0.07))
@@ -65,7 +67,6 @@ struct TimerSummaryView: View {
         .animation(.easeInOut(duration: 0.5).delay(0.3), value: appearAnimation)
     }
 }
-
 #Preview {
     @State var appearAnimation = true
     return TimerSummaryView(
@@ -74,3 +75,4 @@ struct TimerSummaryView: View {
         appearAnimation: $appearAnimation
     )
 }
+

@@ -5,29 +5,28 @@ import UserNotifications
 struct TimerCompletionView: View {
     let store: StoreOf<TimerReducer>
     // onDismissクロージャはAppReducerに処理を移譲するため不要
+    @Dependency(\.notificationService) var notificationService
 
     // アニメーション用の状態変数
     @State private var appearAnimation = false
 
     // 通知許可状態
-    @State private var isNotificationAuthorized: Bool?
+    @State private var isNotificationAuthorized = false
     @State private var showingNotificationInstructionAlert = false
-
-    // ビューで使用される依存関係
-    @Dependency(\.notificationService) var notificationService
 
     var body: some View {
         WithViewStore(store, observe: { $0 }, content: { viewStore in
             ZStack {
                 ScrollView {
                     VStack {
+
                         NotifyEndTimeView(
                             completionDate: viewStore.completionDate,
                             appearAnimation: $appearAnimation
                         )
 
-                        Spacer(minLength: 16)
-
+                        Spacer(minLength: 13)
+                        
                         CloseTimeCompletionViewButton(
                             action: {
                                 // TimerReducerにdismissアクションを送信するだけ
@@ -35,13 +34,9 @@ struct TimerCompletionView: View {
                             },
                             appearAnimation: $appearAnimation
                         )
-                        .accessibilityIdentifier(
-                            SCAccessibilityIdentifiers.TimerCompletionView
-                                .closeTimeCompletionViewButton.rawValue
-                        )
 
-                        Spacer(minLength: 20)
-
+                        Spacer(minLength: 18)
+                        
                         TimerSummaryView(
                             startDate: viewStore.startDate,
                             timerDurationMinutes: viewStore.timerDurationMinutes,
@@ -49,7 +44,7 @@ struct TimerCompletionView: View {
                         )
 
                         // 通知が許可されていない場合は通知許可ボタンを表示
-                        if isNotificationAuthorized == nil {
+                        if !isNotificationAuthorized {
                             Spacer(minLength: 20)
 
                             Button {
@@ -102,6 +97,7 @@ struct TimerCompletionView: View {
 
     // 通知許可状態を確認
     private func checkNotificationAuthorizationStatus() {
+        // Use the injected dependency
         notificationService.checkAuthorizationStatus { isAuthorized in
             isNotificationAuthorized = isAuthorized
         }
@@ -109,6 +105,7 @@ struct TimerCompletionView: View {
 
     // 通知許可をリクエスト
     private func requestNotificationAuthorization(completion: @escaping (Bool) -> Void = { _ in }) {
+        // Use the injected dependency
         notificationService.requestAuthorization { granted in
             isNotificationAuthorized = granted
             completion(granted)
