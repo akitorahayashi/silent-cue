@@ -4,7 +4,7 @@ import WatchKit
 import XCTest
 
 final class SettingsReducerTests: XCTestCase {
-    // AppReducer 経由での設定読み込みの統合テスト
+    
     func testLoadSettingsViaAppReducer() async {
         let mockUserDefaults = MockUserDefaultsManager()
         // setupInitialValues の代わりに直接値を設定
@@ -40,6 +40,7 @@ final class SettingsReducerTests: XCTestCase {
     // AppReducer 経由での触覚タイプ選択の統合テスト
     func testSelectHapticTypeViaAppReducer() async {
         let mockUserDefaults = MockUserDefaultsManager()
+        let clock = TestClock()
 
         var initialState = AppState()
         initialState.settings.selectedHapticType = HapticType.standard
@@ -49,30 +50,43 @@ final class SettingsReducerTests: XCTestCase {
             reducer: { AppReducer() },
             withDependencies: { dependencies in
                 dependencies.userDefaultsService = mockUserDefaults
-                // 共有の MockHapticsService を使用
-                dependencies.hapticsService = MockHapticsService()
+                dependencies.hapticsService = MockHapticsService() // Use a mock that doesn't fail
+                dependencies.continuousClock = clock // Inject TestClock
             }
         )
 
         // 正しいスコープで AppAction.settings を送信
         await store.send(.settings(.selectHapticType(HapticType.weak))) { state in
             state.settings.selectedHapticType = HapticType.weak
+            // The save effect starts immediately but runs in background
+            // The preview effect also starts immediately
         }
 
-        // SettingsReducer 内で selectHapticType によってトリガーされるエフェクトを期待 (スコープ付き)
-        await store.receive(.settings(.previewHapticFeedback(.weak))) { state in
+        // エフェクトによってトリガーされるアクションを期待
+        // 1. Preview starts
+        await store.receive(.settings(.previewHapticFeedback(.weak)))
+        // 2. Previewing state becomes true
+        await store.receive(.settings(.previewingHapticChanged(true))) { state in
             state.settings.isPreviewingHaptic = true
         }
-        // AppReducer から連鎖するアクションを期待
+        // 3. Haptics domain updates (AppReducer coordination)
         await store.receive(.haptics(.updateHapticSettings(type: .weak))) { state in
             state.haptics.hapticType = .weak
         }
-        // Preview completion action
-        await store.receive(.settings(.previewHapticCompleted)) { state in
+
+        // Advance the clock to allow the preview effect to complete
+        await clock.advance(by: .seconds(3))
+
+        // 4. Preview completes
+        await store.receive(.settings(.previewHapticCompleted))
+        // 5. Previewing state becomes false
+        await store.receive(.settings(.previewingHapticChanged(false))) { state in
             state.settings.isPreviewingHaptic = false
         }
 
-        // エフェクト完了後に UserDefaults に値が保存されたことをアサート
+        // エフェクト完了後に UserDefaults に値が保存されたことをアサート (selectHapticType の .run エフェクト)
+        // Need a slight delay for the background save effect to potentially complete
+        // await clock.advance(by: .milliseconds(1)) // Or check directly if timing isn't critical
         XCTAssertEqual(mockUserDefaults.object(forKey: .hapticType) as? String, HapticType.weak.rawValue)
 
         await store.finish()
@@ -105,25 +119,39 @@ final class SettingsReducerTests: XCTestCase {
     // SettingsReducer を直接テスト: selectHapticType によってトリガーされる saveSettings
     func testSaveSettings() async {
         let mockUserDefaults = MockUserDefaultsManager()
+        let clock = TestClock()
         // 変更を確認するために異なる初期状態で開始
         let store = TestStore(initialState: SettingsState(selectedHapticType: .standard)) {
             SettingsReducer() // SettingsReducer を直接テスト
         } withDependencies: { dependencies in
             dependencies.userDefaultsService = mockUserDefaults
-            dependencies.hapticsService = MockHapticsService()
+            dependencies.hapticsService = MockHapticsService() // Use a mock that doesn't fail
+            dependencies.continuousClock = clock // Inject TestClock
         }
 
         // SettingsAction を直接送信
         await store.send(SettingsAction.selectHapticType(.weak)) {
             $0.selectedHapticType = .weak // 状態は即座に更新されるべき
+            // The save effect starts immediately but runs in background
+            // The preview effect also starts immediately
         }
 
-        // SettingsReducer 内でトリガーされるエフェクトを期待
-        // .saveSettings アクションは送信されないため、エフェクト後にモックを直接確認
-        await store.receive(SettingsAction.previewHapticFeedback(.weak)) { $0.isPreviewingHaptic = true }
-        await store.receive(SettingsAction.previewHapticCompleted) { $0.isPreviewingHaptic = false }
+        // エフェクトによってトリガーされるアクションを期待
+        // 1. Preview starts
+        await store.receive(SettingsAction.previewHapticFeedback(.weak))
+        // 2. Previewing state becomes true
+        await store.receive(SettingsAction.previewingHapticChanged(true)) { $0.isPreviewingHaptic = true }
 
-        // エフェクト完了後に UserDefaults に値が保存されたことをアサート
+        // Advance the clock to allow the preview effect to complete
+        await clock.advance(by: .seconds(3))
+
+        // 3. Preview completes
+        await store.receive(SettingsAction.previewHapticCompleted)
+        // 4. Previewing state becomes false
+        await store.receive(SettingsAction.previewingHapticChanged(false)) { $0.isPreviewingHaptic = false }
+
+        // エフェクト完了後に UserDefaults に値が保存されたことをアサート (selectHapticType の .run エフェクト)
+        // await clock.advance(by: .milliseconds(1)) // Or check directly if timing isn't critical
         XCTAssertEqual(mockUserDefaults.object(forKey: .hapticType) as? String, HapticType.weak.rawValue)
 
         await store.finish()

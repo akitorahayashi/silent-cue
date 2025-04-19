@@ -21,10 +21,18 @@ final class HapticsReducerTests: XCTestCase {
     func testStartAndStopHaptic() async {
         // HapticsのEffect.runの中身（実際の振動）はテスト困難なため、
         // 状態変化とキャンセルIDの管理を中心にテストする
+
+        // No-Op Haptics Service for this test
+        struct NoOpHapticsService: HapticsServiceProtocol {
+            func play(_ type: WKHapticType) async {}
+        }
+
         let store = TestStore(
             initialState: AppState(),
             reducer: { AppReducer() }
-        )
+        ) {
+            $0.hapticsService = NoOpHapticsService()
+        }
 
         // Hapticを開始
         await store.send(AppAction.haptics(.startHaptic(HapticType.weak))) { state in

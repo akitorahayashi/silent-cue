@@ -1,4 +1,4 @@
-#if DEBUG // この実装はデバッグビルドにのみ含める
+#if DEBUG
 
 import Foundation
 
@@ -46,4 +46,4 @@ final class PreviewUserDefaultsService: UserDefaultsServiceProtocol {
     }
 }
 
-#endif // DEBUG 
+#endif
