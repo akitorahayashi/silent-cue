@@ -85,15 +85,38 @@ struct SetTimerView: View {
                     Button(action: onSettingsButtonTapped) {
                         Image(systemName: "gearshape.fill")
                             .resizable()
-                            .frame(width: 20, height: 20)
+                            .frame(width: 16, height: 16)
                             .foregroundStyle(.white)
                     }
                     .accessibilityLabel("設定")
                     .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.openSettingsPage.rawValue)
                     .accessibilityAddTraits(.isButton)
-                    .padding(.trailing, 5)
                 }
             }
         })
     }
 }
+
+
+#Preview {
+    // プレビュー用のデフォルトストアを作成
+    let previewStore = Store(
+        initialState: TimerReducer.State(), // デフォルトイニシャライザを使用
+        reducer: { TimerReducer() }
+            // プレビューのデバッグ用に ._printChanges() を追加することもできます
+            // ._printChanges()
+    )
+
+    // SetTimerView を NavigationView でラップしてツールバーを表示
+    NavigationView {
+        SetTimerView(
+            store: previewStore,
+            onSettingsButtonTapped: {
+                print("Settings button tapped in preview")
+            },
+            onTimerStart: {
+                print("Start timer button tapped in preview")
+            }
+        )
+    }
+} 
