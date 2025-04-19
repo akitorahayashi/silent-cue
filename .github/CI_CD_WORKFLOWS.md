@@ -5,8 +5,8 @@
 ## ファイル構成
 
 - **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインです。Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します。
-- **`run-tests.yml`**: アプリのテスト向けビルドとその成果物を使ったテストを実行します。
-- **`build-unsigned-archive.yml`**: 署名なしのアーカイブ（.xcarchive）を作成する再利用可能ワークフロー。主に`ci-cd-pipeline.yml`から`main`ブランチのビルド検証のために呼び出されます。
+- **`run-tests.yml`**: アプリのビルドとテスト（ユニット・UI）を実行する再利用可能ワークフロー。`.github/scripts/` 配下の関数定義ファイルを `source` し、必要な関数（シミュレータ選択、ビルド、テスト実行、結果検証など）を直接呼び出します。
+- **`build-unsigned-archive.yml`**: 署名なしのアーカイブ（.xcarchive）を作成する再利用可能ワークフロー。`.github/scripts/` 配下の関数定義ファイルを `source` し、必要な関数（アーカイブビルド、結果検証など）を直接呼び出します。
 - **`code-quality.yml`**: コード品質チェック（SwiftFormat, SwiftLint）を実行します。
 - **`test-reporter.yml`**: テスト結果のレポートを作成し、PRにコメントします。
 - **`copilot-review.yml`**: GitHub CopilotによるPRレビューを自動化します。
@@ -16,12 +16,13 @@
 
 ### - モジュラー設計
 メインの`ci-cd-pipeline.yml`が、テスト、コード品質チェック、アーカイブビルドなどの個別の再利用可能ワークフローを呼び出す構造になっています。
+コアなビルド・テスト・アーカイブ処理は、`.github/scripts/steps/` および `.github/scripts/common/` 配下のシェルスクリプトに関数として定義され、各ワークフローが必要に応じてこれらを呼び出します。
 
 ### 包括的なビルドプロセスの検証
 Pull Requestや`main`ブランチへのプッシュ時に、以下の自動チェックを実行します。
 - コードフォーマット (SwiftFormat) と静的解析 (SwiftLint)
-- ユニットテストとUIテスト
-- リリース設定でのアーカイブビルドを検証（`main`ブランチプッシュ時）
+- ユニットテストとUIテスト、およびそれらの結果（xcresult）の検証
+- リリース設定でのアーカイブビルドと結果の検証（`main`ブランチプッシュ時）
 
 ### Pull Request に自動でレビュー
 Pull Requestに対して、テスト結果のレポート、GitHub Copilotによる自動レビューリクエスト、パイプライン全体の完了ステータス通知を行います。
@@ -37,28 +38,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 - GitHub Releaseの作成とIPAファイルの添付
 
 ### ローカルでの検証
-`validate-ci-build-steps.sh`スクリプトを提供しており、主要なCIステップ（テスト、アーカイブ）をローカル環境で再現・検証できます。
-
-このスクリプトは、CI と同様の環境（パス設定など）でビルドとテストを実行し、成果物が期待通りに生成されるかを確認するのに役立ちます。
-
-以下のコマンドで実行できます。
-
-```bash
-# 全てのステップ (単体テスト、UIテスト、アーカイブ) を実行
-./.github/scripts/validate-ci-build-steps.sh
-
-# 単体テストとUIテストの両方を実行
-./.github/scripts/validate-ci-build-steps.sh --all-tests
-
-# 単体テストのみを実行
-./.github/scripts/validate-ci-build-steps.sh --unit-test
-
-# UIテストのみを実行
-./.github/scripts/validate-ci-build-steps.sh --ui-test
-
-# アーカイブのみを実行
-./.github/scripts/validate-ci-build-steps.sh --archive-only
-```
+主要なCIステップ（テスト、アーカイブ）のコアロジックを呼び出すローカル検証用スクリプト (`.github/scripts/run-local-validation.sh`) を提供しており、ローカル環境でCIの主要な処理フローを再現・検証できます。このスクリプトは、CIワークフローが使用する関数定義ファイルを `source` して利用します。
 
 ## 機能詳細
 
@@ -85,12 +65,15 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 **トリガー**:
 - `ci-cd-pipeline.yml` から `workflow_call` で呼び出されます。
 **処理内容**:
-1.  テスト用のアプリビルドを実行します (`xcodebuild build-for-testing`)。
-2.  ユニットテストを実行し、結果を JUnit 形式で保存します。
-3.  UI テストを実行し、結果を JUnit 形式で保存します。
-4.  生成されたテスト結果（`.xcresult`, `.xml`）を `test-results` という名前のアーティファクトとしてアップロードします。
+1.  必要な関数定義スクリプト (`.github/scripts/common/*.sh`, `.github/scripts/steps/*.sh`) を `source` します。
+2.  `select_simulator` 関数を呼び出し、CI環境に適したwatchOSシミュレータIDを取得します。
+3.  `build_for_testing` 関数を呼び出し、テスト用ビルドを実行します。
+4.  `run_unit_tests` 関数を呼び出し、ユニットテストを実行します。実行後、`verify_unit_test_results` 関数で結果バンドルの存在を確認します（テスト成功時のみ）。
+5.  `run_ui_tests` 関数を呼び出し、UIテストを実行します。実行後、`verify_ui_test_results` 関数で結果バンドルの存在を確認します（テスト成功時のみ）。
+6.  生成された `.xcresult` ファイルから JUnit XML レポート (`.xml`) を生成します。
+7.  生成されたテスト結果（`.xcresult`, `.xml`）を `test-results` という名前のアーティファクトとしてアップロードします。
 **出力**:
-- テストの成功/失敗ステータス (`test_result`) を呼び出し元に返します。
+- ビルド、テスト実行、結果検証ステップの成否に基づいたテスト全体の成功/失敗ステータス (`test_result`) を呼び出し元に返します。
 
 ### `build-unsigned-archive.yml`
 
@@ -99,9 +82,10 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 **トリガー**:
 - `ci-cd-pipeline.yml` から `workflow_call` で呼び出されます。
 **処理内容**:
-1.  Release設定で署名なしのアーカイブビルド (`.xcarchive`) を作成します。
-2.  アーカイブの内容を検証します。
-3.  作成された `.xcarchive` を `unsigned-archive` という名前のアーティファクトとしてアップロードします。
+1.  必要な関数定義スクリプト (`.github/scripts/common/*.sh`, `.github/scripts/steps/build-archive.sh`) を `source` します。
+2.  `build_archive_step` 関数を呼び出し、Release設定での署名なしアーカイブビルド (`.xcarchive`) を作成します。
+3.  ビルド成功後、`verify_archive_step` 関数を呼び出し、アーカイブの内容（`.app`の存在）を検証します。
+4.  作成された `.xcarchive` を `unsigned-archive` という名前のアーティファクトとしてアップロードします。
 **主な用途**:
 - `ci-cd-pipeline.yml` の `main` ブランチへのプッシュ時に、Releaseビルドが成功するかどうかの検証に使用されます。
 
@@ -128,7 +112,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 **入力**:
 - レポート対象の Pull Request 番号 (`pull_request_number`)。
 **処理内容**:
-1.  `run-tests.yml` でアップロードされた `test-results` アーティファクトをダウンロードします。
+1.  `run-tests.yml` でアップロードされた `test-results` アーティファクト（`.xcresult` と `.xml` を含む）をダウンロードします。
 2.  JUnit レポート (`.xml`) が存在する場合、`mikepenz/action-junit-report` を使用して GitHub Checks に結果を表示します。
 3.  Pull Request にテスト結果のサマリーコメントを作成または更新します。
 
@@ -152,7 +136,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 - `v*.*.*` という形式のタグ（例: `v1.0.0`）がリポジトリにプッシュされた時。
 **処理内容**:
 1.  プッシュされたタグが指すコミットのコードをチェックアウトします。
-2.  SPMキャッシュを利用しつつ、Release設定でアプリをビルドし、署名なしの `.xcarchive` を作成します。
+2.  SPMキャッシュを利用しつつ、Release設定でアプリをビルドし、署名なしの `.xcarchive` を作成します。（この部分は `build-unsigned-archive.yml` を再利用可能ワークフローとして呼び出す形も検討可能）
 3.  GitHub Secretsに保存された証明書とプロファイルを使って一時キーチェーンを準備し、`.xcarchive` に署名して `.ipa` ファイルをエクスポートします。
 4.  生成された `.ipa` を App Store Connect にアップロードします。
 5.  トリガーとなったタグ名で GitHub Release を作成（または更新）し、生成された `.ipa` ファイルをアセットとして添付します。
@@ -170,42 +154,52 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 
 ## ローカルでのCIプロセスの検証
 
-GitHub Actions で実行される CI/CD パイプラインの主要なステップ（テスト、アーカイブ、IPAエクスポート）をローカルで検証するためのスクリプトを用意しています。
+GitHub Actions で実行される主要なCIステップ（テスト、アーカイブ）のコアロジックをローカルで検証するためのスクリプト (`.github/scripts/run-local-validation.sh`) を用意しています。このスクリプトは、`.github/scripts/` 配下の関数定義ファイルを `source` し、コマンドライン引数に基づいて適切な関数を呼び出すことで、CIの主要な処理フローを再現します。
 
-このスクリプトは、CI と同様の環境（パス設定など）でビルドとテストを実行し、成果物が期待通りに生成されるかを確認するのに役立ちます。
+### ビルドを含む検証
 
-以下のコマンドで実行できます。
+ローカル環境でビルドからテストやアーカイブを実行し、CIワークフローで実行されるコアな処理が期待通りかを確認します。
 
-```bash
-# 全てのステップ (単体テスト、UIテスト、アーカイブ) を実行
-./.github/scripts/validate-ci-build-steps.sh
+```shell
+# 全てのステップ (ビルド、単体テスト実行・検証、UIテスト実行・検証、アーカイブビルド・検証) を実行
+$ ./.github/scripts/run-local-validation.sh
 
-# 単体テストとUIテストの両方を実行
-./.github/scripts/validate-ci-build-steps.sh --all-tests
+# テスト用ビルド + 単体テストとUIテストの両方を実行・検証
+$ ./.github/scripts/run-local-validation.sh --all-tests
 
-# 単体テストのみを実行
-./.github/scripts/validate-ci-build-steps.sh --unit-test
+# テスト用ビルド + 単体テストのみを実行・検証
+$ ./.github/scripts/run-local-validation.sh --unit-test
 
-# UIテストのみを実行
-./.github/scripts/validate-ci-build-steps.sh --ui-test
+# テスト用ビルド + UIテストのみを実行・検証
+$ ./.github/scripts/run-local-validation.sh --ui-test
 
-# アーカイブのみを実行
-./.github/scripts/validate-ci-build-steps.sh --archive-only
+# ビルド + アーカイブのみを実行・検証
+$ ./.github/scripts/run-local-validation.sh --archive-only
 ```
 
-1.  `ci-outputs/` ディレクトリをクリーンアップし、再作成します。
-2.  テスト用のビルドを実行します。
-3.  テスト用のビルドの成果物を使って、ユニットテストとUIテストを実行します。
-4.  リリース用（署名なし）のアーカイブを作成します。
-5.  アーカイブの内容を検証します。
+### テストのみ実行 (ビルド成果物を再利用)
+
+テストコードなどを修正した後、既存のビルド成果物 (`ci-outputs/test-results/DerivedData`) を再利用して、テストのみを高速に再実行・検証します。
+事前に上記のコマンドで `--all-tests` や `--unit-test` などを実行してビルド成果物を作成しておく必要があります。
+
+```shell
+# 単体テストとUIテストの両方を再実行・検証
+$ ./.github/scripts/run-local-validation.sh --test-without-building
+
+# 単体テストのみを再実行・検証
+$ ./.github/scripts/run-local-validation.sh --test-without-building --unit-test
+
+# UIテストのみを再実行・検証
+$ ./.github/scripts/run-local-validation.sh --test-without-building --ui-test
+```
 
 ## 技術仕様
 
 - Xcodeバージョン: 16.2
 - テスト環境: watchOS シミュレータ
-- 依存ツール管理: Mint (SwiftFormat, SwiftLint)
+- 依存ツール管理: Mint (SwiftFormat, SwiftLint), Homebrew (xcbeautify), RubyGems (xcpretty)
 - アーティファクト保持期間: ビルド関連 = 1日、テスト結果/アーカイブビルド = 7日
 - 出力先ディレクトリ: `ci-outputs/`
-  - `test-results/`: テストの結果
+  - `test-results/`: テストの結果 (`.xcresult`, `.xml`)
   - `production/`: リリース用（署名なし）のアーカイブの結果
 

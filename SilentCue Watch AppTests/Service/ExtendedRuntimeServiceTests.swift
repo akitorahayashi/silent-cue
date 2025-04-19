@@ -3,7 +3,7 @@ import WatchKit
 import XCTest
 
 class ExtendedRuntimeServiceTests: XCTestCase {
-    var service: MockExtendedRuntimeService! // 型をモックに変更
+    var service: MockExtendedRuntimeService!
 
     override func setUp() {
         super.setUp()
@@ -15,12 +15,7 @@ class ExtendedRuntimeServiceTests: XCTestCase {
         super.tearDown()
     }
 
-    // 基本的な初期化をテスト
-    func testInitialization() {
-        XCTAssertNotNil(service, "サービスが初期化されているべきです。")
-    }
-
-    // startSession が呼び出せること、引数が記録されることをテスト
+    // セッション開始時のパラメータ記録と完了ハンドラの呼び出しを検証
     func testStartSession_RecordsParameters() {
         let testDuration: TimeInterval = 120
         let testEndDate = Date().addingTimeInterval(testDuration)
@@ -39,13 +34,13 @@ class ExtendedRuntimeServiceTests: XCTestCase {
         XCTAssertNotNil(service.startSessionLastParams?.completionHandler)
     }
 
-    // stopSession が呼び出せることをテスト
+    // セッション停止が記録されるか
     func testStopSession_IncrementsCallCount() {
         service.stopSession()
         XCTAssertEqual(service.stopSessionCallCount, 1)
     }
 
-    // checkAndClearBackgroundCompletionFlag がスタブ値を返し、呼び出し回数を記録することをテスト
+    // バックグラウンド完了フラグの確認とクリアのロジックを検証
     func testCheckAndClearBackgroundCompletionFlag_ReturnsStubValue() {
         // 1. 初期状態 (false)
         XCTAssertFalse(service.checkAndClearBackgroundCompletionFlag(), "初期値は false であるべきです。")
@@ -62,7 +57,7 @@ class ExtendedRuntimeServiceTests: XCTestCase {
         XCTAssertEqual(service.checkAndClearBackgroundCompletionFlagCallCount, 3)
     }
 
-    // リセット機能のテスト
+    // モックの状態がリセットされるか
     func testReset() {
         service.startSession(duration: 10, targetEndTime: nil, completionHandler: nil)
         service.stopSession()

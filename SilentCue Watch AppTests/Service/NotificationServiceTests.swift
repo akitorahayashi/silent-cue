@@ -3,11 +3,10 @@ import UserNotifications
 import XCTest
 
 class NotificationServiceTests: XCTestCase {
-    var service: MockNotificationService! // 型をモックに変更
+    var service: MockNotificationService!
 
     override func setUp() {
         super.setUp()
-        // モック実装を使用
         service = MockNotificationService()
     }
 
@@ -16,12 +15,7 @@ class NotificationServiceTests: XCTestCase {
         super.tearDown()
     }
 
-    // 基本的な初期化をテスト
-    func testInitialization() {
-        XCTAssertNotNil(service, "サービスが初期化されているべきです。")
-    }
-
-    // requestAuthorization が呼び出され、スタブ値を使用することをテスト (同期)
+    // 同期的な認証リクエストと結果のコールバックを検証
     func testRequestAuthorization_SyncCompletion() {
         let expectation = expectation(description: "requestAuthorization 完了")
         var receivedGranted: Bool?
@@ -39,7 +33,7 @@ class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(receivedGranted, true)
     }
 
-    // requestAuthorization が呼び出され、スタブ値を使用することをテスト (非同期)
+    // 非同期的な認証リクエストと結果のコールバックを検証
     func testRequestAuthorization_AsyncCompletion() {
         let expectation = expectation(description: "requestAuthorization 完了")
         var receivedGranted: Bool?
@@ -57,7 +51,7 @@ class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(receivedGranted, false)
     }
 
-    // checkAuthorizationStatus が呼び出され、スタブ値を使用することをテスト
+    // 認証ステータスの確認と結果のコールバックを検証
     func testCheckAuthorizationStatus() {
         let expectation = expectation(description: "checkAuthorizationStatus 完了")
         var receivedStatus: Bool?
@@ -74,7 +68,7 @@ class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(receivedStatus, false)
     }
 
-    // scheduleTimerCompletionNotification が呼び出され、引数を記録することをテスト
+    // タイマー完了通知のスケジュール時にパラメータが記録されるか
     func testScheduleTimerCompletionNotification_RecordsParameters() {
         let testDate = Date()
         let testMinutes = 15
@@ -86,13 +80,13 @@ class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(service.lastScheduledNotificationParams?.minutes, testMinutes)
     }
 
-    // cancelTimerCompletionNotification が呼び出されることをテスト
+    // タイマー完了通知のキャンセルが記録されるか
     func testCancelTimerCompletionNotification_IncrementsCallCount() {
         service.cancelTimerCompletionNotification()
         XCTAssertEqual(service.cancelTimerCompletionNotificationCallCount, 1)
     }
 
-    // リセット機能のテスト
+    // モックの状態がリセットされるか
     func testReset() {
         service.requestAuthorizationGrantedResult = false
         service.checkAuthorizationStatusResult = false

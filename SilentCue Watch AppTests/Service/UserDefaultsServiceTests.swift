@@ -6,21 +6,16 @@ class UserDefaultsServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // モック実装を使用
         userDefaultsService = MockUserDefaultsManager()
-        // 各テストの前にUserDefaults(モック)をクリーンアップ
-        // userDefaultsService.removeAll() // Mock の init で空になるので不要かも
     }
 
     override func tearDown() {
-        // 各テストの後にUserDefaults(モック)をクリーンアップ
-        userDefaultsService.removeAll() // tearDown では念のため呼ぶ
+        userDefaultsService.removeAll()
         userDefaultsService = nil
         super.tearDown()
     }
 
-    // MARK: - テストケース
-
+    // 様々な型の値の設定と取得を検証
     func testSetAndGetObject() {
         let keyBool = UserDefaultsKeys.isFirstLaunch
         let valueBool = true
@@ -38,6 +33,7 @@ class UserDefaultsServiceTests: XCTestCase {
         XCTAssertEqual(internalStorage[keyString.rawValue] as? String, valueString)
     }
 
+    // 指定したキーの値の削除を検証
     func testRemoveObject() {
         let keyBool = UserDefaultsKeys.isFirstLaunch
         let keyString = UserDefaultsKeys.hapticType
@@ -54,6 +50,7 @@ class UserDefaultsServiceTests: XCTestCase {
         XCTAssertTrue(userDefaultsService.getAllValues().isEmpty) // 両方削除されたので空のはず
     }
 
+    // 全てのキーと値の削除を検証
     func testRemoveAll() {
         let keyBool = UserDefaultsKeys.isFirstLaunch
         let keyString = UserDefaultsKeys.hapticType
@@ -68,6 +65,7 @@ class UserDefaultsServiceTests: XCTestCase {
         XCTAssertTrue(userDefaultsService.getAllValues().isEmpty) // removeAll で空になることを確認
     }
 
+    // 値に nil を設定するとキーが削除されるか検証
     func testSetNilRemovesObject() {
         let keyBool = UserDefaultsKeys.isFirstLaunch
         userDefaultsService.set(true, forKey: keyBool)
@@ -79,6 +77,7 @@ class UserDefaultsServiceTests: XCTestCase {
         XCTAssertNil(userDefaultsService.getAllValues()[keyBool.rawValue])
     }
 
+    // 存在しないキーの値を取得すると nil が返るか検証
     func testGetObjectNotFound() {
         let keyBool = UserDefaultsKeys.isFirstLaunch
         XCTAssertNil(userDefaultsService.object(forKey: keyBool))

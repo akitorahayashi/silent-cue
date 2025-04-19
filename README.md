@@ -32,9 +32,34 @@ TCA の依存性注入システム (`@Dependency`) を全面的に採用して�
 ```
 SilentCue/
 ├── .github/
-│   ├── README.md
+│   ├── CI_CD_WORKFLOWS.md
 │   ├── scripts/
+│   │   ├── ci-env.sh
+│   │   ├── run-local-validation.sh
+│   │   ├── find-simulator.sh
+│   │   ├── common/
+│   │   │   ├── logging.sh
+│   │   │   └── prerequisites.sh
+│   │   └── steps/
+│   │       ├── clean-old-output.sh
+│   │       ├── select-simulator.sh
+│   │       ├── build-for-testing.sh
+│   │       ├── run-unit-tests.sh
+│   │       ├── run-ui-tests.sh
+│   │       └── build-archive.sh
 │   └── workflows/
+│       ├── ci-cd-pipeline.yml
+│       ├── run-tests.yml
+│       ├── build-unsigned-archive.yml
+│       ├── code-quality.yml
+│       ├── test-reporter.yml
+│       ├── copilot-review.yml
+│       └── release.yml
+├── Shared/
+│   ├── Protocol/
+│   ├── Mock/
+│   ├── SCAppEnvironment.swift
+│   └── SCAccessibilityIdentifiers.swift
 ├── SilentCue Watch App/
 │   ├── Assets.xcassets/
 │   ├── Domain/
@@ -43,37 +68,24 @@ SilentCue/
 │   │   ├── Timer/
 │   │   └── Haptics/
 │   ├── Preview Content/
-│   ├── Service/  # Moved from StorageService and Util
-│   │   ├── UserDefaultsService.swift
-│   │   ├── NotificationService.swift
-│   │   ├── ExtendedRuntimeService.swift
-│   │   └── HapticsService.swift
-│   ├── Util/     # Now contains only pure utility functions
-│   │   └── SCTimeFormatter.swift
+│   ├── Service/
+│   ├── Util/
 │   ├── View/
 │   │   ├── CountdownView/
 │   │   ├── SetTimerView/
 │   │   ├── SettingsView/
 │   │   └── TimerCompletionView/
-│   └── SilentCueApp.swift
+│   └── SilentCueApp.swift # ルートアプリファイル
 ├── SilentCue Watch AppTests/
 │   ├── Domain/
-│   ├── Service/  # Renamed from StorageService
-│   │   └── UserDefaultsServiceTests.swift # Renamed and Moved
-│   └── Mock/ # Mock implementations (if any specific to tests)
+│   ├── Service/
+│   └── Mock/
 ├── SilentCue Watch AppUITests/
-│   ├── CountdownViewUITests.swift
-│   ├── SettingsViewUITests.swift
+│   ├── Tests/
+│   ├── Mock/
+│   ├── Extension/
+│   ├── Constant/
 │   └── Util/
-├── Shared/ # Shared code between App and Tests
-│   ├── Protocols/ # Protocol definitions for services
-│   │   ├── UserDefaultsServiceProtocol.swift
-│   │   ├── NotificationServiceProtocol.swift
-│   │   ├── ExtendedRuntimeServiceProtocol.swift
-│   │   └── HapticsServiceProtocol.swift
-│   └── TestingSupport/ # Mocks and No-op implementations for testing
-│       ├── MockUserDefaultsManager.swift
-│       └── NoopImplementations.swift
 ├── .gitignore
 ├── .swiftformat
 ├── .swiftlint.yml

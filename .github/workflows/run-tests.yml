@@ -11,7 +11,7 @@ jobs:
   build-and-test:
     runs-on: macos-latest
     outputs:
-      test_result: ${{ steps.test_status.outputs.result }}
+      test_result: ${{ steps.set_test_status.outputs.result }}
     steps:
     - uses: actions/checkout@v4
 
@@ -22,103 +22,134 @@ jobs:
 
     - name: Install xcpretty
       run: gem install xcpretty
-        
-    - name: Create Test Output Directories
-      run: mkdir -p ci-outputs/test-results/unit ci-outputs/test-results/ui ci-outputs/test-results/derived-data
-        
-    - name: Make find-simulator script executable
-      run: chmod +x .github/scripts/find-simulator.sh
+
+    - name: Clean Output Directory
+      shell: bash
+      run: |
+        source .github/scripts/steps/clean-old-output.sh
+        clean_old_output
 
     - name: Select Simulator
       id: select_simulator
+      shell: bash
       run: |
-        SIMULATOR_ID=$(./.github/scripts/find-simulator.sh)
-        echo "シミュレータ ID ($SIMULATOR_ID) が選択されました"
-        echo "simulator_id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
+        source .github/scripts/steps/select-simulator.sh
+        # select_simulator は成功時にIDを標準出力へ出力、失敗時は非ゼロで終了
+        simulator_id=$(select_simulator)
+        echo "simulator_id=$simulator_id" >> $GITHUB_OUTPUT
 
     - name: Build for Testing
+      id: build_for_testing
+      shell: bash
       run: |
-        set -o pipefail
-        echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用してテスト用にビルドします"
-        xcodebuild build-for-testing \
-          -project "SilentCue.xcodeproj" \
-          -scheme "SilentCue Watch App" \
-          -destination "platform=watchOS Simulator,id=${{ steps.select_simulator.outputs.simulator_id }}" \
-          -derivedDataPath ./ci-outputs/test-results/derived-data \
-          -configuration Debug \
-          -skipMacroValidation \
-          CODE_SIGNING_ALLOWED=NO \
-          | xcpretty -c
-      
+        source .github/scripts/steps/build-for-testing.sh
+        build_for_testing ${{ steps.select_simulator.outputs.simulator_id }}
+      # このステップは build_for_testing 関数が失敗(非ゼロ終了)したら失敗する
+
     - name: Run Unit Tests
-      id: unit_tests
+      id: run_unit_tests
+      shell: bash
       run: |
-        set -o pipefail
-        echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用してユニットテストを実行します"
-        # Execute test command but don't fail the step immediately on non-zero exit code
-        xcodebuild test-without-building \
-          -project "SilentCue.xcodeproj" \
-          -scheme "SilentCue Watch AppTests" \
-          -destination "platform=watchOS Simulator,id=${{ steps.select_simulator.outputs.simulator_id }}" \
-          -derivedDataPath ./ci-outputs/test-results/DerivedData \
-          -enableCodeCoverage NO \
-          -resultBundlePath ./ci-outputs/test-results/unit/TestResults.xcresult \
-          | xcbeautify --report junit --report-path ./ci-outputs/test-results/unit/junit.xml || echo "Unit test execution finished with non-zero exit code."
-        
-        # Capture the exit status of xcodebuild (first command in the pipe)
-        XCODEBUILD_EXIT_CODE=${PIPESTATUS[0]}
-        echo "UNIT_TEST_XCODEBUILD_STATUS=$XCODEBUILD_EXIT_CODE" >> $GITHUB_ENV
-        ls -la ./ci-outputs/test-results/unit/
-      # Don't use continue-on-error here, let the verification step handle failure
-      
+        source .github/scripts/steps/run-unit-tests.sh
+        # 関数の終了コードをキャプチャして exit
+        run_unit_tests ${{ steps.select_simulator.outputs.simulator_id }}
+        exit $?
+      continue-on-error: true # ステップが失敗してもワークフローを続行
+
     - name: Verify Unit Test Results
+      id: verify_unit_tests
+      shell: bash
+      # Runステップが成功した場合のみ実行
+      if: steps.run_unit_tests.outcome == 'success'
       run: |
-        echo "Checking for Unit Test results bundle..."
-        RESULT_BUNDLE_PATH="./ci-outputs/test-results/unit/TestResults.xcresult"
-        if [ ! -d "$RESULT_BUNDLE_PATH" ]; then
-          echo "❌ Error: Unit test result bundle not found at $RESULT_BUNDLE_PATH"
-          exit 1
-        fi
-        echo "✅ Unit test result bundle found at $RESULT_BUNDLE_PATH"
+        source .github/scripts/steps/run-unit-tests.sh
+        # 引数なしで verify 関数を呼び出す
+        verify_unit_test_results
+      # このステップは検証失敗時にジョブを失敗させない (後続処理のため)
+      continue-on-error: true
 
     - name: Run UI Tests
-      id: ui_tests
+      id: run_ui_tests
+      shell: bash
       run: |
-        set -o pipefail
-        echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用して UI テストを実行します"
-        # Execute test command but don't fail the step immediately on non-zero exit code
-        xcodebuild test-without-building \
-          -project "SilentCue.xcodeproj" \
-          -scheme "SilentCue Watch AppUITests" \
-          -destination "platform=watchOS Simulator,id=${{ steps.select_simulator.outputs.simulator_id }}" \
-          -derivedDataPath ./ci-outputs/test-results/DerivedData \
-          -enableCodeCoverage NO \
-          -resultBundlePath ./ci-outputs/test-results/ui/TestResults.xcresult \
-          | xcbeautify --report junit --report-path ./ci-outputs/test-results/ui/junit.xml || echo "UI test execution finished with non-zero exit code."
-          
-        # Capture the exit status of xcodebuild (first command in the pipe)
-        XCODEBUILD_EXIT_CODE=${PIPESTATUS[0]}
-        echo "UI_TEST_XCODEBUILD_STATUS=$XCODEBUILD_EXIT_CODE" >> $GITHUB_ENV
-        ls -la ./ci-outputs/test-results/ui/
-      # Don't use continue-on-error here, let the verification step handle failure
+        source .github/scripts/steps/run-ui-tests.sh
+        # 関数の終了コードをキャプチャして exit
+        run_ui_tests ${{ steps.select_simulator.outputs.simulator_id }}
+        exit $?
+      continue-on-error: true # ステップが失敗してもワークフローを続行
 
     - name: Verify UI Test Results
+      id: verify_ui_tests
+      shell: bash
+      # Runステップが成功した場合のみ実行
+      if: steps.run_ui_tests.outcome == 'success'
       run: |
-        echo "Checking for UI Test results bundle..."
-        RESULT_BUNDLE_PATH="./ci-outputs/test-results/ui/TestResults.xcresult"
-        if [ ! -d "$RESULT_BUNDLE_PATH" ]; then
-          echo "❌ Error: UI test result bundle not found at $RESULT_BUNDLE_PATH"
-          exit 1
-        fi
-        echo "✅ UI test result bundle found at $RESULT_BUNDLE_PATH"
+        source .github/scripts/steps/run-ui-tests.sh
+        # 引数なしで verify 関数を呼び出す
+        verify_ui_test_results
+      # このステップは検証失敗時にジョブを失敗させない (後続処理のため)
+      continue-on-error: true
 
+    # xcresult から JUnit レポートを生成
+    - name: Generate Unit Test JUnit Report
+      if: always() # 以前のステップが失敗した場合でも、常にレポートを生成するために実行
+      run: |
+        echo "Generating Unit Test JUnit Report..."
+        if [ -d ./ci-outputs/test-results/unit/TestResults.xcresult ]; then
+          xcbeautify --quiet --report junit --report-path ./ci-outputs/test-results/unit/junit.xml --is-ci < ./ci-outputs/test-results/unit/TestResults.xcresult
+          if [ ! -f ./ci-outputs/test-results/unit/junit.xml ]; then
+            echo "⚠️ Unit test JUnit report not generated."
+          else
+            echo "✅ Unit test JUnit report generated."
+          fi
+        else
+            echo "⚠️ Unit test .xcresult bundle not found, skipping report generation."
+        fi
+
+    - name: Generate UI Test JUnit Report
+      if: always()
+      run: |
+        echo "Generating UI Test JUnit Report..."
+        if [ -d ./ci-outputs/test-results/ui/TestResults.xcresult ]; then
+          xcbeautify --quiet --report junit --report-path ./ci-outputs/test-results/ui/junit.xml --is-ci < ./ci-outputs/test-results/ui/TestResults.xcresult
+          if [ ! -f ./ci-outputs/test-results/ui/junit.xml ]; then
+            echo "⚠️ UI test JUnit report not generated."
+          else
+            echo "✅ UI test JUnit report generated."
+          fi
+        else
+           echo "⚠️ UI test .xcresult bundle not found, skipping report generation."
+        fi
+
+    # スクリプトの終了コードとレポート内容に基づいて全体のテストステータスを設定
     - name: Set Test Status
-      id: test_status
-      run: echo "result=success" >> $GITHUB_OUTPUT
-      
+      id: set_test_status
+      if: always() # ジョブ全体の成否に関わらず、常にこのステップを実行して最終結果を判断
+      run: |
+        echo "Build step outcome: ${{ steps.build_for_testing.outcome }}"
+        echo "Unit Test Run outcome: ${{ steps.run_unit_tests.outcome }}"
+        echo "Unit Test Verify outcome: ${{ steps.verify_unit_tests.outcome }}"
+        echo "UI Test Run outcome: ${{ steps.run_ui_tests.outcome }}"
+        echo "UI Test Verify outcome: ${{ steps.verify_ui_tests.outcome }}"
+        # 主要な実行ステップと検証ステップの outcome が failure かどうかをチェック
+        if [[ "${{ steps.build_for_testing.outcome }}" == "failure" || \
+              "${{ steps.run_unit_tests.outcome }}" == "failure" || \
+              "${{ steps.verify_unit_tests.outcome }}" == "failure" || \
+              "${{ steps.run_ui_tests.outcome }}" == "failure" || \
+              "${{ steps.verify_ui_tests.outcome }}" == "failure" ]]; then
+           # いずれかのステップが失敗した場合
+           echo "❌ One or more steps failed."
+           echo "result=failure" >> $GITHUB_OUTPUT
+        else
+          # すべてのステップが成功した場合
+          echo "✅ All tests passed."
+          echo "result=success" >> $GITHUB_OUTPUT
+        fi
+
     - name: Upload Test Results
+      if: always() # 失敗時でも結果をアップロード
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: ci-outputs/test-results
+        path: ci-outputs/test-results # .xcresult と .xml をアップロード
         retention-days: 7 
