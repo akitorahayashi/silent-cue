@@ -1,7 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
 import UserNotifications
-@testable import TestSupport // Import TestSupport to access Mocks
 
 @main
 struct SilentCueWatchApp: App {
