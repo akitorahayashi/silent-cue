@@ -98,36 +98,6 @@ jobs:
         verify_ui_test_results
       continue-on-error: true
 
-    - name: Generate Unit Test JUnit Report
-      if: always()
-      run: |
-        echo "Generating Unit Test JUnit Report..."
-        if [ -d ./ci-outputs/test-results/unit/TestResults.xcresult ]; then
-          xcbeautify --quiet --report junit --report-path ./ci-outputs/test-results/unit/junit.xml --is-ci < ./ci-outputs/test-results/unit/TestResults.xcresult
-          if [ ! -f ./ci-outputs/test-results/unit/junit.xml ]; then
-            echo "⚠️ Unit test JUnit report not generated."
-          else
-            echo "✅ Unit test JUnit report generated."
-          fi
-        else
-            echo "⚠️ Unit test .xcresult bundle not found, skipping report generation."
-        fi
-
-    - name: Generate UI Test JUnit Report
-      if: always()
-      run: |
-        echo "Generating UI Test JUnit Report..."
-        if [ -d ./ci-outputs/test-results/ui/TestResults.xcresult ]; then
-          xcbeautify --quiet --report junit --report-path ./ci-outputs/test-results/ui/junit.xml --is-ci < ./ci-outputs/test-results/ui/TestResults.xcresult
-          if [ ! -f ./ci-outputs/test-results/ui/junit.xml ]; then
-            echo "⚠️ UI test JUnit report not generated."
-          else
-            echo "✅ UI test JUnit report generated."
-          fi
-        else
-           echo "⚠️ UI test .xcresult bundle not found, skipping report generation."
-        fi
-
     - name: Set Test Status
       id: set_test_status
       if: always()

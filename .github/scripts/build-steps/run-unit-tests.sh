@@ -31,7 +31,7 @@ run_unit_tests() {
     -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
     -enableCodeCoverage NO \
     -resultBundlePath "$result_path" \
-  | xcpretty -c
+  | xcbeautify --report junit --report-path ./ci-outputs/test-results/unit/junit.xml
 
   xcodebuild_exit_code=${PIPESTATUS[0]} # xcodebuild の終了コードを取得
   set +o pipefail
