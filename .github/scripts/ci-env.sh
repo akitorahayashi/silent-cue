@@ -1,3 +1,4 @@
+#!/bin/bash
 # CIスクリプト用の環境設定
 
 # === 出力先ディレクトリ ===
@@ -13,3 +14,8 @@ export PROJECT_FILE="SilentCue.xcodeproj"
 export WATCH_APP_SCHEME="SilentCue Watch App"
 export UNIT_TEST_SCHEME="SilentCue Watch AppTests"
 export UI_TEST_SCHEME="SilentCue Watch AppUITests"
+
+# === シミュレータ設定 ===
+# このパターン名に一致する最初の有効なシミュレータが選択される
+export SIMULATOR_NAME_PATTERN="Apple Watch"
+# export TEST_SIMULATOR_ID="" # この変数は select_simulator 関数によって設定、exportされる

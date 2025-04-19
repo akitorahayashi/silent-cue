@@ -1,23 +1,29 @@
 #!/bin/bash
 # このファイルは関数定義のみを提供するため、直接実行は意図されていません。
 
+SCRIPT_DIR_STEPS=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
 # 依存関係を source
-source "$(dirname "$0")/../common/logging.sh"
-source "$(dirname "$0")/../ci-env.sh"
+source "$SCRIPT_DIR_STEPS/../common/logging.sh"
+source "$SCRIPT_DIR_STEPS/../ci-env.sh"
 
 # テスト用にアプリをビルドする関数
 # ロギング関数と環境変数 (PROJECT_FILE など) が source 済みであることを想定
-# 最初の引数 ($1) としてシミュレータIDを受け取る
-
+# 環境変数 TEST_SIMULATOR_ID を使用
 build_for_testing() {
-  if [ -z "${1:-}" ]; then fail "build_for_testing: シミュレータIDが必要です。"; fi
-  local SIMULATOR_ID="$1"
-  step "テスト用にビルド中 (シミュレータID: $SIMULATOR_ID)"
+  # Check if TEST_SIMULATOR_ID is set
+  if [ -z "$TEST_SIMULATOR_ID" ]; then
+    fail "build_for_testing: 環境変数 TEST_SIMULATOR_ID が設定されていません。select_simulator を先に実行する必要があります。"
+    return 1
+  fi
+
+  step "テスト用ビルドを開始します (シミュレータID: $TEST_SIMULATOR_ID)"
+  # 古いDerivedDataを削除
 
   if ! set -o pipefail && xcodebuild build-for-testing \
     -project "$PROJECT_FILE" \
     -scheme "$WATCH_APP_SCHEME" \
-    -destination "platform=watchOS Simulator,id=$SIMULATOR_ID" \
+    -destination "platform=watchOS Simulator,id=$TEST_SIMULATOR_ID" \
     -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
     -configuration Debug \
     -skipMacroValidation \

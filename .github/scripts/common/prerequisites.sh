@@ -1,4 +1,10 @@
-# 前提条件チェック関数
+#!/bin/bash
+# 前提条件チェック用関数
+
+SCRIPT_DIR_PREREQ=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
+# 依存関係を source
+source "$SCRIPT_DIR_PREREQ/logging.sh"
 
 # 注意: 呼び出し元がロギング関数を source 済みであることを想定
 

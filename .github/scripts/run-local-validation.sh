@@ -3,20 +3,21 @@ set -euo pipefail
 
 # --- Source Libraries and Environment --- 
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
 # 環境変数を読み込む
-source "$(dirname "$0")/ci-env.sh"
+source "$SCRIPT_DIR/ci-env.sh"
 
 # 共通関数を読み込む (logging, prerequisites)
-source "$(dirname "$0")/common/logging.sh"
-source "$(dirname "$0")/common/prerequisites.sh"
+source "$SCRIPT_DIR/common/logging.sh"
+source "$SCRIPT_DIR/common/prerequisites.sh"
 
 # ステップ関数を読み込む
-source "$(dirname "$0")/build-steps/clean-old-output.sh"
-source "$(dirname "$0")/build-steps/select-simulator.sh"
-source "$(dirname "$0")/build-steps/build-for-testing.sh"
-source "$(dirname "$0")/build-steps/run-unit-tests.sh"
-source "$(dirname "$0")/build-steps/run-ui-tests.sh"
-source "$(dirname "$0")/build-steps/build-archive.sh"
+source "$SCRIPT_DIR/build-steps/select-simulator.sh"
+source "$SCRIPT_DIR/build-steps/build-for-testing.sh"
+source "$SCRIPT_DIR/build-steps/run-unit-tests.sh"
+source "$SCRIPT_DIR/build-steps/run-ui-tests.sh"
+source "$SCRIPT_DIR/build-steps/build-archive.sh"
 
 # --- Argument Parsing --- 
 
@@ -25,7 +26,7 @@ run_unit=true
 run_ui=true
 run_archive=true
 skip_build_for_testing=false
-provided_simulator_id=""
+# provided_simulator_id="" # Removed
 selected_option="" # オプションの組み合わせチェック用
 
 # 引数解析ループ
@@ -62,10 +63,10 @@ while [[ $# -gt 0 ]]; do
       run_unit=true; run_ui=true; run_archive=false; skip_build_for_testing=true; selected_option="$key"
       # --unit-test/--ui-test が後続すれば run_flags はそちらで調整される
       shift ;;         # 引数を消費
-    --simulator-id)     # シミュレータID指定
-      if [[ -z "${2:-}" ]]; then fail "--simulator-id オプションにはシミュレータIDが必要です。"; fi
-      provided_simulator_id="$2"
-      shift 2 ;;       # オプションと値を消費
+    # --simulator-id)     # Removed
+    #   if [[ -z "${2:-}" ]]; then fail "--simulator-id オプションにはシミュレータIDが必要です。"; fi
+    #   provided_simulator_id="$2"
+    #   shift 2 ;;       # オプションと値を消費
     *)                  # 不明なオプション
       fail "不明なオプション: $1"
       ;;
@@ -78,33 +79,30 @@ main() {
   # 前提条件チェック（xcprettyがなければインストール試行）
   check_xcpretty
 
-  # 出力ディレクトリ初期化
-  clean_old_output
+  # --- シミュレータ選択 (環境変数を設定) ---
+  # テストまたはアーカイブを実行する場合にのみシミュレータ選択が必要
+  # build_archive_step は destination 不要なのでテスト実行時のみ選択
+  if $run_unit || $run_ui; then
+      select_simulator # TEST_SIMULATOR_ID を設定するために実行
+      if [ $? -ne 0 ]; then
+          fail "シミュレータの選択と環境変数への設定に失敗しました。"
+      fi
+  fi
 
-  local simulator_id=""
+  # local simulator_id="" # Removed
   local unit_test_run_exit_code=0
   local unit_test_verify_exit_code=0 # 検証ステップの終了コード用
   local ui_test_run_exit_code=0
   local ui_test_verify_exit_code=0   # 検証ステップの終了コード用
+  local archive_build_exit_code=0    # Initialize archive codes
+  local archive_verify_exit_code=0
 
-  # テストを実行する場合
+  # テストを実行する場合 (シミュレータIDは環境変数から取得される)
   if $run_unit || $run_ui; then
-    # シミュレータ選択
-    if [[ -n "$provided_simulator_id" ]]; then
-      simulator_id="$provided_simulator_id"
-      success "指定されたシミュレータIDを使用します: $simulator_id"
-    else
-      # select_simulator は成功時にIDを標準出力へ出す
-      simulator_id=$(select_simulator)
-      if [ $? -ne 0 ]; then
-        fail "シミュレータの選択に失敗しました。"
-      fi
-      # select_simulator内のログで成功メッセージは出るはず
-    fi
 
     # テスト用ビルド（スキップしない場合）
     if ! $skip_build_for_testing; then
-      build_for_testing "$simulator_id"
+      build_for_testing # 引数なしで呼び出す
     else
       step "ビルドをスキップします (--test-without-building)"
       # ビルドスキップ時もDerivedDataの存在をチェックする方が親切かもしれない
@@ -116,7 +114,7 @@ main() {
 
     # ユニットテスト実行
     if $run_unit; then
-      run_unit_tests "$simulator_id"
+      run_unit_tests # 引数なしで呼び出す
       unit_test_run_exit_code=$? # 実行の終了コードを取得
       # 実行が成功した場合のみ検証を実行
       if [ $unit_test_run_exit_code -eq 0 ]; then
@@ -124,13 +122,13 @@ main() {
         unit_test_verify_exit_code=$? # 検証の終了コードを取得
       else
         # 実行が失敗した場合、検証はスキップ (検証コードは 0 のまま)
-        echo "ℹ️ ユニットテスト実行が失敗したため、結果検証はスキップします。"
+        echo "ℹ️ ユニットテスト実行が失敗したため、結果検証はスキップします。" >&2
       fi
     fi
 
     # UIテスト実行
     if $run_ui; then
-      run_ui_tests "$simulator_id"
+      run_ui_tests # 引数なしで呼び出す
       ui_test_run_exit_code=$? # 実行の終了コードを取得
       # 実行が成功した場合のみ検証を実行
       if [ $ui_test_run_exit_code -eq 0 ]; then
@@ -138,7 +136,7 @@ main() {
         ui_test_verify_exit_code=$? # 検証の終了コードを取得
       else
         # 実行が失敗した場合、検証はスキップ (検証コードは 0 のまま)
-        echo "ℹ️ UIテスト実行が失敗したため、結果検証はスキップします。"
+        echo "ℹ️ UIテスト実行が失敗したため、結果検証はスキップします。" >&2
       fi
     fi
   fi
@@ -146,16 +144,15 @@ main() {
   # アーカイブを実行する場合
   if $run_archive; then
     # build_archive_step を呼び出し、終了コードを取得
-    build_archive_step
+    build_archive_step # 引数なしで呼び出す
     archive_build_exit_code=$?
-    archive_verify_exit_code=0 # 検証コード初期化
-
+    
     # ビルドが成功した場合のみ検証を実行
     if [ $archive_build_exit_code -eq 0 ]; then
       verify_archive_step # 引数なしで呼び出す
       archive_verify_exit_code=$? # 検証の終了コードを取得
     else
-      echo "ℹ️ アーカイブビルドが失敗したため、検証はスキップします。"
+      echo "ℹ️ アーカイブビルドが失敗したため、検証はスキップします。" >&2
     fi
   fi
 
@@ -175,4 +172,4 @@ main() {
 # --- Script Entry Point --- 
 
 # メイン関数を実行（スクリプト引数を渡す）
-main "$@" 
+main "$@"

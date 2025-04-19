@@ -2,18 +2,23 @@
 # このファイルは関数定義のみを提供するため、直接実行は意図されていません。
 # run_unit_tests と verify_unit_test_results 関数を定義します。
 
+SCRIPT_DIR_STEPS=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
 # 依存関係を source
-source "$(dirname "$0")/../common/logging.sh"
-source "$(dirname "$0")/../ci-env.sh"
+source "$SCRIPT_DIR_STEPS/../common/logging.sh"
+source "$SCRIPT_DIR_STEPS/../ci-env.sh"
 
 # ユニットテストを実行する関数
-# 引数: $1 - シミュレータID
+# 引数: なし (環境変数 TEST_SIMULATOR_ID を使用)
 # 戻り値: xcodebuild の終了コード
 run_unit_tests() {
-  if [ -z "${1:-}" ]; then fail "run_unit_tests: シミュレータIDが必要です。"; return 1; fi
-  local simulator_id="$1"
-  step "ユニットテストを実行中 (Simulator ID: $simulator_id)..."
+  # Check if TEST_SIMULATOR_ID is set
+  if [ -z "$TEST_SIMULATOR_ID" ]; then
+    fail "run_unit_tests: 環境変数 TEST_SIMULATOR_ID が設定されていません。select_simulator を先に実行する必要があります。"
+    return 1
+  fi
 
+  step "ユニットテストを実行しています (シミュレータID: $TEST_SIMULATOR_ID)"
   local result_path="$TEST_RESULTS_DIR/unit/TestResults.xcresult"
   rm -rf "$result_path" # 前回の結果を削除
 
@@ -22,7 +27,7 @@ run_unit_tests() {
   set -o pipefail && xcodebuild test-without-building \
     -project "$PROJECT_FILE" \
     -scheme "$UNIT_TEST_SCHEME" \
-    -destination "platform=watchOS Simulator,id=$simulator_id" \
+    -destination "platform=watchOS Simulator,id=$TEST_SIMULATOR_ID" \
     -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
     -enableCodeCoverage NO \
     -resultBundlePath "$result_path" \

@@ -1,21 +1,28 @@
 #!/bin/bash
 # このファイルは関数定義のみを提供するため、直接実行は意図されていません。
 
-# 依存関係を source
-source "$(dirname "$0")/../common/logging.sh"
-source "$(dirname "$0")/../ci-env.sh"
+SCRIPT_DIR_STEPS=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
-# 利用可能なシミュレータを選択し、そのIDを出力する関数
+# 依存関係を source
+source "$SCRIPT_DIR_STEPS/../common/logging.sh"
+source "$SCRIPT_DIR_STEPS/../ci-env.sh" # SIMULATOR_NAME_PATTERN を読み込む
+
+# 利用可能なシミュレータを選択し、環境変数 TEST_SIMULATOR_ID に設定する関数
 # 戻り値: 0 (成功) or 1 (失敗)
-# 成功時: シミュレータIDを標準出力へ出力
 select_simulator() {
-  step "利用可能なシミュレータを検索・検証中..."
+  step "watchOSシミュレータを検索・検証し、環境変数に設定しています..."
 
   local watch_scheme="$WATCH_APP_SCHEME"
   local unit_scheme="$UNIT_TEST_SCHEME"
   local ui_scheme="$UI_TEST_SCHEME"
   local schemes=("$watch_scheme" "$unit_scheme" "$ui_scheme") # 検証対象のスキーム配列
   local simulator_name_pattern="$SIMULATOR_NAME_PATTERN" # ci-env.sh から
+
+  # SIMULATOR_NAME_PATTERN が空かチェック
+  if [ -z "$simulator_name_pattern" ]; then
+      echo "ℹ️ SIMULATOR_NAME_PATTERN が空です。利用可能な最初の watchOS Simulator を検索します。" >&2
+      simulator_name_pattern="." # Match any name if pattern is empty
+  fi
 
   local destinations
   local simulator_info
@@ -30,6 +37,7 @@ select_simulator() {
   fi
 
   # パターンに一致する watchOS Simulator を検索
+  # grep で name をフィルターし、head で最初のものを取得
   simulator_info=$(echo "$destinations" | grep "platform:watchOS Simulator" | grep "name:$simulator_name_pattern" | head -1)
 
   if [ -z "$simulator_info" ]; then
@@ -39,12 +47,12 @@ select_simulator() {
     return 1
   fi
 
-  # IDと名前を抽出
-  simulator_id=$(echo "$simulator_info" | sed -nE 's/.*id:([0-9A-F-]+).*/\1/p')
-  simulator_name=$(echo "$simulator_info" | sed -nE 's/.*name:([^,]+).*/\1/p' | xargs)
+  # IDと名前を抽出 (awkを使用)
+  simulator_id=$(echo "$simulator_info" | awk -F '[,:]' '{for(i=1; i<=NF; i++) if($i == " id") {gsub(/^[[:space:]]+|[[:space:]]+$/, "", $(i+1)); print $(i+1); exit}}')
+  simulator_name=$(echo "$simulator_info" | awk -F '[,:]' '{for(i=1; i<=NF; i++) if($i == " name") {gsub(/^[[:space:]]+|[[:space:]]+$/, "", $(i+1)); print $(i+1); exit}}')
 
-  if [ -z "$simulator_id" ]; then
-    fail "シミュレーター情報からIDを抽出できませんでした: $simulator_info"
+  if [ -z "$simulator_id" ] || [ -z "$simulator_name" ]; then
+    fail "シミュレーター情報からIDまたは名前を抽出できませんでした: $simulator_info"
     return 1
   fi
 
@@ -63,11 +71,14 @@ select_simulator() {
       xcodebuild -showdestinations -project "$PROJECT_FILE" -scheme "$scheme" 2>/dev/null | cat >&2
       return 1
     fi
-    success "OK: Scheme '$scheme' で有効です。"
+    success "OK: Scheme '$scheme' で有効です。" >&2
   done
 
-  success "選択されたシミュレータはすべての必須スキームで有効です: $simulator_name (ID: $simulator_id)"
-  echo "$simulator_id" # 成功した場合のみIDを標準出力へ
+  success "選択されたシミュレータはすべての必須スキームで有効です: $simulator_name (ID: $simulator_id)" >&2
+
+  # 見つけたIDを環境変数にエクスポート
+  export TEST_SIMULATOR_ID="$simulator_id"
+  success "環境変数 TEST_SIMULATOR_ID に設定しました: $TEST_SIMULATOR_ID"
   return 0
 }
 

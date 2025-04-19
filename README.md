@@ -41,7 +41,6 @@ SilentCue/
 │   │   │   ├── logging.sh
 │   │   │   └── prerequisites.sh
 │   │   └── build-steps/
-│   │       ├── clean-old-output.sh
 │   │       ├── select-simulator.sh
 │   │       ├── build-for-testing.sh
 │   │       ├── run-unit-tests.sh
