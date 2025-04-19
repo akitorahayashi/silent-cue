@@ -18,6 +18,9 @@ final class TimerCompletionViewUITests: XCTestCase {
                 .waitForExistence(timeout: UITestConstants.Timeout.standard) ?? false,
             "TimerCompletionView の閉じるボタンが表示される"
         )
+        
+        // 初回起動時に対して通知を許可
+        NotificationPermissionHelper.ensureNotificationPermission(for: app!)
     }
 
     override func tearDown() {
