@@ -11,9 +11,9 @@ source "$SCRIPT_DIR/ci-env.sh"
 # 共通関数を読み込む (logging, prerequisites)
 source "$SCRIPT_DIR/common/logging.sh"
 source "$SCRIPT_DIR/common/prerequisites.sh"
+source "$SCRIPT_DIR/common/select-simulator.sh"
 
 # ステップ関数を読み込む
-source "$SCRIPT_DIR/build-steps/select-simulator.sh"
 source "$SCRIPT_DIR/build-steps/build-for-testing.sh"
 source "$SCRIPT_DIR/build-steps/run-unit-tests.sh"
 source "$SCRIPT_DIR/build-steps/run-ui-tests.sh"

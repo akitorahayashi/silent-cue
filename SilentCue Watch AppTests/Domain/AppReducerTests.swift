@@ -18,9 +18,6 @@ final class AppReducerTests: XCTestCase {
             }
         )
 
-        // 完全網羅的テストをオフにする
-        store.exhaustivity = .off
-
         // AppAction.onAppear を送信
         await store.send(AppAction.onAppear)
 
@@ -36,10 +33,12 @@ final class AppReducerTests: XCTestCase {
         }
 
         // AppReducer内の機能連携による updateHapticSettings アクションを期待
-        // 状態の変更は assert しない（同じ値の設定か、変更が起きていない可能性があるため）
+        // 状態の変更もアサートする
         await store.receive(AppAction.haptics(.updateHapticSettings(
             type: HapticType.standard
-        )))
+        ))) { state in
+            state.haptics.hapticType = HapticType.standard
+        }
 
         // エフェクトが完了したことを確認
         await store.finish()
@@ -58,15 +57,17 @@ final class AppReducerTests: XCTestCase {
             state.settings.isSettingsLoaded = true
         }
 
-        // AppReducerの連携による後続のアクションをアサート (状態変更なしで受信)
+        // AppReducerの連携による後続のアクションをアサート (状態変更を伴う)
         await store.receive(AppAction.haptics(.updateHapticSettings(
             type: HapticType.weak
-        )))
-
-        // 最終的な状態をアサート
-        store.assert { state in
+        ))) { state in
             state.haptics.hapticType = HapticType.weak
         }
+
+        // 最終的な状態をアサート (Now handled in the receive block above)
+        // store.assert { state in
+        //     state.haptics.hapticType = HapticType.weak
+        // }
 
         await store.finish()
     }

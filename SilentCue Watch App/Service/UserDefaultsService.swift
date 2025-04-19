@@ -40,9 +40,8 @@ extension DependencyValues {
 private enum UserDefaultsServiceKey: DependencyKey { // キーenum名を変更
     static let liveValue: UserDefaultsServiceProtocol = LiveUserDefaultsService() // 新しいクラスとプロトコルを使用
 
-    // プレビューには MockUserDefaultsManager を使用します (必要に応じて新しいプロトコルに準拠することを確認)
-    // MockUserDefaultsManager が UserDefaultsServiceProtocol に準拠できるか、適合できると仮定します
-    static let previewValue: UserDefaultsServiceProtocol = MockUserDefaultsManager()
+    // Use PreviewUserDefaultsService for previews (defined in PreviewUserDefaultsService.swift #if DEBUG)
+    static let previewValue: UserDefaultsServiceProtocol = PreviewUserDefaultsService()
 }
 
 extension LiveUserDefaultsService: TestDependencyKey { // 拡張ターゲットを更新

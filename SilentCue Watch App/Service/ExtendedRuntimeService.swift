@@ -133,9 +133,8 @@ extension DependencyValues {
 private enum ExtendedRuntimeServiceKey: DependencyKey { // キーenum名を変更
     static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService() // 新しいクラスとプロトコルを使用
 
-    // プレビューには Mock を使用
-    static let previewValue: ExtendedRuntimeServiceProtocol =
-        MockExtendedRuntimeService()
+    // プレビューには liveValue を使用 (モックはテストターゲット専用)
+    static let previewValue: ExtendedRuntimeServiceProtocol = Self.liveValue
 }
 
 // TestDependencyKey を使用して testValue を定義

@@ -29,68 +29,40 @@ TCA の依存性注入システム (`@Dependency`) を全面的に採用して�
 
 ## ディレクトリ構成
 
-```
+```md
 SilentCue/
-├── .github/
-│   ├── CI_CD_WORKFLOWS.md
-│   ├── scripts/
-│   │   ├── ci-env.sh
-│   │   ├── run-local-validation.sh
-│   │   ├── find-simulator.sh
-│   │   ├── common/
-│   │   │   ├── logging.sh
-│   │   │   └── prerequisites.sh
-│   │   └── build-steps/
-│   │       ├── select-simulator.sh
-│   │       ├── build-for-testing.sh
-│   │       ├── run-unit-tests.sh
-│   │       ├── run-ui-tests.sh
-│   │       └── build-archive.sh
-│   └── workflows/
-│       ├── ci-cd-pipeline.yml
-│       ├── run-tests.yml
-│       ├── build-unsigned-archive.yml
-│       ├── code-quality.yml
-│       ├── test-reporter.yml
-│       ├── copilot-review.yml
-│       └── release.yml
-├── Shared/
-│   ├── Protocol/
-│   ├── Mock/
-│   ├── SCAppEnvironment.swift
-│   └── SCAccessibilityIdentifiers.swift
+├── TestSupport/
 ├── SilentCue Watch App/
 │   ├── Assets.xcassets/
+│   ├── Preview Content/
+│   ├── Procotol/
+│   ├── Service/
+│   ├── Util/
 │   ├── Domain/
 │   │   ├── App/
 │   │   ├── Settings/
 │   │   ├── Timer/
 │   │   └── Haptics/
-│   ├── Preview Content/
-│   ├── Service/
-│   ├── Util/
 │   ├── View/
 │   │   ├── CountdownView/
 │   │   ├── SetTimerView/
 │   │   ├── SettingsView/
 │   │   └── TimerCompletionView/
-│   └── SilentCueApp.swift # ルートアプリファイル
+│   └── SilentCueApp.swift
 ├── SilentCue Watch AppTests/
 │   ├── Domain/
-│   ├── Service/
-│   └── Mock/
+│   └── Service/
 ├── SilentCue Watch AppUITests/
-│   ├── Tests/
-│   ├── Mock/
-│   ├── Extension/
 │   ├── Constant/
+│   ├── Extension/
+│   ├── Tests/
 │   └── Util/
+├── SilentCue.xcodeproj/
 ├── .gitignore
 ├── .swiftformat
 ├── .swiftlint.yml
 ├── Mintfile
 ├── README.md
-├── SilentCue.xcodeproj/
 └── SilentCue-Watch-App-Info.plist
 ```
 

@@ -6,7 +6,7 @@ final class TimerCompletionViewUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
         let application = XCUIApplication()
-        SCAppEnvironment.setupEnvironment(for: application, initialView: .timerCompletionView)
+        SCAppEnvironment.setupUITestEnv(for: application, initialView: .timerCompletionView)
         application.launch()
         app = application
 

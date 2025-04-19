@@ -3,12 +3,11 @@ import ComposableArchitecture
 import WatchKit
 import XCTest
 
-@MainActor
 final class SettingsReducerTests: XCTestCase {
-    // Test AppReducer integration for load settings
+    // AppReducer 経由での設定読み込みの統合テスト
     func testLoadSettingsViaAppReducer() async {
         let mockUserDefaults = MockUserDefaultsManager()
-        // Use direct set instead of setupInitialValues
+        // setupInitialValues の代わりに直接値を設定
         mockUserDefaults.set(HapticType.strong.rawValue, forKey: UserDefaultsKeys.hapticType)
 
         let store = TestStore(
@@ -19,7 +18,7 @@ final class SettingsReducerTests: XCTestCase {
             }
         )
 
-        // Send AppAction.settings with correct scope
+        // 正しいスコープで AppAction.settings を送信
         await store.send(.settings(.loadSettings))
 
         await store.receive(.settings(.settingsLoaded(
@@ -29,7 +28,7 @@ final class SettingsReducerTests: XCTestCase {
             state.settings.isSettingsLoaded = true
         }
 
-        // Action chained within AppReducer
+        // AppReducer 内で連鎖するアクション
         await store.receive(.haptics(.updateHapticSettings(
             type: HapticType.strong
         ))) { state in
@@ -38,7 +37,7 @@ final class SettingsReducerTests: XCTestCase {
         await store.finish()
     }
 
-    // Test AppReducer integration for select haptic type
+    // AppReducer 経由での触覚タイプ選択の統合テスト
     func testSelectHapticTypeViaAppReducer() async {
         let mockUserDefaults = MockUserDefaultsManager()
 
@@ -50,74 +49,82 @@ final class SettingsReducerTests: XCTestCase {
             reducer: { AppReducer() },
             withDependencies: { dependencies in
                 dependencies.userDefaultsService = mockUserDefaults
-                // Use shared MockHapticsService
+                // 共有の MockHapticsService を使用
                 dependencies.hapticsService = MockHapticsService()
             }
         )
 
-        // Send AppAction.settings with correct scope
+        // 正しいスコープで AppAction.settings を送信
         await store.send(.settings(.selectHapticType(HapticType.weak))) { state in
             state.settings.selectedHapticType = HapticType.weak
         }
 
-        // Expect chained actions from AppReducer
-        await store.receive(.haptics(.updateHapticSettings(type: .weak))) { state in
-            state.haptics.hapticType = .weak
-        }
-        // Expect effects triggered by selectHapticType within SettingsReducer (now scoped)
-        await store.receive(.settings(.saveSettings))
+        // SettingsReducer 内で selectHapticType によってトリガーされるエフェクトを期待 (スコープ付き)
         await store.receive(.settings(.previewHapticFeedback(.weak))) { state in
             state.settings.isPreviewingHaptic = true
         }
+        // AppReducer から連鎖するアクションを期待
+        await store.receive(.haptics(.updateHapticSettings(type: .weak))) { state in
+            state.haptics.hapticType = .weak
+        }
+        // Preview completion action
         await store.receive(.settings(.previewHapticCompleted)) { state in
             state.settings.isPreviewingHaptic = false
         }
 
+        // エフェクト完了後に UserDefaults に値が保存されたことをアサート
+        XCTAssertEqual(mockUserDefaults.object(forKey: .hapticType) as? String, HapticType.weak.rawValue)
+
         await store.finish()
     }
 
-    // Test AppReducer integration for save settings (if needed as separate test)
+    // AppReducer 経由での設定保存の統合テスト (必要であれば別途テスト)
     // func testSaveSettingsViaAppReducer() async { ... }
 
-    // Test SettingsReducer directly: loadSettings with no value
+    // SettingsReducer を直接テスト: 値が存在しない場合の loadSettings
     func testLoadSettings_WhenNoValueExists() async {
-        let mockUserDefaults = MockUserDefaultsManager() // No initial value set
+        let mockUserDefaults = MockUserDefaultsManager() // 初期値は未設定
         let store = TestStore(initialState: SettingsState()) {
-            SettingsReducer() // Test SettingsReducer directly
+            SettingsReducer() // SettingsReducer を直接テスト
         } withDependencies: { dependencies in
             dependencies.userDefaultsService = mockUserDefaults
         }
 
-        // Send SettingsAction directly
-        await store.send(.loadSettings)
+        // SettingsAction を直接送信
+        await store.send(SettingsAction.loadSettings)
 
-        // Expect SettingsAction directly
-        await store.receive(.settingsLoaded(hapticType: HapticType.standard)) { // Use full HapticType path
+        // SettingsAction を直接期待
+        await store.receive(SettingsAction.settingsLoaded(hapticType: HapticType.standard)) {
             $0.selectedHapticType = HapticType.standard
             $0.isSettingsLoaded = true
         }
+        // No effects expected from loadSettings itself, so finish immediately
+        await store.finish()
     }
 
-    // Test SettingsReducer directly: saveSettings triggered by selectHapticType
+    // SettingsReducer を直接テスト: selectHapticType によってトリガーされる saveSettings
     func testSaveSettings() async {
         let mockUserDefaults = MockUserDefaultsManager()
-        let store = TestStore(initialState: SettingsState(selectedHapticType: .weak)) {
-            SettingsReducer() // Test SettingsReducer directly
+        // 変更を確認するために異なる初期状態で開始
+        let store = TestStore(initialState: SettingsState(selectedHapticType: .standard)) {
+            SettingsReducer() // SettingsReducer を直接テスト
         } withDependencies: { dependencies in
             dependencies.userDefaultsService = mockUserDefaults
             dependencies.hapticsService = MockHapticsService()
         }
 
-        // Send SettingsAction directly
-        await store.send(.selectHapticType(HapticType.weak)) // Use full HapticType path
+        // SettingsAction を直接送信
+        await store.send(SettingsAction.selectHapticType(.weak)) {
+            $0.selectedHapticType = .weak // 状態は即座に更新されるべき
+        }
 
-        // Check mock state directly
+        // SettingsReducer 内でトリガーされるエフェクトを期待
+        // .saveSettings アクションは送信されないため、エフェクト後にモックを直接確認
+        await store.receive(SettingsAction.previewHapticFeedback(.weak)) { $0.isPreviewingHaptic = true }
+        await store.receive(SettingsAction.previewHapticCompleted) { $0.isPreviewingHaptic = false }
+
+        // エフェクト完了後に UserDefaults に値が保存されたことをアサート
         XCTAssertEqual(mockUserDefaults.object(forKey: .hapticType) as? String, HapticType.weak.rawValue)
-
-        // Expect effects triggered within SettingsReducer
-        await store.receive(.saveSettings)
-        await store.receive(.previewHapticFeedback(HapticType.weak)) { $0.isPreviewingHaptic = true } // Use full HapticType path
-        await store.receive(.previewHapticCompleted) { $0.isPreviewingHaptic = false }
 
         await store.finish()
     }

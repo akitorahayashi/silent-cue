@@ -2,10 +2,6 @@ import XCTest
 
 extension SCAppEnvironment {
     private static func setEnv(_ key: LaunchArguments, to value: String, for app: XCUIApplication) {
-        guard key == .disableNotificationsForTesting else {
-            print("Warning: Trying to set non-env key \(key.rawValue) as environment variable.")
-            return
-        }
         app.launchEnvironment[key.rawValue] = value
     }
 
@@ -21,9 +17,6 @@ extension SCAppEnvironment {
         initialView: InitialViewOption? = nil,
         otherArguments: [SCAppEnvironment.LaunchArguments] = []
     ) {
-        // UITest環境では通知を無効化
-        setEnv(.disableNotificationsForTesting, to: "YES", for: app)
-
         var arguments: [String] = [LaunchArguments.uiTesting.rawValue]
         if let initialViewRawValue = initialView?.rawValue {
             arguments.append(initialViewRawValue)

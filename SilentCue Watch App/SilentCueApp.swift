@@ -26,13 +26,13 @@ struct SilentCueWatchApp: App {
                 store = Store(initialState: AppState()) {
                     AppReducer()
                 } withDependencies: { // このストアインスタンスに特化した依存関係をオーバーライド
-                    $0.userDefaultsService = MockUserDefaultsManager()
-                    // MockUserDefaultsManager が UserDefaultsServiceProtocol に準拠していることを確認
+                    // Use PreviewUserDefaultsService for UI tests
+                    $0.userDefaultsService = PreviewUserDefaultsService()
 
-                    // UIテストに必要な他のオーバーライドを追加:
-                    // $0.notificationService = MockNotificationService()
-                    // $0.extendedRuntimeManager = MockExtendedRuntimeManager()
-                    // $0.hapticClient = .noop // または特定のモック
+                    // UIテストに必要な他のオーバーライドを追加 (必要に応じて Preview...Service を作成):
+                    // $0.notificationService = PreviewNotificationService()
+                    // $0.extendedRuntimeService = PreviewExtendedRuntimeService()
+                    // $0.hapticsService = PreviewHapticsService()
                     // $0.continuousClock = ImmediateClock() // テストには即時クロックを使用
                 }
             } else {

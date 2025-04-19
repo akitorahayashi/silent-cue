@@ -23,8 +23,8 @@ extension DependencyValues {
 private enum HapticsServiceKey: DependencyKey { // キーenum名を変更
     static let liveValue: HapticsServiceProtocol = LiveHapticsService() // 新しいクラスとプロトコルを使用
 
-    // Preview実装 - Mock実装を使用
-    static let previewValue: HapticsServiceProtocol = MockHapticsService()
+    // Preview実装 - liveValue を使用 (モックはテストターゲット専用)
+    static let previewValue: HapticsServiceProtocol = Self.liveValue
 }
 
 // TestDependencyKey を使用して testValue を定義

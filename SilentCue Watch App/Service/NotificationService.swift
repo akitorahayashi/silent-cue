@@ -140,9 +140,8 @@ private enum NotificationServiceKey: DependencyKey { // キーenum名を変更
         return service
     }() // Use new class and protocol
 
-    // Preview実装を提供 (Mock)
-    static let previewValue: NotificationServiceProtocol =
-        MockNotificationService()
+    // Preview実装 - liveValue を使用 (モックはテストターゲット専用)
+    static let previewValue: NotificationServiceProtocol = Self.liveValue
 }
 
 // TestDependencyKey を使用して testValue を定義
