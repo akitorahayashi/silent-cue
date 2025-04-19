@@ -23,76 +23,83 @@ jobs:
     - name: Install xcpretty
       run: gem install xcpretty
 
-    - name: Clean Output Directory
-      shell: bash
-      run: |
-        source .github/scripts/build-steps/clean-old-output.sh
-        clean_old_output
-
-    - name: Select Simulator
+    - name: Select Simulator and Set Env Var
       id: select_simulator
       shell: bash
       run: |
+        source .github/scripts/common/logging.sh
+        source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/select-simulator.sh
-        # select_simulator は成功時にIDを標準出力へ出力、失敗時は非ゼロで終了
-        simulator_id=$(select_simulator)
-        echo "simulator_id=$simulator_id" >> $GITHUB_OUTPUT
+        select_simulator
 
     - name: Build for Testing
-      id: build_for_testing
+      id: build
+      if: steps.select_simulator.outcome == 'success'
       shell: bash
       run: |
+        source .github/scripts/common/logging.sh
+        source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/build-for-testing.sh
-        build_for_testing ${{ steps.select_simulator.outputs.simulator_id }}
-      # このステップは build_for_testing 関数が失敗(非ゼロ終了)したら失敗する
+        build_for_testing
+      continue-on-error: true
+
+    - name: Verify Build for Testing
+      id: verify_build
+      if: steps.build.outcome == 'success'
+      shell: bash
+      run: |
+        source .github/scripts/common/logging.sh
+        source .github/scripts/ci-env.sh
+        source .github/scripts/build-steps/build-for-testing.sh
+        verify_build_for_testing
+      continue-on-error: true
 
     - name: Run Unit Tests
       id: run_unit_tests
+      if: steps.verify_build.outcome == 'success'
       shell: bash
       run: |
+        source .github/scripts/common/logging.sh
+        source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/run-unit-tests.sh
-        # 関数の終了コードをキャプチャして exit
-        run_unit_tests ${{ steps.select_simulator.outputs.simulator_id }}
-        exit $?
-      continue-on-error: true # ステップが失敗してもワークフローを続行
+        run_unit_tests
+      continue-on-error: true
 
     - name: Verify Unit Test Results
       id: verify_unit_tests
-      shell: bash
-      # Runステップが成功した場合のみ実行
       if: steps.run_unit_tests.outcome == 'success'
+      shell: bash
       run: |
+        source .github/scripts/common/logging.sh
+        source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/run-unit-tests.sh
-        # 引数なしで verify 関数を呼び出す
         verify_unit_test_results
-      # このステップは検証失敗時にジョブを失敗させない (後続処理のため)
       continue-on-error: true
 
     - name: Run UI Tests
       id: run_ui_tests
+      if: steps.verify_build.outcome == 'success'
       shell: bash
       run: |
+        source .github/scripts/common/logging.sh
+        source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/run-ui-tests.sh
-        # 関数の終了コードをキャプチャして exit
-        run_ui_tests ${{ steps.select_simulator.outputs.simulator_id }}
-        exit $?
-      continue-on-error: true # ステップが失敗してもワークフローを続行
+        run_ui_tests
+      continue-on-error: true
 
     - name: Verify UI Test Results
       id: verify_ui_tests
-      shell: bash
-      # Runステップが成功した場合のみ実行
       if: steps.run_ui_tests.outcome == 'success'
+      shell: bash
       run: |
+        source .github/scripts/common/logging.sh
+        source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/run-ui-tests.sh
-        # 引数なしで verify 関数を呼び出す
         verify_ui_test_results
-      # このステップは検証失敗時にジョブを失敗させない (後続処理のため)
       continue-on-error: true
 
-    # xcresult から JUnit レポートを生成
     - name: Generate Unit Test JUnit Report
-      if: always() # 以前のステップが失敗した場合でも、常にレポートを生成するために実行
+      if: always()
       run: |
         echo "Generating Unit Test JUnit Report..."
         if [ -d ./ci-outputs/test-results/unit/TestResults.xcresult ]; then
@@ -121,35 +128,35 @@ jobs:
            echo "⚠️ UI test .xcresult bundle not found, skipping report generation."
         fi
 
-    # スクリプトの終了コードとレポート内容に基づいて全体のテストステータスを設定
     - name: Set Test Status
       id: set_test_status
-      if: always() # ジョブ全体の成否に関わらず、常にこのステップを実行して最終結果を判断
+      if: always()
       run: |
-        echo "Build step outcome: ${{ steps.build_for_testing.outcome }}"
+        echo "Select Simulator step outcome: ${{ steps.select_simulator.outcome }}"
+        echo "Build step outcome: ${{ steps.build.outcome }}"
+        echo "Verify Build step outcome: ${{ steps.verify_build.outcome }}"
         echo "Unit Test Run outcome: ${{ steps.run_unit_tests.outcome }}"
         echo "Unit Test Verify outcome: ${{ steps.verify_unit_tests.outcome }}"
         echo "UI Test Run outcome: ${{ steps.run_ui_tests.outcome }}"
         echo "UI Test Verify outcome: ${{ steps.verify_ui_tests.outcome }}"
-        # 主要な実行ステップと検証ステップの outcome が failure かどうかをチェック
-        if [[ "${{ steps.build_for_testing.outcome }}" == "failure" || \
+        if [[ "${{ steps.select_simulator.outcome }}" == "failure" || \
+              "${{ steps.build.outcome }}" == "failure" || \
+              "${{ steps.verify_build.outcome }}" == "failure" || \
               "${{ steps.run_unit_tests.outcome }}" == "failure" || \
               "${{ steps.verify_unit_tests.outcome }}" == "failure" || \
               "${{ steps.run_ui_tests.outcome }}" == "failure" || \
               "${{ steps.verify_ui_tests.outcome }}" == "failure" ]]; then
-           # いずれかのステップが失敗した場合
            echo "❌ One or more steps failed."
            echo "result=failure" >> $GITHUB_OUTPUT
         else
-          # すべてのステップが成功した場合
           echo "✅ All tests passed."
           echo "result=success" >> $GITHUB_OUTPUT
         fi
 
     - name: Upload Test Results
-      if: always() # 失敗時でも結果をアップロード
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: ci-outputs/test-results # .xcresult と .xml をアップロード
+        path: ci-outputs/test-results
         retention-days: 7 

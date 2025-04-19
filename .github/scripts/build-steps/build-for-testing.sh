@@ -17,23 +17,51 @@ build_for_testing() {
     return 1
   fi
 
-  step "テスト用ビルドを開始します (シミュレータID: $TEST_SIMULATOR_ID)"
-  # 古いDerivedDataを削除
+  step "テスト用ビルドを開始します (Unit Test Scheme, シミュレータID: $TEST_SIMULATOR_ID)"
+  # 古いDerivedDataを削除 - build_for_testing 自体が上書きするので不要かもしれないが念のため
+  if [ -d "$TEST_DERIVED_DATA_DIR" ]; then
+      echo "古いテスト用DerivedDataを削除しています: $TEST_DERIVED_DATA_DIR"
+      rm -rf "$TEST_DERIVED_DATA_DIR"
+  fi
+  mkdir -p "$TEST_DERIVED_DATA_DIR"
 
-  if ! set -o pipefail && xcodebuild build-for-testing \
+  local xcodebuild_exit_code=0
+  set -o pipefail && xcodebuild build-for-testing \
     -project "$PROJECT_FILE" \
-    -scheme "$WATCH_APP_SCHEME" \
+    -scheme "$UNIT_TEST_SCHEME" \
     -destination "platform=watchOS Simulator,id=$TEST_SIMULATOR_ID" \
     -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
     -configuration Debug \
     -skipMacroValidation \
     CODE_SIGNING_ALLOWED=NO \
-    | xcpretty -c; then
-    fail "テスト用ビルドに失敗しました。ログを確認してください。"
-  fi
+    | xcpretty -c
 
-  success "テスト用ビルドが完了しました。"
-  return 0
+  xcodebuild_exit_code=${PIPESTATUS[0]}
+  set +o pipefail
+
+  if [ $xcodebuild_exit_code -ne 0 ]; then
+    echo "⚠️ テスト用ビルドがゼロ以外の終了コード ($xcodebuild_exit_code) で完了しました。" >&2
+    # fail は呼ばず、終了コードを返す
+  else
+    success "テスト用ビルドが終了コード 0 で完了しました。"
+  fi
+  return $xcodebuild_exit_code
 }
 
-export -f build_for_testing 
+# build-for-testing の結果を検証する関数
+# 引数: なし
+# 戻り値: 0 (成功) or 1 (失敗)
+verify_build_for_testing() {
+  step "テスト用ビルドの結果を検証中..."
+  local app_bundle_path="$TEST_DERIVED_DATA_DIR/Build/Products/Debug-watchsimulator/$WATCH_APP_SCHEME.app"
+
+  if [ ! -d "$app_bundle_path" ]; then
+    fail "テスト用ビルドは成功しましたが、期待されるアプリケーションバンドルが見つかりません: $app_bundle_path"
+    return 1 # 検証失敗
+  fi
+
+  success "テスト用ビルドの成果物 (アプリケーションバンドル) を確認しました: $app_bundle_path"
+  return 0 # 検証成功
+}
+
+export -f build_for_testing verify_build_for_testing 
