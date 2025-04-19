@@ -50,8 +50,8 @@ final class SettingsReducerTests: XCTestCase {
             reducer: { AppReducer() },
             withDependencies: { dependencies in
                 dependencies.userDefaultsService = mockUserDefaults
-                // Use shared NoopHapticsService
-                dependencies.hapticsService = NoopHapticsService()
+                // Use shared MockHapticsService
+                dependencies.hapticsService = MockHapticsService()
             }
         )
 
@@ -92,8 +92,8 @@ final class SettingsReducerTests: XCTestCase {
         await store.send(.loadSettings)
 
         // Expect SettingsAction directly
-        await store.receive(.settingsLoaded(hapticType: .standard)) {
-            $0.selectedHapticType = .standard
+        await store.receive(.settingsLoaded(hapticType: HapticType.standard)) { // Use full HapticType path
+            $0.selectedHapticType = HapticType.standard
             $0.isSettingsLoaded = true
         }
     }
@@ -105,26 +105,20 @@ final class SettingsReducerTests: XCTestCase {
             SettingsReducer() // Test SettingsReducer directly
         } withDependencies: { dependencies in
             dependencies.userDefaultsService = mockUserDefaults
-            // Use shared NoopHapticsService
-            dependencies.hapticsService = NoopHapticsService()
+            dependencies.hapticsService = MockHapticsService()
         }
 
         // Send SettingsAction directly
-        await store.send(.selectHapticType(.weak))
+        await store.send(.selectHapticType(HapticType.weak)) // Use full HapticType path
 
         // Check mock state directly
         XCTAssertEqual(mockUserDefaults.object(forKey: .hapticType) as? String, HapticType.weak.rawValue)
 
-        // Expect effects triggered within SettingsReducer (no AppReducer scope needed)
+        // Expect effects triggered within SettingsReducer
         await store.receive(.saveSettings)
-        await store.receive(.previewHapticFeedback(.weak)) { $0.isPreviewingHaptic = true }
+        await store.receive(.previewHapticFeedback(HapticType.weak)) { $0.isPreviewingHaptic = true } // Use full HapticType path
         await store.receive(.previewHapticCompleted) { $0.isPreviewingHaptic = false }
 
         await store.finish()
     }
 }
-
-// Remove local mock definition
-// struct HapticsServiceProtocolNoopMock: HapticsServiceProtocol {
-//    func play(_ type: WKHapticType) async { /* do nothing */ }
-// }

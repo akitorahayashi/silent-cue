@@ -17,7 +17,7 @@ build_for_testing() {
     return 1
   fi
 
-  step "テスト用ビルドを開始します (Unit Test Scheme, シミュレータID: $TEST_SIMULATOR_ID)"
+  step "テスト用ビルドを開始します (App Scheme, シミュレータID: $TEST_SIMULATOR_ID)"
   # 古いDerivedDataを削除 - build_for_testing 自体が上書きするので不要かもしれないが念のため
   if [ -d "$TEST_DERIVED_DATA_DIR" ]; then
       echo "古いテスト用DerivedDataを削除しています: $TEST_DERIVED_DATA_DIR"
@@ -28,7 +28,7 @@ build_for_testing() {
   local xcodebuild_exit_code=0
   set -o pipefail && xcodebuild build-for-testing \
     -project "$PROJECT_FILE" \
-    -scheme "$UNIT_TEST_SCHEME" \
+    -scheme "$WATCH_APP_SCHEME" \
     -destination "platform=watchOS Simulator,id=$TEST_SIMULATOR_ID" \
     -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
     -configuration Debug \

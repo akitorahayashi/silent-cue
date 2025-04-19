@@ -179,7 +179,7 @@ $ ./.github/scripts/run-local-validation.sh --archive-only
 
 ### テストのみ実行 (ビルド成果物を再利用)
 
-テストコードなどを修正した後、既存のビルド成果物 (`ci-outputs/test-results/DerivedData`) を再利用して、テストのみを高速に再実行・検証します。
+テストコードのみを修正した後、既存のビルド成果物 (`ci-outputs/test-results/DerivedData`) を再利用して、テストのみを高速に再実行・検証します。
 事前に上記のコマンドで `--all-tests` や `--unit-test` などを実行してビルド成果物を作成しておく必要があります。
 
 ```shell
