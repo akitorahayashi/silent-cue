@@ -78,6 +78,7 @@ select_simulator() {
 
   # 見つけたIDを環境変数にエクスポート
   export TEST_SIMULATOR_ID="$simulator_id"
+  echo "TEST_SIMULATOR_ID=$simulator_id" >> $GITHUB_ENV
   success "環境変数 TEST_SIMULATOR_ID に設定しました: $TEST_SIMULATOR_ID"
   return 0
 }

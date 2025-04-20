@@ -63,23 +63,3 @@ verify_ui_test_results() {
 }
 
 export -f run_ui_tests verify_ui_test_results
-
-# --- スクリプトエントリポイント --- を削除
-# # 第一引数に基づいて実行する関数を決定
-# COMMAND=${1:-"run"} # デフォルトは run
-# shift || true # 第一引数を消費 (引数がない場合もエラーにしない)
-# 
-# case "$COMMAND" in
-#   run)
-#     run_ui_tests "$@" # 残りの引数を渡す (シミュレータID)
-#     exit $? # 関数の終了コードで exit
-#     ;;
-#   verify)
-#     verify_ui_test_results "$@" # 残りの引数を渡す (終了コード)
-#     exit $? # 関数の終了コードで exit
-#     ;;
-#   *)
-#     fail "不明なコマンド: $COMMAND 。'run' または 'verify' を指定してください。"
-#     exit 1
-#     ;;
-# esac 
