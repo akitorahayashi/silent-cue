@@ -10,20 +10,31 @@ final class TimerCompletionViewUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
         let application = XCUIApplication()
+        // TimerCompletionView からテストを開始するように環境設定
         SCAppEnvironment.setupUITestEnv(for: application, initialView: .timerCompletionView)
         application.launch()
         app = application
 
-        XCTAssertNotNil(app, "XCUIApplication が初期化されている")
+        guard let unwrappedApp = app else {
+            XCTFail("XCUIApplication instance failed to initialize in setUp.")
+            return
+        }
+        XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されていること")
 
+        // 初回起動時に対して通知を許可 (要素チェックの前に実行)
+        NotificationPermissionHelper.ensureNotificationPermission(for: unwrappedApp)
+
+        // デバッグ用に要素階層を出力
+        print("--- TimerCompletionView setUp UI Tree Start ---")
+        print(unwrappedApp.debugDescription)
+        print("--- TimerCompletionView setUp UI Tree End ---")
+
+        // TimerCompletionView の主要要素（閉じるボタン）が表示されることを確認
         XCTAssertTrue(
-            app!.buttons[timerCompletionView.closeTimeCompletionViewButton.rawValue]
+            unwrappedApp.buttons[timerCompletionView.closeTimeCompletionViewButton.rawValue]
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "TimerCompletionView の閉じるボタンが表示される"
+            "TimerCompletionView の閉じるボタンが表示されること"
         )
-
-        // 初回起動時に対して通知を許可
-        NotificationPermissionHelper.ensureNotificationPermission(for: app!)
     }
 
     override func tearDown() {

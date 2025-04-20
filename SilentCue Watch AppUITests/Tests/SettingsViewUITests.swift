@@ -1,43 +1,44 @@
+@testable import SilentCue_Watch_App
 import XCTest
 
 final class SettingsViewUITests: XCTestCase {
-    // app プロパティをオプショナルに変更
     var app: XCUIApplication?
     // Accessibility Identifiers
     let settingsView = SCAccessibilityIdentifiers.SettingsView.self
-    let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self // 戻るボタンの遷移先確認用
+    let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
 
     override func setUp() {
         continueAfterFailure = false
-
-        // ローカルでインスタンスを作成
         let application = XCUIApplication()
-        // 環境設定を行い、アプリを起動する (設定画面から開始)
+        // SettingsView からテストを開始するように環境設定
         SCAppEnvironment.setupUITestEnv(for: application, initialView: .settingsView)
         application.launch()
-        // プロパティに代入
         app = application
 
         guard let unwrappedApp = app else {
             XCTFail("XCUIApplication instance failed to initialize in setUp.")
             return
         }
-        XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されている")
+        XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されていること")
 
-        // 設定タイトルが表示されていることを確認して起動を検証
-        XCTAssertTrue(
-            unwrappedApp.navigationBars[settingsView.navigationBarTitle.rawValue] // 定数を使用
-                .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "設定画面のナビゲーションバーが表示されている"
-        )
-
-        // 初回起動時に対して通知を許可
+        // 初回起動時に対して通知を許可 (要素チェックの前に実行)
         NotificationPermissionHelper.ensureNotificationPermission(for: unwrappedApp)
+
+        // デバッグ用に要素階層を出力
+        print("--- SettingsView setUp UI Tree Start ---")
+        print(unwrappedApp.debugDescription)
+        print("--- SettingsView setUp UI Tree End ---")
+
+        // SettingsView の主要要素（ナビゲーションバータイトル）が表示されることを確認
+        XCTAssertTrue(
+            unwrappedApp.navigationBars[settingsView.navigationBarTitle.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "SettingsView のナビゲーションバータイトルが表示されること"
+        )
     }
 
-    // tearDown を追加
     override func tearDown() {
-        app?.terminate() // アプリ終了
+        app?.terminate()
         app = nil
         super.tearDown()
     }

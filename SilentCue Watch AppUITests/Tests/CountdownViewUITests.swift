@@ -1,7 +1,9 @@
+@testable import SilentCue_Watch_App
 import XCTest
 
 final class CountdownViewUITests: XCTestCase {
     var app: XCUIApplication?
+    // Accessibility Identifiers
     let countdownView = SCAccessibilityIdentifiers.CountdownView.self
     let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
 
@@ -27,7 +29,7 @@ final class CountdownViewUITests: XCTestCase {
         print(unwrappedApp.debugDescription)
         print("--- CountdownView setUp UI Tree End ---")
 
-        // CountdownView の主要要素（時間表示）が表示されることを確認
+        // CountdownView の時間表示が表示されることを確認
         XCTAssertTrue(
             unwrappedApp.staticTexts[countdownView.countdownTimeDisplay.rawValue]
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),

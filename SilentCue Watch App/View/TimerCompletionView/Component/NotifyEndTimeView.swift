@@ -18,9 +18,15 @@ struct NotifyEndTimeView: View {
                 .font(.system(size: 14))
                 .foregroundStyle(.secondary)
 
-            Text(completionDate != nil ? SCTimeFormatter.formatToHoursAndMinutes(completionDate!) : "00:00")
-                .font(.system(size: 24))
-                .foregroundStyle(.primary)
+            if let date = completionDate {
+                Text(SCTimeFormatter.formatToHoursAndMinutes(date))
+                    .font(.system(size: 24))
+                    .foregroundStyle(.primary)
+            } else {
+                Text("00:00")
+                    .font(.system(size: 24))
+                    .foregroundStyle(.primary)
+            }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.notifyEndTimeViewVStack.rawValue)

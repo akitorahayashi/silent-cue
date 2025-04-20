@@ -154,10 +154,12 @@ extension TimerReducerTests {
         await store.finish()
     }
 
-    // Test: Timer start, tick, complete sequence for .time mode (foreground)
     func testTimerFinishes_AtTime_Foreground() async throws {
         let calendar = Calendar.current
-        let timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        guard let timeZone = TimeZone(identifier: "Asia/Tokyo") else {
+            XCTFail("Failed to get TimeZone")
+            return
+        }
         var components = DateComponents(
             timeZone: timeZone,
             year: 2023,
@@ -167,11 +169,17 @@ extension TimerReducerTests {
             minute: 0,
             second: 0
         )
-        let startDate = calendar.date(from: components)! // 10:00:00 JST
+        guard let startDate = calendar.date(from: components) else {
+            XCTFail("Failed to create start date")
+            return
+        } // 10:00:00 JST
 
         components.hour = 10
         components.minute = 1 // ターゲット時刻: 10:01:00 JST
-        let targetTime = calendar.date(from: components)!
+        guard let targetTime = calendar.date(from: components) else {
+            XCTFail("Failed to create target time")
+            return
+        }
 
         let initialHour = 10
         let initialMinute = 1
@@ -184,7 +192,6 @@ extension TimerReducerTests {
             selectedMinute: initialMinute
         )
         // ユーティリティで初期秒数を計算 (startDate 時点での 10:01:00 までの秒数)
-        // Pass all required args
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
             mode: .time,
             selectedMinutes: initialState.selectedMinutes, // Pass required arg
@@ -210,27 +217,26 @@ extension TimerReducerTests {
         }
 
         // 1. タイマーを開始
-        await store.send(TimerReducer.Action.startTimer) {
-            $0.isRunning = true
-            $0.startDate = startDate
+        await store.send(TimerReducer.Action.startTimer) { state in
+            state.isRunning = true
+            state.startDate = startDate
             // targetEndDate は now + totalSeconds ではなく、計算された目標時刻になるはず
             // Reducer内部で TimeCalculation.calculateTargetEndDate を使う想定
             // 正確な targetEndDate を計算 (Reducerのロジックに合わせる)
-            let calculatedTargetEndDate = self.calculateExpectedTargetEndDateAtTime(
+            let calculatedTargetEndDate = try? self.calculateExpectedTargetEndDateAtTime(
                 selectedHour: initialHour,
                 selectedMinute: initialMinute,
                 now: startDate,
                 calendar: calendar
             )
 
-            // Unwrap calculatedTargetEndDate before comparison
-            let unwrappedTargetEndDate = try XCTUnwrap(
-                calculatedTargetEndDate,
-                "Calculated target end date should not be nil"
-            )
+            guard let unwrappedTargetEndDate = calculatedTargetEndDate else {
+                XCTFail("Calculated target end date should not be nil")
+                return
+            }
             XCTAssertEqual(unwrappedTargetEndDate, finishDate) // Compare unwrapped value
 
-            $0.targetEndDate = calculatedTargetEndDate // Assign the optional value
+            state.targetEndDate = calculatedTargetEndDate // Assign the optional value
 
             // 開始時に totalSeconds/currentRemainingSeconds が再計算される
             // Pass all required args
@@ -242,14 +248,14 @@ extension TimerReducerTests {
                 now: startDate,
                 calendar: calendar
             )
-            $0.totalSeconds = secondsOnStart
-            $0.timerDurationMinutes = secondsOnStart / 60
-            $0.currentRemainingSeconds = secondsOnStart
-            XCTAssertEqual(secondsOnStart, 60)
+            state.totalSeconds = secondsOnStart
+            state.currentRemainingSeconds = secondsOnStart
+            state.timerDurationMinutes = secondsOnStart / 60
+            XCTAssertEqual(secondsOnStart, expectedInitialSeconds)
         }
 
         // 2. クロックを終了直前まで進める
-        await clock.advance(by: .seconds(expectedInitialSeconds - 1)) // 59秒進める
+        await clock.advance(by: .seconds(expectedInitialSeconds - 1))
         // すべてのティックを受信
         for i in 1 ... (expectedInitialSeconds - 1) {
             await store.receive(TimerReducer.Action.tick) { $0.currentRemainingSeconds = expectedInitialSeconds - i }
@@ -274,7 +280,10 @@ extension TimerReducerTests {
     // Test: Cross-day .time timer
     func testTimerFinishes_AtTime_CrossDay() async throws {
         let calendar = Calendar.current
-        let timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        guard let timeZone = TimeZone(identifier: "Asia/Tokyo") else {
+            XCTFail("Failed to get TimeZone")
+            return
+        }
         var startComponents = DateComponents(
             timeZone: timeZone,
             year: 2023,
@@ -284,7 +293,10 @@ extension TimerReducerTests {
             minute: 59,
             second: 30
         )
-        let startDate = calendar.date(from: startComponents)! // 23:59:30 JST (26日)
+        guard let startDate = calendar.date(from: startComponents) else {
+            XCTFail("Failed to create start date for cross-day test")
+            return
+        }
 
         let targetHour = 0
         let targetMinute = 1 // ターゲット時刻: 00:01:00 JST (翌27日)
@@ -342,11 +354,11 @@ extension TimerReducerTests {
         }
 
         // 1. タイマーを開始
-        await store.send(TimerReducer.Action.startTimer) {
-            $0.isRunning = true
-            $0.startDate = startDate
+        await store.send(TimerReducer.Action.startTimer) { state in
+            state.isRunning = true
+            state.startDate = startDate
             // Assign the original optional result from the helper to the optional state property
-            $0.targetEndDate = calculatedTargetEndDate
+            state.targetEndDate = calculatedTargetEndDate
 
             // Pass all required args
             let secondsOnStart = TimeCalculation.calculateTotalSeconds(
@@ -357,9 +369,9 @@ extension TimerReducerTests {
                 now: startDate,
                 calendar: calendar
             )
-            $0.totalSeconds = secondsOnStart
-            $0.timerDurationMinutes = secondsOnStart / 60 // Int 除算なので注意
-            $0.currentRemainingSeconds = secondsOnStart
+            state.totalSeconds = secondsOnStart
+            state.timerDurationMinutes = secondsOnStart / 60 // Int 除算なので注意
+            state.currentRemainingSeconds = secondsOnStart
             XCTAssertEqual(secondsOnStart, 90)
         }
 
@@ -375,9 +387,9 @@ extension TimerReducerTests {
         XCTAssertEqual(store.state.currentRemainingSeconds, 0)
         await store.receive(TimerReducer.Action.timerFinished)
         // Expect completionDate to match the date dependency set before the final tick
-        await store.receive(TimerReducer.Action.internal(.finalizeTimerCompletion(completionDate: finishDate))) {
-            $0.isRunning = false
-            $0.completionDate = finishDate
+        await store.receive(TimerReducer.Action.internal(.finalizeTimerCompletion(completionDate: finishDate))) { state in
+            state.isRunning = false
+            state.completionDate = finishDate
         }
         await store.finish()
     }
@@ -385,7 +397,10 @@ extension TimerReducerTests {
     // テスト: .time モードでのタイマー開始、ティック、キャンセル
     func testCancelTimer_AtTime() async throws {
         let calendar = Calendar.current
-        let timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        guard let timeZone = TimeZone(identifier: "Asia/Tokyo") else {
+            XCTFail("Failed to get TimeZone")
+            return
+        }
         var components = DateComponents(
             timeZone: timeZone,
             year: 2023,
@@ -395,7 +410,10 @@ extension TimerReducerTests {
             minute: 0,
             second: 0
         )
-        let startDate = calendar.date(from: components)! // 11:00:00 JST
+        guard let startDate = calendar.date(from: components) else {
+            XCTFail("Failed to create start date")
+            return
+        } // 11:00:00 JST
 
         let targetHour = 11
         let targetMinute = 2 // Target: 11:02:00 JST (120 seconds duration)
@@ -522,5 +540,32 @@ extension TimerReducerTests {
 
         // エフェクトがキャンセルされることを確認
         await store.finish()
+    }
+
+    // Helper to calculate expected target end date for .time mode
+    private func calculateExpectedTargetEndDateAtTime(
+        selectedHour: Int,
+        selectedMinute: Int,
+        now: Date,
+        calendar: Calendar
+    ) throws -> Date? {
+        var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
+        dateComponents.hour = selectedHour
+        dateComponents.minute = selectedMinute
+        dateComponents.second = 0 // 秒は常に0にリセット
+
+        guard var targetDate = calendar.date(from: dateComponents) else {
+            return nil
+        }
+
+        // If the calculated target time is earlier than or equal to the current time,
+        // it means the target time is on the next day.
+        if targetDate <= now {
+            guard let nextDayTarget = calendar.date(byAdding: .day, value: 1, to: targetDate) else {
+                return nil
+            }
+            targetDate = nextDayTarget
+        }
+        return targetDate
     }
 }

@@ -7,7 +7,7 @@ class MockHapticsService: HapticsServiceProtocol {
     // MARK: - 呼び出し記録
 
     var playCallCount = 0
-    var lastPlayedHapticType: WKHapticType? = nil
+    var lastPlayedHapticType: WKHapticType?
     var playedHapticTypes: [WKHapticType] = []
 
     // MARK: - Protocol Conformance

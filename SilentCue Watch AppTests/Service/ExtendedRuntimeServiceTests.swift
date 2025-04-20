@@ -1,46 +1,46 @@
 import Combine
-import ComposableArchitecture // For XCTestDynamicOverlay / unimplemented if needed
+import ComposableArchitecture // 必要なら XCTestDynamicOverlay / unimplemented のため
 @testable import SilentCue_Watch_App
 import WatchKit
 import XCTest
 
 @MainActor
 final class ExtendedRuntimeServiceTests: XCTestCase {
-    var service: MockExtendedRuntimeService!
-    var cancellables: Set<AnyCancellable> = []
+    var service: MockExtendedRuntimeService! // モックサービス
+    var cancellables: Set<AnyCancellable> = [] // Combine キャンセル用
 
     override func setUp() {
         super.setUp()
-        service = MockExtendedRuntimeService()
+        service = MockExtendedRuntimeService() // 各テスト前にモックを初期化
     }
 
     override func tearDown() {
-        service = nil
-        cancellables.removeAll()
+        service = nil // サービス解放
+        cancellables.removeAll() // キャンセル可能なものをクリア
         super.tearDown()
     }
 
-    // Helper to await stream completion
+    // ストリームの完了を待つヘルパー
     private func awaitStreamCompletion(_ stream: AsyncStream<Void>, timeout: TimeInterval = 1.0) async {
-        let expectation = XCTestExpectation(description: "Wait for stream completion")
+        let expectation = XCTestExpectation(description: "ストリーム完了を待機")
         var task: Task<Void, Never>?
         task = Task {
             for await _ in stream {}
-            // Stream completed
+            // ストリーム完了
             expectation.fulfill()
             task?.cancel()
         }
 
-        // fulfillment(of:timeout:) handles the timeout failure.
-        // Remove manual timeout check and fulfillment.
+        // fulfillment(of:timeout:) がタイムアウト失敗を処理
+        // 手動のタイムアウトチェックと fulfill を削除
         await fulfillment(of: [expectation], timeout: timeout)
-        task?.cancel() // Ensure task is cancelled
+        task?.cancel() // タスクキャンセルを保証
     }
 
-    // Helper to await stream yielding a value then completing
+    // ストリームの値発行と完了を待つヘルパー
     private func awaitStreamYieldAndCompletion(_ stream: AsyncStream<Void>, timeout: TimeInterval = 1.0) async {
-        let yieldExpectation = XCTestExpectation(description: "Wait for stream yield")
-        let completionExpectation = XCTestExpectation(description: "Wait for stream completion")
+        let yieldExpectation = XCTestExpectation(description: "ストリームの値発行を待機")
+        let completionExpectation = XCTestExpectation(description: "ストリーム完了を待機")
         var task: Task<Void, Never>?
         task = Task {
             var yielded = false
@@ -48,43 +48,42 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
                 yieldExpectation.fulfill()
                 yielded = true
             }
-            // Stream completed
-            if !yielded { yieldExpectation.fulfill() } // Fulfill yield if completes without yielding
+            // ストリーム完了
+            if !yielded { yieldExpectation.fulfill() } // 発行せずに完了した場合も yield を fulfill
             completionExpectation.fulfill()
             task?.cancel()
         }
 
-        // fulfillment(of:timeout:) handles the timeout failure.
-        // Remove manual timeout check and fulfillment.
+        // fulfillment(of:timeout:) がタイムアウト失敗を処理
+        // 手動のタイムアウトチェックと fulfill を削除
         await fulfillment(of: [yieldExpectation, completionExpectation], timeout: timeout)
-        task?.cancel() // Ensure task is cancelled
+        task?.cancel() // タスクキャンセルを保証
     }
 
-    // セッション開始時のパラメータ記録を検証 (完了ハンドラ削除)
+    // セッション開始時のパラメータ記録を検証
     func testStartSession_RecordsParameters() {
         let testDuration: TimeInterval = 120
         let testEndDate = Date().addingTimeInterval(testDuration)
-        // expectation と shouldCallStartSessionCompletionImmediately は削除
+        // expectation と shouldCallStartSessionCompletionImmediately は不要
 
-        // startSession 呼び出しを修正 (completionHandler 削除)
+        // startSession 呼び出し (completionHandler なし)
         service.startSession(duration: testDuration, targetEndTime: testEndDate)
 
-        // waitForExpectations は削除
+        // waitForExpectations は不要
 
         XCTAssertEqual(service.startSessionCallCount, 1)
         XCTAssertEqual(service.startSessionLastParams?.duration, testDuration)
         XCTAssertEqual(service.startSessionLastParams?.targetEndTime, testEndDate)
-        // completionHandler のアサーションは削除
-        // XCTAssertNotNil(service.startSessionLastParams?.completionHandler)
+        // completionHandler のアサーションは不要
     }
 
-    // セッション停止が記録されるか
+    // セッション停止が記録されるか検証
     func testStopSession_IncrementsCallCount() {
         service.stopSession()
         XCTAssertEqual(service.stopSessionCallCount, 1)
     }
 
-    // バックグラウンド完了フラグの確認とクリアのロジックを検証
+    // バックグラウンド完了フラグの確認・クリアロジックを検証 (モック)
     func testCheckAndClearBackgroundCompletionFlag_ReturnsStubValue() {
         // 1. 初期状態 (false)
         XCTAssertFalse(service.checkAndClearBackgroundCompletionFlag(), "初期値は false であるべきです。")
@@ -101,9 +100,9 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
         XCTAssertEqual(service.checkAndClearBackgroundCompletionFlagCallCount, 3)
     }
 
-    // モックの状態がリセットされるか
+    // モックの状態リセットを検証
     func testReset() {
-        // startSession 呼び出しを修正 (completionHandler 削除)
+        // startSession 呼び出し (completionHandler なし)
         service.startSession(duration: 10, targetEndTime: nil)
         service.stopSession()
         service.checkAndClearBackgroundCompletionFlagReturnValue = true
@@ -116,64 +115,67 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
         XCTAssertEqual(service.stopSessionCallCount, 0)
         XCTAssertEqual(service.checkAndClearBackgroundCompletionFlagCallCount, 0)
         XCTAssertFalse(service.checkAndClearBackgroundCompletionFlagReturnValue)
-        // shouldCallStartSessionCompletionImmediately のアサーション削除
-        // XCTAssertFalse(service.shouldCallStartSessionCompletionImmediately)
+        // shouldCallStartSessionCompletionImmediately のアサーション不要
     }
 
+    // ライブサービス: セッション開始・停止でストリームが完了するか検証
     func testStartAndStopSession_CompletesStream() async {
         let service = LiveExtendedRuntimeService()
 
-        // Start session (we don't directly test WKExtendedRuntimeSession interaction here)
+        // セッション開始 (WKExtendedRuntimeSession との直接的なやり取りはここではテストしない)
         service.startSession(duration: 60, targetEndTime: nil)
 
-        // Stop session
+        // セッション停止
         service.stopSession()
 
-        // Assert that the stream completes shortly after stopSession
+        // stopSession 直後にストリームが完了することをアサート
         await awaitStreamCompletion(service.completionEvents)
     }
 
+    // ライブサービス: セッション期限切れ時にストリームが値を発行し完了するか検証
     func testSessionWillExpire_YieldsAndCompletesStream() async {
         let service = LiveExtendedRuntimeService()
-        // It needs a session instance to call delegate methods on.
-        // However, we can call the delegate methods directly for testing.
-        // We simulate the scenario where a session existed and is about to expire.
+        // デリゲートメソッドを呼び出すにはセッションインスタンスが必要。
+        // しかし、テストではデリゲートメソッドを直接呼び出せる。
+        // セッションが存在し、期限切れになろうとしている状況をシミュレート。
 
         let stream = service.completionEvents
 
-        // Directly call the delegate method
-        // We don't need a real WKExtendedRuntimeSession instance for this test
-        service.extendedRuntimeSessionWillExpire(WKExtendedRuntimeSession()) // Pass a dummy session
+        // デリゲートメソッドを直接呼び出し
+        // このテストでは実際の WKExtendedRuntimeSession インスタンスは不要
+        service.extendedRuntimeSessionWillExpire(WKExtendedRuntimeSession()) // ダミーセッションを渡す
 
-        // Assert that the stream yields and then completes
+        // ストリームが値を発行し、その後完了することをアサート
         await awaitStreamYieldAndCompletion(stream)
 
-        // Check if session reference is cleared (optional but good practice)
-        // How to access internal state? Need to make it testable or infer from behavior.
-        // For now, we focus on the stream behavior.
+        // セッション参照がクリアされたか確認 (任意だが良い実践)
+        // 内部状態へのアクセス方法は？ テスト可能にするか、振る舞いから推測する必要あり。
+        // 現状では、ストリームの振る舞いに焦点を当てる。
     }
 
+    // ライブサービス: セッション無効化時にストリームが完了するか検証
     func testSessionDidInvalidate_CompletesStream() async {
         let service = LiveExtendedRuntimeService()
-        // Simulate the scenario where a session existed and was invalidated.
+        // セッションが存在し、無効化された状況をシミュレート。
 
         let stream = service.completionEvents
 
-        // Directly call the delegate method
+        // デリゲートメソッドを直接呼び出し
         service
             .extendedRuntimeSession(
                 WKExtendedRuntimeSession(),
                 didInvalidateWith: .sessionInProgress,
                 error: nil
-            ) // Dummy session
+            ) // ダミーセッション
 
-        // Assert that the stream completes
+        // ストリームが完了することをアサート
         await awaitStreamCompletion(stream)
     }
 
+    // ライブサービス: 廃止されたフラグ確認メソッドが false を返すか検証
     func testCheckAndClearFlag_ReturnsFalse() {
         let service = LiveExtendedRuntimeService()
-        // Ensure the obsolete method returns false as expected for now.
+        // 廃止されたメソッドが期待通り false を返すことを保証。
         XCTAssertFalse(service.checkAndClearBackgroundCompletionFlag())
     }
 }

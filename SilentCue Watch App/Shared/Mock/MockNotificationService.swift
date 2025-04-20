@@ -9,7 +9,7 @@ class MockNotificationService: NotificationServiceProtocol {
     var requestAuthorizationCallCount = 0
     var checkAuthorizationStatusCallCount = 0
     var scheduleTimerCompletionNotificationCallCount = 0
-    var lastScheduledNotificationParams: (targetDate: Date, minutes: Int)? = nil
+    var lastScheduledNotificationParams: (targetDate: Date, minutes: Int)?
     var cancelTimerCompletionNotificationCallCount = 0
 
     // MARK: - スタブ設定

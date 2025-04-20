@@ -1,8 +1,9 @@
+@testable import SilentCue_Watch_App
 import XCTest
 
 final class SetTimerViewUITests: XCTestCase {
     var app: XCUIApplication?
-    // アクセシビリティ識別子
+    // Accessibility Identifiers
     let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
     let countdownView = SCAccessibilityIdentifiers.CountdownView.self
     let settingsView = SCAccessibilityIdentifiers.SettingsView.self
@@ -10,7 +11,7 @@ final class SetTimerViewUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
         let application = XCUIApplication()
-        // 初期ビューを設定
+        // SetTimerView からテストを開始するように環境設定
         SCAppEnvironment.setupUITestEnv(for: application, initialView: .setTimerView)
         application.launch()
         app = application
@@ -21,20 +22,20 @@ final class SetTimerViewUITests: XCTestCase {
         }
         XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されていること")
 
-        // UI階層をデバッグ出力
-        print("--- CountdownView setUp UI Tree Start ---")
-        print(unwrappedApp.debugDescription)
-        print("--- CountdownView setUp UI Tree End ---")
-        
-        // SetTimerView のナビゲーションバーが表示されることを確認
-        XCTAssertTrue(
-            unwrappedApp.navigationBars[setTimerView.navigationBarTitle.rawValue]
-                .waitForExistence(timeout: UITestConstants.Timeout.short),
-            "SetTimerView のナビゲーションバーが表示されること"
-        )
-
-        // 通知許可ダイアログに対応
+        // 初回起動時に対して通知を許可 (要素チェックの前に実行)
         NotificationPermissionHelper.ensureNotificationPermission(for: unwrappedApp)
+
+        // デバッグ用に要素階層を出力
+        print("--- SetTimerView setUp UI Tree Start ---")
+        print(unwrappedApp.debugDescription)
+        print("--- SetTimerView setUp UI Tree End ---")
+
+        // SetTimerView の主要要素（スタートボタン）が表示されることを確認
+        XCTAssertTrue(
+            unwrappedApp.buttons[setTimerView.startTimerButton.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "SetTimerView のスタートボタンが表示されること"
+        )
     }
 
     override func tearDown() {
@@ -102,7 +103,7 @@ final class SetTimerViewUITests: XCTestCase {
             XCTFail("XCUIApplication instance was nil")
             return
         }
-        
+
         let minutesPicker = app.otherElements[setTimerView.minutesPickerView.rawValue]
         // 初期値の取得
         let initialValueLabel = minutesPicker.staticTexts.firstMatch.label
@@ -130,7 +131,10 @@ final class SetTimerViewUITests: XCTestCase {
 
         // ピッカーコンテナ表示確認
         let hourMinutePickerContainer = app.otherElements[setTimerView.hourMinutePickerView.rawValue]
-        XCTAssertTrue(hourMinutePickerContainer.waitForExistence(timeout: UITestConstants.Timeout.standard), "時刻指定Pickerコンテナが存在すること")
+        XCTAssertTrue(
+            hourMinutePickerContainer.waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "時刻指定Pickerコンテナが存在すること"
+        )
 
         // 時刻ピッカーコンポーネント取得
         let pickerComponents = app.otherElements.matching(identifier: setTimerView.hourMinutePickerView.rawValue)
@@ -145,7 +149,8 @@ final class SetTimerViewUITests: XCTestCase {
 
         // 初期値取得
         guard let initialHourValue = hourContainer.value,
-              let initialMinuteValue = minuteContainer.value else {
+              let initialMinuteValue = minuteContainer.value
+        else {
             XCTFail("Failed to get initial picker container values")
             return
         }
@@ -163,7 +168,8 @@ final class SetTimerViewUITests: XCTestCase {
 
         // 操作後の値を取得
         guard let finalHourValue = hourContainer.value,
-              let finalMinuteValue = minuteContainer.value else {
+              let finalMinuteValue = minuteContainer.value
+        else {
             XCTFail("Failed to get final picker container values")
             return
         }
@@ -177,17 +183,17 @@ final class SetTimerViewUITests: XCTestCase {
     }
 
     func testStartButtonExistsAndTappable() throws {
-         guard let app else {
-             XCTFail("XCUIApplication instance was nil")
-             return
-         }
-         let startButton = app.buttons[setTimerView.startTimerButton.rawValue]
-         XCTAssertTrue(startButton.exists)
-         XCTAssertTrue(startButton.isEnabled)
-         // タップと画面遷移確認
-         startButton.tap()
-         // CountdownView 要素で画面遷移確認
-         XCTAssertTrue(app.staticTexts[countdownView.timeFormatLabel.rawValue].waitForExistence(timeout: 2))
+        guard let app else {
+            XCTFail("XCUIApplication instance was nil")
+            return
+        }
+        let startButton = app.buttons[setTimerView.startTimerButton.rawValue]
+        XCTAssertTrue(startButton.exists)
+        XCTAssertTrue(startButton.isEnabled)
+        // タップと画面遷移確認
+        startButton.tap()
+        // CountdownView 要素で画面遷移確認
+        XCTAssertTrue(app.staticTexts[countdownView.timeFormatLabel.rawValue].waitForExistence(timeout: 2))
     }
 
     func testSettingsButtonExistsAndTappable() throws {

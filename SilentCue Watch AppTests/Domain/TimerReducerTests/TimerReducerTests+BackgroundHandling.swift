@@ -66,7 +66,10 @@ extension TimerReducerTests {
     // テスト: .time モードでのバックグラウンド完了
     func testTimerFinishes_AtTime_Background() async throws {
         let calendar = Calendar.current
-        let timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        guard let timeZone = TimeZone(identifier: "Asia/Tokyo") else {
+            XCTFail("Failed to get TimeZone")
+            return
+        }
         var components = DateComponents(
             timeZone: timeZone,
             year: 2023,
@@ -76,7 +79,10 @@ extension TimerReducerTests {
             minute: 30,
             second: 0
         )
-        let startDate = calendar.date(from: components)! // 12:30:00 JST
+        guard let startDate = calendar.date(from: components) else {
+            XCTFail("Failed to create start date")
+            return
+        } // 12:30:00 JST
 
         let targetHour = 12
         let targetMinute = 31 // Target: 12:31:00 JST (60 seconds duration)

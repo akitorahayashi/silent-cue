@@ -151,10 +151,17 @@ extension TimerReducerTests {
         let initialDate = Date(timeIntervalSince1970: 0) // 例: 09:00 JST
         let actionDate = Date(timeIntervalSince1970: 100)
         let calendar = Calendar.current
-        var components = calendar.dateComponents(in: TimeZone(identifier: "Asia/Tokyo")!, from: initialDate)
+        guard let timeZone = TimeZone(identifier: "Asia/Tokyo") else {
+            XCTFail("Failed to get TimeZone")
+            return
+        }
+        var components = calendar.dateComponents(in: timeZone, from: initialDate)
         components.hour = 9
         components.minute = 0
-        let initialTime = calendar.date(from: components)!
+        guard let initialTime = calendar.date(from: components) else { // Use guard let
+            XCTFail("Failed to create initial time")
+            return
+        }
 
         let initialHour = 9
         let initialMinute = 0
