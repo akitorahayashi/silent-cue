@@ -31,9 +31,19 @@ jobs:
         source .github/scripts/ci-env.sh
         source .github/scripts/common/select-simulator.sh
         select_simulator
+        
+        if [ $? -eq 0 ] && [ -n "$TEST_SIMULATOR_ID" ]; then
+          echo "TEST_SIMULATOR_ID=$TEST_SIMULATOR_ID" >> $GITHUB_ENV
+          success "Exported TEST_SIMULATOR_ID=$TEST_SIMULATOR_ID to GITHUB_ENV for subsequent steps."
+        else
+          fail "select_simulator failed or did not set TEST_SIMULATOR_ID in the current shell."
+          exit 1
+        fi
 
     - name: Build for Testing
       id: build
+      env:
+        TEST_SIMULATOR_ID: ${{ env.TEST_SIMULATOR_ID }}
       if: steps.select_simulator.outcome == 'success'
       shell: bash
       run: |
