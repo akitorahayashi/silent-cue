@@ -26,7 +26,7 @@ run_unit=true
 run_ui=true
 run_archive=true
 skip_build_for_testing=false
-selected_option="" # 排他的オプションのチェック用
+selected_option=""
 
 # 引数解析ループ
 while [[ $# -gt 0 ]]; do
@@ -78,10 +78,16 @@ main() {
   # --- シミュレータ選択 (TEST_SIMULATOR_ID を設定) ---
   # テスト実行時のみシミュレータが必要
   if $run_unit || $run_ui; then
-      select_simulator # 環境変数 TEST_SIMULATOR_ID を設定
+      # 常に select_simulator を呼び出して ID を決定・設定する
+      select_simulator # 既存の TEST_SIMULATOR_ID 変数に値を設定する
       if [ $? -ne 0 ]; then
-          fail "シミュレータの選択と環境変数への設定に失敗しました。"
+          fail "シミュレータの自動選択に失敗しました。"
       fi
+      # select_simulator が ID を設定したか確認
+      if [[ -z "${TEST_SIMULATOR_ID:-}" ]]; then
+           fail "select_simulator は成功しましたが、TEST_SIMULATOR_ID が設定されませんでした。"
+      fi
+      success "使用するシミュレータを決定しました: $TEST_SIMULATOR_ID" >&2
   fi
 
   # 各ステップの終了コードを保持する変数

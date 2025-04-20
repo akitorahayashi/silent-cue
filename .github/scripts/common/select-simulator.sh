@@ -76,10 +76,8 @@ select_simulator() {
 
   success "選択されたシミュレータはすべての必須スキームで有効です: $simulator_name (ID: $simulator_id)" >&2
 
-  # 見つけたIDを環境変数にエクスポート
-  export TEST_SIMULATOR_ID="$simulator_id"
-  echo "TEST_SIMULATOR_ID=$simulator_id" >> $GITHUB_ENV
-  success "環境変数 TEST_SIMULATOR_ID に設定しました: $TEST_SIMULATOR_ID"
+  # 見つけたIDを既存の環境変数に代入
+  TEST_SIMULATOR_ID="$simulator_id"
   return 0
 }
 
