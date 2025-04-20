@@ -8,6 +8,8 @@ enum SCAccessibilityIdentifiers {
         case timeModeButton
         case minutesPickerView
         case hourMinutePickerView
+        case hourPickerWheel
+        case minutePickerWheel
         case startTimerButton
     }
 

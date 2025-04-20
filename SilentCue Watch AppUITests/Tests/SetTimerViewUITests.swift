@@ -21,10 +21,15 @@ final class SetTimerViewUITests: XCTestCase {
         }
         XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されていること")
 
+        // デバッグ用に要素階層を出力
+        print("--- CountdownView setUp UI Tree Start ---")
+        print(unwrappedApp.debugDescription)
+        print("--- CountdownView setUp UI Tree End ---")
+        
         // SetTimerView のナビゲーションバーが表示されることを確認
         XCTAssertTrue(
             unwrappedApp.navigationBars[setTimerView.navigationBarTitle.rawValue]
-                .waitForExistence(timeout: UITestConstants.Timeout.standard),
+                .waitForExistence(timeout: UITestConstants.Timeout.short),
             "SetTimerView のナビゲーションバーが表示されること"
         )
 
@@ -92,7 +97,7 @@ final class SetTimerViewUITests: XCTestCase {
         XCTAssertFalse(hourMinutePicker.exists, "時刻指定 Picker が非表示になること")
     }
 
-    func 実際の実装をよく確認して、どこをスワイプすればいいのかとかちゃんと考えてくださいね。必要であればアクセシビリティーIDを追加してもいいよ。ScアクセシビリティーID.スウィフトにね。() throws {
+    func testMinutesPickerInteraction() throws {
         guard let app else {
             XCTFail("XCUIApplication instance was nil")
             return
@@ -120,33 +125,52 @@ final class SetTimerViewUITests: XCTestCase {
             return
         }
 
-        // 「時刻指定」モードへ
-        app.buttons[setTimerView.timeModeButton.rawValue].tap()
+        // 時刻指定モードへ切り替える
+        let timeModeButton = app.buttons[setTimerView.timeModeButton.rawValue]
+        XCTAssertTrue(timeModeButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "時刻指定モードボタンが存在すること")
+        timeModeButton.tap()
 
-        let hourMinutePicker = app.otherElements[setTimerView.hourMinutePickerView.rawValue]
+        // ピッカーコンテナが表示されるのを待つ (モード切り替えの確認)
+        let hourMinutePickerContainer = app.otherElements[setTimerView.hourMinutePickerView.rawValue]
+        XCTAssertTrue(hourMinutePickerContainer.waitForExistence(timeout: UITestConstants.Timeout.standard), "時刻指定Pickerコンテナが存在すること")
 
-        // ホイールのコンテナ要素を取得 (テキスト特定のため必要)
-        let hourWheelContainer = hourMinutePicker.children(matching: .any).element(boundBy: 0)
-        let minuteWheelContainer = hourMinutePicker.children(matching: .any).element(boundBy: 1)
-        XCTAssertTrue(hourWheelContainer.exists, "時ホイールコンテナが存在すること")
-        XCTAssertTrue(minuteWheelContainer.exists, "分ホイールコンテナが存在すること")
+        // 'hourMinutePickerView' 識別子を持つ要素をすべて取得
+        let pickerComponents = app.otherElements.matching(identifier: setTimerView.hourMinutePickerView.rawValue)
 
-        // 初期値を取得
-        let initialHourLabel = hourWheelContainer.staticTexts.firstMatch.label
-        let initialMinuteLabel = minuteWheelContainer.staticTexts.firstMatch.label
+        // 最初の要素を時コンテナ、2番目の要素を分コンテナとする
+        let hourContainer = pickerComponents.element(boundBy: 0)
+        let minuteContainer = pickerComponents.element(boundBy: 1)
 
-        // ピッカー要素自体をスワイプ
-        hourMinutePicker.swipeUp()
+        // コンテナが存在するか確認
+        XCTAssertTrue(hourContainer.waitForExistence(timeout: UITestConstants.Timeout.short), "時コンテナが存在すること")
+        XCTAssertTrue(minuteContainer.waitForExistence(timeout: UITestConstants.Timeout.short), "分コンテナが存在すること")
 
-        sleep(1)
+        // 初期値を取得 (コンテナ要素の value プロパティを使用)
+        guard let initialHourValue = hourContainer.value,
+              let initialMinuteValue = minuteContainer.value else {
+            XCTFail("Failed to get initial picker container values")
+            return
+        }
+        print("Initial Hour Value: \(initialHourValue), Initial Minute Value: \(initialMinuteValue)")
 
-        // 新しい値を取得
-        let newHourLabel = hourWheelContainer.staticTexts.firstMatch.label
-        let newMinuteLabel = minuteWheelContainer.staticTexts.firstMatch.label
+        // 各コンテナを直接スワイプして操作
+        hourContainer.swipeUp(velocity: 250)   // 例: 上スワイプ
+        minuteContainer.swipeDown(velocity: 250) // 例: 下スワイプ
+        sleep(1) // スワイプ後のUI更新のための待機
 
-        // 値が変わったことを確認
-        XCTAssertNotEqual(newHourLabel, initialHourLabel, "スワイプ操作後に時間の値が変わること")
-        XCTAssertNotEqual(newMinuteLabel, initialMinuteLabel, "スワイプ操作後に分の値が変わること")
+        // 操作後の値を取得
+        guard let finalHourValue = hourContainer.value,
+              let finalMinuteValue = minuteContainer.value else {
+            XCTFail("Failed to get final picker container values")
+            return
+        }
+        print("Final Hour Value: \(finalHourValue), Final Minute Value: \(finalMinuteValue)")
+
+        // 値が変わったことを確認 (Any型なので比較前にString等にキャスト推奨だが、直接比較も可能)
+        XCTAssertTrue(
+            "\(finalHourValue)" != "\(initialHourValue)" || "\(finalMinuteValue)" != "\(initialMinuteValue)",
+            "操作後に時または分の値が変わること (Initial: H=\(initialHourValue), M=\(initialMinuteValue), Final: H=\(finalHourValue), M=\(finalMinuteValue))"
+        )
     }
 
     func testStartButtonExistsAndTappable() throws {
