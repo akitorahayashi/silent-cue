@@ -38,7 +38,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 - GitHub Releaseの作成とIPAファイルの添付
 
 ### ローカルでの検証
-主要なCIステップ（テスト、アーカイブ）のコアロジックを呼び出すローカル検証用スクリプト (`.github/scripts/run-local-validation.sh`) を提供しており、ローカル環境でCIの主要な処理フローを再現・検証できますこのスクリプトは、CIワークフローが使用する関数定義ファイルを `source` して利用します
+主要なCIステップ（テスト、アーカイブ）のコアロジックを呼び出すローカル検証用スクリプト (`.github/scripts/run-local-ci.sh`) を提供しており、ローカル環境でCIの主要な処理フローを再現・検証できますこのスクリプトは、CIワークフローが使用する関数定義ファイルを `source` して利用します
 
 ## 機能詳細
 
@@ -121,7 +121,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 
 ## ローカルでのCIプロセスの検証
 
-GitHub Actions で実行される主要なCIステップ（テスト、アーカイブ）のコアロジックをローカルで検証するためのスクリプト (`.github/scripts/run-local-validation.sh`) を用意していますこのスクリプトは、`.github/scripts/` 配下の関数定義ファイルを `source` し、コマンドライン引数に基づいて適切な関数を呼び出すことで、CIの主要な処理フローを再現します
+GitHub Actions で実行される主要なCIステップ（テスト、アーカイブ）のコアロジックをローカルで検証するためのスクリプト (`.github/scripts/run-local-ci.sh`) を用意していますこのスクリプトは、`.github/scripts/` 配下の関数定義ファイルを `source` し、コマンドライン引数に基づいて適切な関数を呼び出すことで、CIの主要な処理フローを再現します
 
 ### ビルドを含む検証
 
@@ -129,19 +129,19 @@ GitHub Actions で実行される主要なCIステップ（テスト、アーカ
 
 ```shell
 # 全てのステップ (ビルド、単体テスト実行・検証、UIテスト実行・検証、アーカイブビルド・検証) を実行
-$ ./.github/scripts/run-local-validation.sh
+$ ./.github/scripts/run-local-ci.sh
 
 # テスト用ビルド + 単体テストとUIテストの両方を実行・検証
-$ ./.github/scripts/run-local-validation.sh --all-tests
+$ ./.github/scripts/run-local-ci.sh --all-tests
 
 # テスト用ビルド + 単体テストのみを実行・検証
-$ ./.github/scripts/run-local-validation.sh --unit-test
+$ ./.github/scripts/run-local-ci.sh --unit-test
 
 # テスト用ビルド + UIテストのみを実行・検証
-$ ./.github/scripts/run-local-validation.sh --ui-test
+$ ./.github/scripts/run-local-ci.sh --ui-test
 
 # ビルド + アーカイブのみを実行・検証
-$ ./.github/scripts/run-local-validation.sh --archive-only
+$ ./.github/scripts/run-local-ci.sh --archive-only
 ```
 
 ### テストのみ実行 (ビルド成果物を再利用)
@@ -151,13 +151,13 @@ $ ./.github/scripts/run-local-validation.sh --archive-only
 
 ```shell
 # 単体テストとUIテストの両方を再実行・検証
-$ ./.github/scripts/run-local-validation.sh --test-without-building
+$ ./.github/scripts/run-local-ci.sh --test-without-building
 
 # 単体テストのみを再実行・検証
-$ ./.github/scripts/run-local-validation.sh --test-without-building --unit-test
+$ ./.github/scripts/run-local-ci.sh --test-without-building --unit-test
 
 # UIテストのみを再実行・検証
-$ ./.github/scripts/run-local-validation.sh --test-without-building --ui-test
+$ ./.github/scripts/run-local-ci.sh --test-without-building --ui-test
 ```
 
 ## 技術仕様

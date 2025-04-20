@@ -3,7 +3,7 @@ import ComposableArchitecture
 import XCTest
 
 extension TimerReducerTests {
-    // テスト: フォアグラウンドでのタイマー完了シーケンス
+    // フォアグラウンドでのタイマー完了
     func testTimerFinishes_Foreground() async {
         let startDate = Date(timeIntervalSince1970: 0)
         let selectedMinutes = 1
@@ -387,10 +387,11 @@ extension TimerReducerTests {
         XCTAssertEqual(store.state.currentRemainingSeconds, 0)
         await store.receive(TimerReducer.Action.timerFinished)
         // Expect completionDate to match the date dependency set before the final tick
-        await store.receive(TimerReducer.Action.internal(.finalizeTimerCompletion(completionDate: finishDate))) { state in
-            state.isRunning = false
-            state.completionDate = finishDate
-        }
+        await store
+            .receive(TimerReducer.Action.internal(.finalizeTimerCompletion(completionDate: finishDate))) { state in
+                state.isRunning = false
+                state.completionDate = finishDate
+            }
         await store.finish()
     }
 

@@ -30,30 +30,51 @@ jobs:
       - name: Install xcpretty
         run: gem install xcpretty
 
-      - name: Build Archive
-        id: build_archive
-        shell: bash
+      - name: Build Release Version (Unsigned)
         run: |
-          source .github/scripts/build-steps/build-archive.sh
-          source .github/scripts/common/prerequisites.sh
-          check_xcpretty
-          build_archive_step
-          exit $?
-        continue-on-error: true
+          set -euo pipefail
 
-      - name: Verify Archive
-        id: verify_archive
-        shell: bash
-        if: steps.build_archive.outcome == 'success'
+          # バージョン情報の取得
+          VERSION=$(grep -A 1 'MARKETING_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9.]//g')
+          BUILD_NUMBER=$(grep -A 1 'CURRENT_PROJECT_VERSION' SilentCue.xcodeproj/project.pbxproj | tail -1 | sed 's/[^0-9]//g')
+          echo "Building version $VERSION ($BUILD_NUMBER)"
+          
+          # ビルドディレクトリ作成 (アーカイブ用サブディレクトリも含む)
+          # DerivedDataもここに含める
+          mkdir -p ./ci-outputs/production/archives/DerivedData
+          
+          # 署名なしでビルド
+          set -o pipefail && xcodebuild \
+            -project "SilentCue.xcodeproj" \
+            -scheme "SilentCue Watch App" \
+            -configuration Release \
+            -destination "generic/platform=watchOS" \
+            -archivePath "./ci-outputs/production/archives/SilentCue.xcarchive" \
+            -derivedDataPath "./ci-outputs/production/archives/DerivedData" \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            archive \
+          | xcpretty -c
+          
+      - name: Verify Archive Contents
         run: |
-          source .github/scripts/build-steps/build-archive.sh
-          verify_archive_step
-
+          set -euo pipefail
+          echo "Checking archive contents..."
+          # Check if the specific .app directory exists within the archive's Products/Applications path
+          ARCHIVE_APP_PATH="./ci-outputs/production/archives/SilentCue.xcarchive/Products/Applications/SilentCue Watch App.app"
+          if [ ! -d "$ARCHIVE_APP_PATH" ]; then
+            echo "Error: 'SilentCue Watch App.app' not found in expected archive location ($ARCHIVE_APP_PATH)."
+            # Optionally list contents again on error
+            echo "--- Archive Contents (on error) ---"
+            ls -lR ./ci-outputs/production/archives/SilentCue.xcarchive || echo "Archive directory not found or empty."
+            exit 1
+          fi
+          echo "✅ Archive content verified."
+            
       - name: Upload Build Artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-archive
-          path: ./ci-outputs/production/archives/SilentCue.xcarchive
-          if-no-files-found: warn
+          path: |-
+            ./ci-outputs/production/archives/SilentCue.xcarchive
           retention-days: 7

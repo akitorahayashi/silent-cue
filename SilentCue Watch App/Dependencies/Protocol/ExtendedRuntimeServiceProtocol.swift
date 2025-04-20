@@ -12,4 +12,4 @@ protocol ExtendedRuntimeServiceProtocol {
 
     /// 拡張ランタイムセッションを停止する。
     func stopSession()
-} 
+}

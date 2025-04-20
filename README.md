@@ -31,13 +31,14 @@ TCA の依存性注入システム (`@Dependency`) を全面的に採用して�
 
 ```md
 SilentCue/
-├── TestSupport/
+├── Shared/
 ├── SilentCue Watch App/
-│   ├── Assets.xcassets/
-│   ├── Preview Content/
-│   ├── Procotol/
-│   ├── Service/
 │   ├── Util/
+│   ├── Dependencies/
+│   │   ├── Preview Content/
+│   │   ├── Mock/
+│   │   ├── Protocol/
+│   │   └── Service/
 │   ├── Domain/
 │   │   ├── App/
 │   │   ├── Settings/
@@ -48,6 +49,7 @@ SilentCue/
 │   │   ├── SetTimerView/
 │   │   ├── SettingsView/
 │   │   └── TimerCompletionView/
+│   ├── Assets.xcassets/
 │   └── SilentCueApp.swift
 ├── SilentCue Watch AppTests/
 │   ├── Domain/
@@ -55,8 +57,8 @@ SilentCue/
 ├── SilentCue Watch AppUITests/
 │   ├── Constant/
 │   ├── Extension/
-│   ├── Tests/
-│   └── Util/
+│   ├── Util/
+│   └── Tests/
 ├── SilentCue.xcodeproj/
 ├── .gitignore
 ├── .swiftformat

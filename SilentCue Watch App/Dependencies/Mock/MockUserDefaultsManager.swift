@@ -1,6 +1,6 @@
+import Combine
 import Foundation
 @testable import SilentCue_Watch_App
-import Combine
 
 final class MockUserDefaultsManager: UserDefaultsServiceProtocol { // Conform to the new protocol
     /// UserDefaultsの代わりとなるインメモリ辞書。
@@ -23,7 +23,7 @@ final class MockUserDefaultsManager: UserDefaultsServiceProtocol { // Conform to
     func remove(forKey defaultName: UserDefaultsKeys) {
         storage.removeValue(forKey: defaultName.rawValue)
     }
-    
+
     func removeAll() {
         storage.removeAll()
     }

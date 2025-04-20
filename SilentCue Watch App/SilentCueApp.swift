@@ -37,13 +37,13 @@ struct SilentCueWatchApp: App {
             } else {
                 // --- 通常のデバッグビルド: デフォルトの依存関係でストアを初期化 ---
                 store = Store(initialState: AppState()) {
-                    AppReducer() // 設定されたライブ/プレビュー/テスト値を使用
+                    AppReducer()
                 }
             }
         #else
             // --- リリースビルド: デフォルトの依存関係でストアを初期化 ---
             store = Store(initialState: AppState()) {
-                AppReducer() // ライブ値を使用
+                AppReducer()
             }
         #endif
     }
