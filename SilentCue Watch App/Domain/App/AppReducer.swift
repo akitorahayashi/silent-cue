@@ -45,8 +45,7 @@ struct AppReducer: Reducer {
                         // タイマーが完了しており (completionDateがある)、
                         // かつ、まだ完了画面にいない場合
                         if state.timer.completionDate != nil,
-                           state.path.last != .completion
-                        {
+                           state.path.last != .completion {
                             // バックグラウンド完了を示すフラグは不要になった
                             // if wasCompletedInBackground, state.timer.completionDate != nil {
                             // UI起因ではない完了(バックグラウンドや通知経由)を示唆する
