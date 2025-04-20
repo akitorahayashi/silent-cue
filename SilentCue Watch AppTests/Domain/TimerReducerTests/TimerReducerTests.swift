@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class TimerReducerTests: XCTestCase {
     // .time モードの期待される目標終了日時を計算するヘルパー関数
-    private func calculateExpectedTargetEndDateAtTime(
+    func calculateExpectedTargetEndDateAtTime(
         selectedHour: Int,
         selectedMinute: Int,
         now: Date,
@@ -36,7 +36,7 @@ final class TimerReducerTests: XCTestCase {
         return targetDate
     }
 
-    private func createInitialState(
+    func createInitialState(
         now: Date,
         selectedMinutes: Int = 1,
         timerMode: TimerMode = .minutes,

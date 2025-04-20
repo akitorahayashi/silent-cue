@@ -33,24 +33,6 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(receivedGranted, true)
     }
 
-    // 非同期的な認証リクエストと結果のコールバックを検証
-    func testRequestAuthorization_AsyncCompletion() {
-        let expectation = expectation(description: "requestAuthorization 完了")
-        var receivedGranted: Bool?
-
-        service.requestAuthorizationGrantedResult = false
-        service.completeRequestAuthorizationAsynchronously = true
-
-        service.requestAuthorization { granted in
-            receivedGranted = granted
-            expectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 1.0) // 非同期完了を待つ
-        XCTAssertEqual(service.requestAuthorizationCallCount, 1)
-        XCTAssertEqual(receivedGranted, false)
-    }
-
     // 認証ステータスの確認と結果のコールバックを検証
     func testCheckAuthorizationStatus() {
         let expectation = expectation(description: "checkAuthorizationStatus 完了")

@@ -12,10 +12,6 @@ struct HourMinutePicker: View {
                         .tag(hour)
                 }
             }
-            .accessibilityIdentifier(
-                SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView
-                    .rawValue
-            )
             .pickerStyle(.wheel)
 
             Picker("分", selection: selectedMinute) {
@@ -26,6 +22,10 @@ struct HourMinutePicker: View {
             }
             .pickerStyle(.wheel)
         }
+        .accessibilityIdentifier(
+            SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView
+                .rawValue
+        )
         .frame(height: 100)
         .padding(.horizontal, 6)
     }

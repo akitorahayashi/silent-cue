@@ -10,7 +10,7 @@ struct CancelButtonView: View {
                 .font(.system(size: 16))
         }
         .accessibilityLabel("CancelTimerButton")
-        .accessibilityIdentifier("CancelTimerButton")
+        .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.cancelTimerButton.rawValue)
         .buttonStyle(.plain)
         .padding(.horizontal)
     }
