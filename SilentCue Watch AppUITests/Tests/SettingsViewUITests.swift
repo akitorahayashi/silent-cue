@@ -30,7 +30,7 @@ final class SettingsViewUITests: XCTestCase {
         if let currentApp = app {
             NotificationPermissionHelper.ensureNotificationPermission(for: currentApp)
         } else {
-             XCTFail("app インスタンスが nil です")
+            XCTFail("app インスタンスが nil です")
         }
     }
 

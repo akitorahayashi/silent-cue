@@ -67,6 +67,7 @@ struct TimerSummaryView: View {
         .animation(.easeInOut(duration: 0.5).delay(0.3), value: appearAnimation)
     }
 }
+
 #Preview {
     @State var appearAnimation = true
     return TimerSummaryView(
@@ -75,4 +76,3 @@ struct TimerSummaryView: View {
         appearAnimation: $appearAnimation
     )
 }
-

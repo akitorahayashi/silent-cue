@@ -10,9 +10,9 @@ enum TimeCalculation {
         calendar: Calendar = .current // Default to current calendar
     ) -> Int {
         switch mode {
-        case .minutes:
+            case .minutes:
                 return max(0, selectedMinutes) * 60
-        case .time:
+            case .time:
                 var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
                 dateComponents.hour = selectedHour
                 dateComponents.minute = selectedMinute

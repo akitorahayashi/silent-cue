@@ -1,7 +1,6 @@
 import XCTest
 
 final class CountdownViewUITests: XCTestCase {
-
     var app: XCUIApplication?
     let countdownView = SCAccessibilityIdentifiers.CountdownView.self
     let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
@@ -22,12 +21,12 @@ final class CountdownViewUITests: XCTestCase {
                 .waitForExistence(timeout: UITestConstants.Timeout.standard) ?? false,
             "CountdownView の時間表示が表示されること"
         )
-        
+
         // 初回起動時に対して通知を許可
         if let currentApp = app {
             NotificationPermissionHelper.ensureNotificationPermission(for: currentApp)
         } else {
-             XCTFail("app インスタンスが nil です")
+            XCTFail("app インスタンスが nil です")
         }
     }
 
@@ -64,10 +63,10 @@ final class CountdownViewUITests: XCTestCase {
             startButton?.waitForExistence(timeout: UITestConstants.Timeout.standard) ?? false,
             "キャンセルボタンタップ後に SetTimerView に戻る"
         )
-        
+
         // CountdownView の要素（キャンセルボタン）が消えていることを確認
         XCTAssertFalse(cancelButton?.exists ?? false, "SetTimerView に戻った後、キャンセルボタンは存在しない")
-        
+
         // SetTimerView のナビゲーションバータイトルが存在するか確認
         XCTAssertTrue(
             app?.staticTexts[SCAccessibilityIdentifiers.SetTimerView.navigationBarTitle.rawValue]

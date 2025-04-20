@@ -17,7 +17,7 @@ struct NotifyEndTimeView: View {
             Text("終了時刻")
                 .font(.system(size: 14))
                 .foregroundStyle(.secondary)
-            
+
             Text(completionDate != nil ? SCTimeFormatter.formatToHoursAndMinutes(completionDate!) : "00:00")
                 .font(.system(size: 24))
                 .foregroundStyle(.primary)

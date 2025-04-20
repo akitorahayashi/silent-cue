@@ -99,7 +99,6 @@ struct SetTimerView: View {
     }
 }
 
-
 #Preview {
     // プレビュー用のデフォルトストアを作成
     let previewStore = Store(
@@ -119,4 +118,4 @@ struct SetTimerView: View {
             }
         )
     }
-} 
+}

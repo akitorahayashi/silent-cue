@@ -18,7 +18,7 @@ final class TimerCompletionViewUITests: XCTestCase {
                 .waitForExistence(timeout: UITestConstants.Timeout.standard) ?? false,
             "TimerCompletionView の閉じるボタンが表示される"
         )
-        
+
         // 初回起動時に対して通知を許可
         NotificationPermissionHelper.ensureNotificationPermission(for: app!)
     }
@@ -40,12 +40,14 @@ final class TimerCompletionViewUITests: XCTestCase {
         // 2. NotifyEndTimeView 関連要素
         // 完了時刻表示を確認（正確な識別子がない場合は、テキスト内容で確認）
         // モックデータが使用される前提でテスト
-        let notifyEndTimeView = app?.otherElements[SCAccessibilityIdentifiers.TimerCompletionView.notifyEndTimeViewVStack.rawValue]
+        let notifyEndTimeView = app?
+            .otherElements[SCAccessibilityIdentifiers.TimerCompletionView.notifyEndTimeViewVStack.rawValue]
         XCTAssertTrue(notifyEndTimeView?.exists ?? false, "NotifyEndTimeView が存在する")
 
         // 3. TimerSummaryView 関連要素
         // 開始時刻とタイマー時間の表示を確認
-        let timerSummaryView = app?.otherElements[SCAccessibilityIdentifiers.TimerCompletionView.timerSummaryViewVStack.rawValue]
+        let timerSummaryView = app?
+            .otherElements[SCAccessibilityIdentifiers.TimerCompletionView.timerSummaryViewVStack.rawValue]
         XCTAssertTrue(timerSummaryView?.exists ?? false, "TimerSummaryView が存在する")
 
         // 4. 通知許可ボタン (通知未許可の場合)
