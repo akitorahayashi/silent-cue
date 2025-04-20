@@ -58,16 +58,16 @@ jobs:
             const { owner, repo } = context.repo;
 
             const commentMarker = '<!-- test-and-coverage-report -->';
-            let commentBody = `${commentMarker}\\n\\n## Test Summary\\n\\n`;
+            let commentBody = `${commentMarker}\n\n## Test Summary\n\n`;
             const fs = require('fs');
 
             // Test Results Summary
             const unitTestFile = './ci-outputs/test-results/unit/junit.xml';
             const uiTestFile = './ci-outputs/test-results/ui/junit.xml';
             if (fs.existsSync(unitTestFile) || fs.existsSync(uiTestFile)) {
-               commentBody += `✅ Test Results: Available in Checks tab.\\n`;
+               commentBody += `✅ Test Results: Available in Checks tab.\n`;
             } else {
-               commentBody += `ℹ️ Test Results: No JUnit reports found.\\n`;
+               commentBody += `ℹ️ Test Results: No JUnit reports found.\n`;
             }
 
             // 既存コメントの検索・更新 or 新規作成
