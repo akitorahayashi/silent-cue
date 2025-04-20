@@ -2,7 +2,7 @@ import XCTest
 
 final class SetTimerViewUITests: XCTestCase {
     var app: XCUIApplication?
-    // Accessibility Identifiers
+    // アクセシビリティ識別子
     let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
     let countdownView = SCAccessibilityIdentifiers.CountdownView.self
     let settingsView = SCAccessibilityIdentifiers.SettingsView.self
@@ -10,7 +10,7 @@ final class SetTimerViewUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
         let application = XCUIApplication()
-        // SCAppEnvironment を使用して初期ビューを設定
+        // 初期ビューを設定
         SCAppEnvironment.setupUITestEnv(for: application, initialView: .setTimerView)
         application.launch()
         app = application
@@ -21,7 +21,7 @@ final class SetTimerViewUITests: XCTestCase {
         }
         XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されていること")
 
-        // デバッグ用に要素階層を出力
+        // UI階層をデバッグ出力
         print("--- CountdownView setUp UI Tree Start ---")
         print(unwrappedApp.debugDescription)
         print("--- CountdownView setUp UI Tree End ---")
@@ -33,7 +33,7 @@ final class SetTimerViewUITests: XCTestCase {
             "SetTimerView のナビゲーションバーが表示されること"
         )
 
-        // 初回起動時に対して通知を許可
+        // 通知許可ダイアログに対応
         NotificationPermissionHelper.ensureNotificationPermission(for: unwrappedApp)
     }
 
@@ -54,7 +54,7 @@ final class SetTimerViewUITests: XCTestCase {
             .waitForExistence(timeout: UITestConstants.Timeout.standard)
         XCTAssertTrue(minutesModeButtonExists)
 
-        // 初期要素が存在することを確認する
+        // 初期UI要素の確認
         let settingsButtonExists = app.buttons[setTimerView.openSettingsButton.rawValue]
             .waitForExistence(timeout: UITestConstants.Timeout.short)
         XCTAssertTrue(settingsButtonExists, "設定ボタンが存在する")
@@ -62,12 +62,12 @@ final class SetTimerViewUITests: XCTestCase {
         XCTAssertTrue(app.buttons[setTimerView.minutesModeButton.rawValue].exists)
         XCTAssertTrue(app.buttons[setTimerView.timeModeButton.rawValue].exists)
 
-        // Picker として MinutesPicker が存在することを確認
+        // 分数ピッカーの存在確認
         let minutesPickerExists = app.otherElements[setTimerView.minutesPickerView.rawValue]
             .waitForExistence(timeout: UITestConstants.Timeout.standard)
         XCTAssertTrue(minutesPickerExists, "分選択の Picker が存在すること")
 
-        // Picker として HourMinutePicker が初期状態では存在しないことを確認
+        // 時刻ピッカーが初期非表示か確認
         XCTAssertFalse(
             app.otherElements[setTimerView.hourMinutePickerView.rawValue]
                 .exists,
@@ -86,12 +86,12 @@ final class SetTimerViewUITests: XCTestCase {
         let minutesPicker = app.otherElements[setTimerView.minutesPickerView.rawValue]
         let hourMinutePicker = app.otherElements[setTimerView.hourMinutePickerView.rawValue]
 
-        // 「時刻指定」モードに切り替える
+        // 時刻モードへ切り替え
         timeModeButton.tap()
         XCTAssertTrue(hourMinutePicker.waitForExistence(timeout: 1), "時刻指定 Picker が表示されること")
         XCTAssertFalse(minutesPicker.exists, "分数指定 Picker が非表示になること")
 
-        // 「分数指定」モードに戻す
+        // 分数モードへ切り替え（戻し）
         minutesModeButton.tap()
         XCTAssertTrue(minutesPicker.waitForExistence(timeout: 1), "分数指定 Picker が再表示されること")
         XCTAssertFalse(hourMinutePicker.exists, "時刻指定 Picker が非表示になること")
@@ -104,18 +104,16 @@ final class SetTimerViewUITests: XCTestCase {
         }
         
         let minutesPicker = app.otherElements[setTimerView.minutesPickerView.rawValue]
-        // 初期値を取得
+        // 初期値の取得
         let initialValueLabel = minutesPicker.staticTexts.firstMatch.label
 
-        // ピッカー要素自体をスワイプ
+        // ピッカーをスワイプ
         minutesPicker.swipeUp()
 
-        sleep(1)
-
-        // 新しい値を取得
+        // スワイプ後の値を取得
         let newValueLabel = minutesPicker.staticTexts.firstMatch.label
 
-        // 値が変わったことを確認
+        // 値変更の確認
         XCTAssertNotEqual(newValueLabel, initialValueLabel, "スワイプ操作後に分数ピッカーの値が変わること")
     }
 
@@ -125,27 +123,27 @@ final class SetTimerViewUITests: XCTestCase {
             return
         }
 
-        // 時刻指定モードへ切り替える
+        // 時刻モードへ切り替え
         let timeModeButton = app.buttons[setTimerView.timeModeButton.rawValue]
         XCTAssertTrue(timeModeButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "時刻指定モードボタンが存在すること")
         timeModeButton.tap()
 
-        // ピッカーコンテナが表示されるのを待つ (モード切り替えの確認)
+        // ピッカーコンテナ表示確認
         let hourMinutePickerContainer = app.otherElements[setTimerView.hourMinutePickerView.rawValue]
         XCTAssertTrue(hourMinutePickerContainer.waitForExistence(timeout: UITestConstants.Timeout.standard), "時刻指定Pickerコンテナが存在すること")
 
-        // 'hourMinutePickerView' 識別子を持つ要素をすべて取得
+        // 時刻ピッカーコンポーネント取得
         let pickerComponents = app.otherElements.matching(identifier: setTimerView.hourMinutePickerView.rawValue)
 
-        // 最初の要素を時コンテナ、2番目の要素を分コンテナとする
+        // 時・分コンテナ特定
         let hourContainer = pickerComponents.element(boundBy: 0)
         let minuteContainer = pickerComponents.element(boundBy: 1)
 
-        // コンテナが存在するか確認
+        // コンテナ存在確認
         XCTAssertTrue(hourContainer.waitForExistence(timeout: UITestConstants.Timeout.short), "時コンテナが存在すること")
         XCTAssertTrue(minuteContainer.waitForExistence(timeout: UITestConstants.Timeout.short), "分コンテナが存在すること")
 
-        // 初期値を取得 (コンテナ要素の value プロパティを使用)
+        // 初期値取得
         guard let initialHourValue = hourContainer.value,
               let initialMinuteValue = minuteContainer.value else {
             XCTFail("Failed to get initial picker container values")
@@ -153,10 +151,15 @@ final class SetTimerViewUITests: XCTestCase {
         }
         print("Initial Hour Value: \(initialHourValue), Initial Minute Value: \(initialMinuteValue)")
 
-        // 各コンテナを直接スワイプして操作
-        hourContainer.swipeUp(velocity: 250)   // 例: 上スワイプ
-        minuteContainer.swipeDown(velocity: 250) // 例: 下スワイプ
-        sleep(1) // スワイプ後のUI更新のための待機
+        // --- 時コンテナ操作（タップ＆Digital Crown回転） ---
+        hourContainer.tap()
+        XCUIDevice.shared.rotateDigitalCrown(delta: 0.2)
+        XCUIDevice.shared.rotateDigitalCrown(delta: -0.1)
+
+        // --- 分コンテナ操作（タップ＆Digital Crown回転） ---
+        minuteContainer.tap()
+        XCUIDevice.shared.rotateDigitalCrown(delta: 0.2)
+        XCUIDevice.shared.rotateDigitalCrown(delta: -0.1)
 
         // 操作後の値を取得
         guard let finalHourValue = hourContainer.value,
@@ -166,7 +169,7 @@ final class SetTimerViewUITests: XCTestCase {
         }
         print("Final Hour Value: \(finalHourValue), Final Minute Value: \(finalMinuteValue)")
 
-        // 値が変わったことを確認 (Any型なので比較前にString等にキャスト推奨だが、直接比較も可能)
+        // 値変更の確認
         XCTAssertTrue(
             "\(finalHourValue)" != "\(initialHourValue)" || "\(finalMinuteValue)" != "\(initialMinuteValue)",
             "操作後に時または分の値が変わること (Initial: H=\(initialHourValue), M=\(initialMinuteValue), Final: H=\(finalHourValue), M=\(finalMinuteValue))"
@@ -181,9 +184,9 @@ final class SetTimerViewUITests: XCTestCase {
          let startButton = app.buttons[setTimerView.startTimerButton.rawValue]
          XCTAssertTrue(startButton.exists)
          XCTAssertTrue(startButton.isEnabled)
-         // タップして画面遷移を確認
+         // タップと画面遷移確認
          startButton.tap()
-         // CountdownView の要素が存在するかで画面遷移を確認する例
+         // CountdownView 要素で画面遷移確認
          XCTAssertTrue(app.staticTexts[countdownView.timeFormatLabel.rawValue].waitForExistence(timeout: 2))
     }
 
@@ -192,12 +195,12 @@ final class SetTimerViewUITests: XCTestCase {
             XCTFail("XCUIApplication instance was nil")
             return
         }
-        // ナビゲーションバー内の設定ボタンを特定して取得
+        // ナビゲーションバーの設定ボタン取得
         let settingsButton = app.navigationBars[setTimerView.navigationBarTitle.rawValue]
             .buttons[setTimerView.openSettingsButton.rawValue].firstMatch
         XCTAssertTrue(settingsButton.exists, "ナビゲーションバー内に設定ボタンが存在すること")
         settingsButton.tap()
-        // 設定画面のナビゲーションバーが表示されていることを確認して画面遷移を検証
+        // 設定画面への遷移確認
         XCTAssertTrue(
             app.navigationBars[settingsView.navigationBarTitle.rawValue]
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),

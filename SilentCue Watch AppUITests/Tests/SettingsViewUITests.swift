@@ -1,4 +1,3 @@
-// @testable import SilentCue_Watch_App
 import XCTest
 
 final class SettingsViewUITests: XCTestCase {
@@ -53,10 +52,6 @@ final class SettingsViewUITests: XCTestCase {
         scrollDelta: CGFloat = 0.2,
         maxScrollAttempts: Int = 10
     ) {
-        guard let app else { // ヘルパー内でも nil チェック
-            XCTFail("rotateDigitalCrownToFindElement: app is nil")
-            return
-        }
         let startTime = Date()
         var scrollAttempts = 0
 
