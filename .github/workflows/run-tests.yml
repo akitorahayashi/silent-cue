@@ -29,7 +29,7 @@ jobs:
       run: |
         source .github/scripts/common/logging.sh
         source .github/scripts/ci-env.sh
-        source .github/scripts/build-steps/select-simulator.sh
+        source .github/scripts/common/select-simulator.sh
         select_simulator
 
     - name: Build for Testing
