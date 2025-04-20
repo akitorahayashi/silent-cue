@@ -1,19 +1,15 @@
 import Foundation
 
-/// 拡張ランタイムセッション管理機能のインターフェース
 protocol ExtendedRuntimeServiceProtocol {
-    /// セッションの完了イベントを通知するストリーム
+    /// セッション完了イベントを通知する非同期ストリーム
     var completionEvents: AsyncStream<Void> { get }
 
-    /// セッションを開始します。
+    /// 拡張ランタイムセッションを開始する。
     /// - Parameters:
-    ///   - duration: セッションの最大期間（システムが保証するものではない）
-    ///   - targetEndTime: タイマーの目標終了時刻 (バックグラウンド更新のため)
+    ///   - duration: セッションの最大持続時間（秒単位）
+    ///   - targetEndTime: タイマーの実際の目標終了時刻（通知スケジュールなどに使用）
     func startSession(duration: TimeInterval, targetEndTime: Date?)
 
-    /// 現在のセッションを停止します。
+    /// 拡張ランタイムセッションを停止する。
     func stopSession()
-
-    // This flag seems less relevant with the stream approach, consider removing later.
-    func checkAndClearBackgroundCompletionFlag() -> Bool
-}
+} 

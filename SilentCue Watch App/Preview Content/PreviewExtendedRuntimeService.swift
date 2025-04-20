@@ -16,11 +16,6 @@
         func stopSession() {
             print("⏱️ [プレビュー] ExtendedRuntimeService: stopSession 呼び出し。")
         }
-
-        func checkAndClearBackgroundCompletionFlag() -> Bool {
-            print("⏱️ [プレビュー] ExtendedRuntimeService: checkAndClearBackgroundCompletionFlag 呼び出し。false を返します。")
-            return false // プレビューでは通常 false を返すのが適切
-        }
     }
 
 #endif

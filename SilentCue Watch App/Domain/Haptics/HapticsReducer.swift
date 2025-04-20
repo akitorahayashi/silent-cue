@@ -10,9 +10,15 @@ struct HapticsReducer: Reducer {
 
     private enum CancelID { case haptic, preview }
 
+    // 時間関連の依存関係を追加
+    @Dependency(\.continuousClock) var clock
+    @Dependency(\.date) var date
+    @Dependency(\.hapticsService) var hapticsService
+
     var body: some ReducerOf<Self> {
         Reduce { state, action in
-            @Dependency(\.hapticsService) var hapticsService
+            // @Dependency(\.hapticsService) var hapticsService // Reduceブロックから削除
+            // clock, date, hapticsService は struct のプロパティとしてアクセス可能
 
             switch action {
                 case let .startHaptic(type):
@@ -26,12 +32,14 @@ struct HapticsReducer: Reducer {
                     return .merge(
                         effect,
                         .run { [type = state.hapticType] _ in
-                            let startTime = Date()
+                            let startTime = date() // Date() -> date()
                             let endTime = startTime.addingTimeInterval(3.0)
 
-                            while Date() < endTime {
+                            while date() < endTime { // Date() -> date()
                                 await hapticsService.play(type.wkHapticType)
-                                try? await Task.sleep(for: .seconds(type.interval))
+                                // Task.sleep -> clock.sleep
+                                try? await clock.sleep(for: .seconds(type.interval))
+                                // Task.isCancelled はそのまま
                                 if Task.isCancelled {
                                     print("Haptic task cancelled in run loop")
                                     break
@@ -47,38 +55,6 @@ struct HapticsReducer: Reducer {
 
                 case let .updateHapticSettings(type):
                     state.hapticType = type
-                    return .none
-
-                case let .previewHaptic(type):
-                    if state.isPreviewingHaptic {
-                        return .merge(
-                            .cancel(id: CancelID.preview),
-                            .run { send in
-                                try? await Task.sleep(for: .milliseconds(50))
-                                await send(.previewHaptic(type))
-                            }
-                        )
-                    }
-                    state.isPreviewingHaptic = true
-
-                    return .run { [type] send in
-                        let startTime = Date()
-                        let endTime = startTime.addingTimeInterval(3.0)
-
-                        while Date() < endTime {
-                            await hapticsService.play(type.wkHapticType)
-                            try? await Task.sleep(for: .seconds(type.interval))
-                            if Task.isCancelled {
-                                print("Haptic preview task cancelled in run loop")
-                                break
-                            }
-                        }
-                        await send(.previewHapticCompleted)
-                    }
-                    .cancellable(id: CancelID.preview)
-
-                case .previewHapticCompleted:
-                    state.isPreviewingHaptic = false
                     return .none
             }
         }

@@ -141,7 +141,13 @@ private enum NotificationServiceKey: DependencyKey { // キーenum名を変更
     }()
 
     // Preview実装 - liveValue を使用 (モックはテストターゲット専用)
-    static let previewValue: NotificationServiceProtocol = Self.liveValue
+    #if DEBUG
+        // Preview Content にある PreviewNotificationService を使用
+        static let previewValue: NotificationServiceProtocol = PreviewNotificationService()
+    #else
+        // リリースビルドでは liveValue と同じにする
+        static let previewValue: NotificationServiceProtocol = LiveNotificationService()
+    #endif
 }
 
 // TestDependencyKey を使用して testValue を定義

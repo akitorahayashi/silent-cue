@@ -1,4 +1,6 @@
 import Foundation
+@testable import SilentCue_Watch_App
+import Combine
 
 final class MockUserDefaultsManager: UserDefaultsServiceProtocol { // Conform to the new protocol
     /// UserDefaultsの代わりとなるインメモリ辞書。

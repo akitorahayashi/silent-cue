@@ -40,12 +40,6 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
         print("拡張ランタイムセッションが停止されました")
     }
 
-    /// アプリがフォアグラウンドに戻ったときに呼び出して、バックグラウンドでタイマーが完了していたかを確認 (削除検討)
-    func checkAndClearBackgroundCompletionFlag() -> Bool {
-        print("⚠️ checkAndClearBackgroundCompletionFlag is likely obsolete with AsyncStream.")
-        return false // 削除までの暫定
-    }
-
     // MARK: - WKExtendedRuntimeSessionDelegate
 
     func extendedRuntimeSession(
@@ -108,13 +102,6 @@ extension LiveExtendedRuntimeService: TestDependencyKey {
                 unimplemented(
                     "\(Self.self).stopSession",
                     placeholder: () // Void のプレースホルダー
-                )
-            }
-
-            func checkAndClearBackgroundCompletionFlag() -> Bool {
-                unimplemented(
-                    "\(Self.self).checkAndClearBackgroundCompletionFlag",
-                    placeholder: false // Bool のプレースホルダー
                 )
             }
         }

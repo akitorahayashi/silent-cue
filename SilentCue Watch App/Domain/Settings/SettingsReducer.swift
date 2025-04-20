@@ -14,11 +14,17 @@ struct SettingsReducer: Reducer {
         case hapticPreviewTimeout // For the 3-second timeout
     }
 
+    // 依存関係を struct のプロパティとして宣言
+    @Dependency(\.userDefaultsService) var userDefaultsService
+    @Dependency(\.hapticsService) var hapticsService
+    @Dependency(\.continuousClock) var clock
+
     var body: some ReducerOf<Self> {
         Reduce { state, action in
-            @Dependency(\.userDefaultsService) var userDefaultsService
-            @Dependency(\.hapticsService) var hapticsService
-            @Dependency(\.continuousClock) var clock
+            // @Dependency(\.userDefaultsService) var userDefaultsService // Reduceブロックから削除
+            // @Dependency(\.hapticsService) var hapticsService // Reduceブロックから削除
+            // @Dependency(\.continuousClock) var clock           // Reduceブロックから削除
+            // 依存関係は struct のプロパティとしてアクセス可能
 
             switch action {
                 case .loadSettings:

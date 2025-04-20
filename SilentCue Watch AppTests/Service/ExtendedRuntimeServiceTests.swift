@@ -83,38 +83,17 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
         XCTAssertEqual(service.stopSessionCallCount, 1)
     }
 
-    // バックグラウンド完了フラグの確認・クリアロジックを検証 (モック)
-    func testCheckAndClearBackgroundCompletionFlag_ReturnsStubValue() {
-        // 1. 初期状態 (false)
-        XCTAssertFalse(service.checkAndClearBackgroundCompletionFlag(), "初期値は false であるべきです。")
-        XCTAssertEqual(service.checkAndClearBackgroundCompletionFlagCallCount, 1)
-
-        // 2. スタブ値を true に設定
-        service.checkAndClearBackgroundCompletionFlagReturnValue = true
-        XCTAssertTrue(service.checkAndClearBackgroundCompletionFlag(), "スタブ値 true が返されるべきです。")
-        XCTAssertEqual(service.checkAndClearBackgroundCompletionFlagCallCount, 2)
-
-        // 3. スタブ値を false に戻す
-        service.checkAndClearBackgroundCompletionFlagReturnValue = false
-        XCTAssertFalse(service.checkAndClearBackgroundCompletionFlag(), "スタブ値 false が返されるべきです。")
-        XCTAssertEqual(service.checkAndClearBackgroundCompletionFlagCallCount, 3)
-    }
-
     // モックの状態リセットを検証
     func testReset() {
         // startSession 呼び出し (completionHandler なし)
         service.startSession(duration: 10, targetEndTime: nil)
         service.stopSession()
-        service.checkAndClearBackgroundCompletionFlagReturnValue = true
-        _ = service.checkAndClearBackgroundCompletionFlag()
 
         service.reset()
 
         XCTAssertEqual(service.startSessionCallCount, 0)
         XCTAssertNil(service.startSessionLastParams)
         XCTAssertEqual(service.stopSessionCallCount, 0)
-        XCTAssertEqual(service.checkAndClearBackgroundCompletionFlagCallCount, 0)
-        XCTAssertFalse(service.checkAndClearBackgroundCompletionFlagReturnValue)
         // shouldCallStartSessionCompletionImmediately のアサーション不要
     }
 
@@ -146,7 +125,7 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
         service.extendedRuntimeSessionWillExpire(WKExtendedRuntimeSession()) // ダミーセッションを渡す
 
         // ストリームが値を発行し、その後完了することをアサート
-        await awaitStreamYieldAndCompletion(stream)
+        await awaitStreamCompletion(stream)
 
         // セッション参照がクリアされたか確認 (任意だが良い実践)
         // 内部状態へのアクセス方法は？ テスト可能にするか、振る舞いから推測する必要あり。
@@ -170,12 +149,5 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
 
         // ストリームが完了することをアサート
         await awaitStreamCompletion(stream)
-    }
-
-    // ライブサービス: 廃止されたフラグ確認メソッドが false を返すか検証
-    func testCheckAndClearFlag_ReturnsFalse() {
-        let service = LiveExtendedRuntimeService()
-        // 廃止されたメソッドが期待通り false を返すことを保証。
-        XCTAssertFalse(service.checkAndClearBackgroundCompletionFlag())
     }
 }

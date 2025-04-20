@@ -1,7 +1,7 @@
 import Foundation
-import WatchKit // For WKHapticType
+import WatchKit
+@testable import SilentCue_Watch_App
 
-/// HapticsServiceProtocol のモック実装
 class MockHapticsService: HapticsServiceProtocol {
     // 呼び出し記録
     var playCallCount = 0

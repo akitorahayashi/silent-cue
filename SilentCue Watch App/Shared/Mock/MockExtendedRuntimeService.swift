@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+@testable import SilentCue_Watch_App
 
 class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
     // Completion Stream
@@ -26,11 +27,6 @@ class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
 
     func stopSession() {
         stopSessionCallCount += 1
-    }
-
-    func checkAndClearBackgroundCompletionFlag() -> Bool {
-        checkAndClearBackgroundCompletionFlagCallCount += 1
-        return checkAndClearBackgroundCompletionFlagReturnValue
     }
 
     /// テストから完了イベントを発行

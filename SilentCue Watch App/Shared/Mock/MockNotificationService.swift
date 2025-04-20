@@ -1,5 +1,6 @@
 import Foundation
 import UserNotifications
+@testable import SilentCue_Watch_App
 
 class MockNotificationService: NotificationServiceProtocol {
     // 呼び出し記録

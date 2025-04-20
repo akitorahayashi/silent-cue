@@ -34,19 +34,28 @@ struct AppReducer: Reducer {
                 case let .scenePhaseChanged(newPhase):
                     // バックグラウンドから復帰時の処理
                     if newPhase == .active {
+                        var effects: [Effect<Action>] = []
+
                         // カウントダウン画面表示中ならタイマー表示を更新
                         if state.path.last == .countdown {
-                            return .send(.timer(.updateTimerDisplay))
+                            effects.append(.send(.timer(.updateTimerDisplay)))
                         }
 
-                        // バックグラウンドでタイマーが完了していたかチェック
-                        let wasCompletedInBackground = extendedRuntimeService
-                            .checkAndClearBackgroundCompletionFlag()
-
-                        // バックグラウンドで完了していた場合、通知から来た可能性が高いので振動なしで完了画面に遷移
-                        if wasCompletedInBackground, state.timer.completionDate != nil {
-                            return .send(.pushScreen(.completion))
+                        // 変更: 状態を直接チェックして完了画面へ遷移
+                        // タイマーが完了しており (completionDateがある)、
+                        // かつ、まだ完了画面にいない場合
+                        if state.timer.completionDate != nil,
+                           state.path.last != .completion
+                        {
+                            // バックグラウンド完了を示すフラグは不要になった
+                            // if wasCompletedInBackground, state.timer.completionDate != nil {
+                            // UI起因ではない完了(バックグラウンドや通知経由)を示唆する
+                            // この場合、自動的に完了画面に遷移させる
+                            print("AppReducer: Detected completed timer on becoming active, navigating to completion.")
+                            effects.append(.send(.pushScreen(.completion)))
                         }
+
+                        return .merge(effects)
                     }
                     return .none
 

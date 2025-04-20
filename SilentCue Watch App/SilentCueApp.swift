@@ -25,13 +25,14 @@ struct SilentCueWatchApp: App {
                 print("--- UI Testing: Initializing Store with overridden dependencies (DEBUG build) ---")
                 store = Store(initialState: AppState()) {
                     AppReducer()
-                } withDependencies: {
-                    // UIテスト用に、依存関係をテスト用の実装（モック/スタブ）に差し替える
-                    $0.userDefaultsService = PreviewUserDefaultsService()
-                    $0.notificationService = MockNotificationService()
-                    $0.extendedRuntimeService = MockExtendedRuntimeService()
-                    $0.hapticsService = MockHapticsService()
-                    $0.continuousClock = ImmediateClock() // テストには即時クロックを使用
+                } withDependencies: { dependencies in
+                    // UIテスト用に、依存関係をプレビュー用の実装に差し替える
+                    // Preview*Service は #if DEBUG でアプリ本体ターゲットに存在するので直接参照可能
+                    dependencies.userDefaultsService = PreviewUserDefaultsService()
+                    dependencies.notificationService = PreviewNotificationService() // 直接 Preview実装をインスタンス化
+                    dependencies.extendedRuntimeService = PreviewExtendedRuntimeService() // 直接 Preview実装をインスタンス化
+                    dependencies.hapticsService = PreviewHapticsService() // 直接 Preview実装をインスタンス化
+                    dependencies.continuousClock = ImmediateClock() // テストには即時クロックを使用
                 }
             } else {
                 // --- 通常のデバッグビルド: デフォルトの依存関係でストアを初期化 ---

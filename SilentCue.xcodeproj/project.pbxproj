@@ -34,6 +34,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		982CAED02DB51655003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/Mock/MockExtendedRuntimeService.swift,
+				Shared/Mock/MockHapticsService.swift,
+				Shared/Mock/MockNotificationService.swift,
+				Shared/Mock/MockUserDefaultsManager.swift,
+			);
+			target = 98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */;
+		};
 		98FEB0612DB37F1500006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -66,6 +76,7 @@
 		98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				982CAED02DB51655003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */,
 				98FEB14D2DB3BD3400006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppTests" target */,
 				98FEB0612DB37F1500006FA8 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */,
 			);

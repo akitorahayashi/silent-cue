@@ -24,7 +24,13 @@ private enum HapticsServiceKey: DependencyKey { // キーenum名を変更
     static let liveValue: HapticsServiceProtocol = LiveHapticsService() // 新しいクラスとプロトコルを使用
 
     // Preview実装 - liveValue を使用 (モックはテストターゲット専用)
-    static let previewValue: HapticsServiceProtocol = Self.liveValue
+    #if DEBUG
+        // Preview Content にある PreviewHapticsService を使用
+        static let previewValue: HapticsServiceProtocol = PreviewHapticsService()
+    #else
+        // リリースビルドでは liveValue と同じにするか、エラーにする (通常 #if DEBUG で囲むので不要)
+        static let previewValue: HapticsServiceProtocol = LiveHapticsService()
+    #endif
 }
 
 // TestDependencyKey を使用して testValue を定義
