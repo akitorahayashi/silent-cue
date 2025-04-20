@@ -541,31 +541,4 @@ extension TimerReducerTests {
         // エフェクトがキャンセルされることを確認
         await store.finish()
     }
-
-    // Helper to calculate expected target end date for .time mode
-    private func calculateExpectedTargetEndDateAtTime(
-        selectedHour: Int,
-        selectedMinute: Int,
-        now: Date,
-        calendar: Calendar
-    ) throws -> Date? {
-        var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
-        dateComponents.hour = selectedHour
-        dateComponents.minute = selectedMinute
-        dateComponents.second = 0 // 秒は常に0にリセット
-
-        guard var targetDate = calendar.date(from: dateComponents) else {
-            return nil
-        }
-
-        // If the calculated target time is earlier than or equal to the current time,
-        // it means the target time is on the next day.
-        if targetDate <= now {
-            guard let nextDayTarget = calendar.date(byAdding: .day, value: 1, to: targetDate) else {
-                return nil
-            }
-            targetDate = nextDayTarget
-        }
-        return targetDate
-    }
 }
