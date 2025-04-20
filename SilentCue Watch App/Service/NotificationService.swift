@@ -21,7 +21,7 @@ final class LiveNotificationService: NotificationServiceProtocol {
         case timerCompleted = "TIMER_COMPLETED_NOTIFICATION"
     }
 
-    init() { // 暗黙の internal init を明示的に定義
+    init() {
         setupNotificationCategories()
     }
 
@@ -121,7 +121,7 @@ final class LiveNotificationService: NotificationServiceProtocol {
 // MARK: - TCA 依存関係
 
 extension DependencyValues {
-    var notificationService: NotificationServiceProtocol { // プロパティ名を変更、型とキーを更新
+    var notificationService: NotificationServiceProtocol {
         get { self[NotificationServiceKey.self] }
         set { self[NotificationServiceKey.self] = newValue }
     }
@@ -138,7 +138,7 @@ private enum NotificationServiceKey: DependencyKey { // キーenum名を変更
         // ここでは LiveNotificationService の暗黙 init で setup を呼ぶことに期待する。
         // (setupNotificationCategories を init から独立させるリファクタリングも検討可)
         return service
-    }() // Use new class and protocol
+    }()
 
     // Preview実装 - liveValue を使用 (モックはテストターゲット専用)
     static let previewValue: NotificationServiceProtocol = Self.liveValue

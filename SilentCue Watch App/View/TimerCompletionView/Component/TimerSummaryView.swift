@@ -69,7 +69,7 @@ struct TimerSummaryView: View {
 }
 
 #Preview {
-    @State var appearAnimation = true
+    @Previewable @State var appearAnimation = true
     return TimerSummaryView(
         startDate: Date(),
         timerDurationMinutes: 15,

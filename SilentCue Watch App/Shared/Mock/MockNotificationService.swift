@@ -1,19 +1,15 @@
 import Foundation
-@testable import SilentCue_Watch_App // Import the main module to access the protocol
 import UserNotifications
 
-/// NotificationServiceProtocol のモック実装
 class MockNotificationService: NotificationServiceProtocol {
-    // MARK: - 呼び出し記録
-
+    // 呼び出し記録
     var requestAuthorizationCallCount = 0
     var checkAuthorizationStatusCallCount = 0
     var scheduleTimerCompletionNotificationCallCount = 0
     var lastScheduledNotificationParams: (targetDate: Date, minutes: Int)?
     var cancelTimerCompletionNotificationCallCount = 0
 
-    // MARK: - スタブ設定
-
+    // スタブ設定
     /// requestAuthorization の完了ハンドラに渡す値（許可されたか）
     var requestAuthorizationGrantedResult: Bool = true
     /// requestAuthorization を非同期で完了させるか（テスト用）
@@ -62,8 +58,6 @@ class MockNotificationService: NotificationServiceProtocol {
         cancelTimerCompletionNotificationCallCount += 1
         print("[MockNotificationService] Cancelling notification")
     }
-
-    // MARK: - テスト用リセット
 
     func reset() {
         requestAuthorizationCallCount = 0

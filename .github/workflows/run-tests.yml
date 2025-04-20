@@ -63,7 +63,7 @@ jobs:
         source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/run-unit-tests.sh
         run_unit_tests
-      continue-on-error: true
+      continue-on-error: false
 
     - name: Run UI Tests
       id: run_ui_tests
@@ -74,7 +74,7 @@ jobs:
         source .github/scripts/ci-env.sh
         source .github/scripts/build-steps/run-ui-tests.sh
         run_ui_tests
-      continue-on-error: true
+      continue-on-error: false
 
     - name: Verify Unit Test Results
       id: verify_unit_tests

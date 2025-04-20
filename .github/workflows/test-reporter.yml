@@ -25,12 +25,7 @@ jobs:
         with:
           name: test-results # run-tests.yml でアップロードされたテスト結果のアーティファクト名
           path: ./ci-outputs/test-results
-
-      - name: List downloaded files (for debugging)
-        run: |
-          echo "--- Test Results ---"
-          ls -lR ./ci-outputs/test-results
-
+          
       - name: Publish Test Report as Check
         uses: mikepenz/action-junit-report@v4
         # JUnitファイルが存在する場合のみ実行
