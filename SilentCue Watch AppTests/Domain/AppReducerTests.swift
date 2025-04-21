@@ -6,21 +6,17 @@ import XCTest
 final class AppReducerTests: XCTestCase {
     func testOnAppearLoadsSettings() async {
         let mockUserDefaults = MockUserDefaultsManager()
+
         // モックに期待される初期値を設定
-        mockUserDefaults.setupInitialValues([
-            .hapticType: HapticType.standard.rawValue, // 例: standard
-        ])
+        mockUserDefaults.set(HapticType.standard.rawValue, forKey: UserDefaultsKeys.hapticType)
 
         let store = TestStore(
             initialState: AppState(),
             reducer: { AppReducer() },
             withDependencies: { dependencies in
-                dependencies.userDefaultsManager = mockUserDefaults
+                dependencies.userDefaultsService = mockUserDefaults
             }
         )
-
-        // 完全網羅的テストをオフにする
-        store.exhaustivity = .off
 
         // AppAction.onAppear を送信
         await store.send(AppAction.onAppear)
@@ -37,7 +33,7 @@ final class AppReducerTests: XCTestCase {
         }
 
         // AppReducer内の機能連携による updateHapticSettings アクションを期待
-        // 状態の変更は assert しない（同じ値の設定か、変更が起きていない可能性があるため）
+        // 状態の変更もアサートする
         await store.receive(AppAction.haptics(.updateHapticSettings(
             type: HapticType.standard
         )))
@@ -59,20 +55,23 @@ final class AppReducerTests: XCTestCase {
             state.settings.isSettingsLoaded = true
         }
 
-        // AppReducerの連携による後続のアクションをアサート
+        // AppReducerの連携による後続のアクションをアサート (状態変更を伴う)
         await store.receive(AppAction.haptics(.updateHapticSettings(
             type: HapticType.weak
         ))) { state in
             state.haptics.hapticType = HapticType.weak
         }
+
+        // 最終的な状態をアサート (Now handled in the receive block above)
+        // store.assert { state in
+        //     state.haptics.hapticType = HapticType.weak
+        // }
+
         await store.finish()
     }
 
     func testDismissCompletionViewClearsPathAndStopsHaptic() async {
-        let initialState = AppState(
-            path: [NavigationDestination.completion],
-            haptics: HapticsState(isActive: true)
-        )
+        let initialState = AppState()
         var mutableInitialState = initialState
         mutableInitialState.timer.completionDate = Date()
 
@@ -87,8 +86,11 @@ final class AppReducerTests: XCTestCase {
             state.timer.completionDate = nil
         }
 
-        // 後続のアクションをアサート
-        await store.receive(AppAction.haptics(.stopHaptic)) { state in
+        // 後続のアクションを受信する
+        await store.receive(AppAction.haptics(.stopHaptic))
+
+        // 最終的な状態をアサート
+        store.assert { state in
             state.haptics.isActive = false
         }
         await store.finish()

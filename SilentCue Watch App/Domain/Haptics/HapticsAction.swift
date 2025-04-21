@@ -9,8 +9,4 @@ enum HapticsAction: Equatable {
 
     // 設定
     case updateHapticSettings(type: HapticType)
-
-    // プレビュー
-    case previewHaptic(HapticType)
-    case previewHapticCompleted
 }

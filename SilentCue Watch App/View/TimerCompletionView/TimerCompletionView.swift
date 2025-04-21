@@ -5,6 +5,7 @@ import UserNotifications
 struct TimerCompletionView: View {
     let store: StoreOf<TimerReducer>
     // onDismissクロージャはAppReducerに処理を移譲するため不要
+    @Dependency(\.notificationService) var notificationService
 
     // アニメーション用の状態変数
     @State private var appearAnimation = false
@@ -18,7 +19,14 @@ struct TimerCompletionView: View {
             ZStack {
                 ScrollView {
                     VStack {
-                        CloseButtonView(
+                        NotifyEndTimeView(
+                            completionDate: viewStore.completionDate,
+                            appearAnimation: $appearAnimation
+                        )
+
+                        Spacer(minLength: 13)
+
+                        CloseTimeCompletionViewButton(
                             action: {
                                 // TimerReducerにdismissアクションを送信するだけ
                                 viewStore.send(.dismissCompletionView)
@@ -26,14 +34,7 @@ struct TimerCompletionView: View {
                             appearAnimation: $appearAnimation
                         )
 
-                        Spacer(minLength: 20)
-
-                        CompletionDetailsView(
-                            completionDate: viewStore.completionDate,
-                            appearAnimation: $appearAnimation
-                        )
-
-                        Spacer(minLength: 20)
+                        Spacer(minLength: 18)
 
                         TimerSummaryView(
                             startDate: viewStore.startDate,
@@ -95,16 +96,41 @@ struct TimerCompletionView: View {
 
     // 通知許可状態を確認
     private func checkNotificationAuthorizationStatus() {
-        NotificationManager.shared.checkAuthorizationStatus { isAuthorized in
+        // Use the injected dependency
+        notificationService.checkAuthorizationStatus { isAuthorized in
             isNotificationAuthorized = isAuthorized
         }
     }
 
     // 通知許可をリクエスト
     private func requestNotificationAuthorization(completion: @escaping (Bool) -> Void = { _ in }) {
-        NotificationManager.shared.requestAuthorization { granted in
+        // Use the injected dependency
+        notificationService.requestAuthorization { granted in
             isNotificationAuthorized = granted
             completion(granted)
         }
     }
+}
+
+// MARK: - Preview
+
+#Preview {
+    TimerCompletionView(
+        store: Store(
+            // TimerStateを直接初期化 (ビューに必要な最小限の状態を設定)
+            initialState: TimerReducer.State(
+                now: Date(), // TimerStateのinitに必要
+                isRunning: false,
+                // TimerCompletionView が表示に使う completionDate を設定
+                completionDate: Date()
+                // 他のプロパティ(selectedMinutesなど)はTimerStateのデフォルトを使用
+            )
+        ) {
+            // TimerReducerを直接使用
+            TimerReducer()
+                // 依存関係を直接Reducerに注入
+                .dependency(\.notificationService, PreviewNotificationService())
+            // ★ AppStateやスコープは使用しない
+        }
+    )
 }

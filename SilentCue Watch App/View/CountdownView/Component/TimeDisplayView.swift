@@ -9,14 +9,14 @@ struct TimeDisplayView: View {
             Text(remainingSeconds >= 3600 ? "時間  :  分" : "分  :  秒")
                 .font(.system(size: 14, weight: .regular))
                 .foregroundStyle(.secondary)
-                .accessibilityLabel("TimeFormatLabel")
-                .accessibilityIdentifier("TimeFormatLabel")
+                .accessibilityLabel(SCAccessibilityIdentifiers.CountdownView.timeFormatLabel.rawValue)
+                .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.timeFormatLabel.rawValue)
 
             Text(displayTime)
                 .font(.system(size: 40, weight: .semibold, design: .monospaced))
                 .foregroundStyle(.primary)
-                .accessibilityLabel("CountdownTimeDisplay")
-                .accessibilityIdentifier("CountdownTimeDisplay")
+                .accessibilityLabel(SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue)
+                .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue)
         }
     }
 }

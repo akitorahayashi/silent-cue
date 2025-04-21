@@ -1,0 +1,46 @@
+import SwiftUI
+
+struct SelectVibrationTypeSection: View {
+    let hapticTypes: [HapticType]
+    let selectedHapticType: HapticType
+    let onSelect: (HapticType) -> Void
+
+    var body: some View {
+        Section(
+            header: Text("Vibration Type")
+                .accessibilityLabel("VibrationTypeHeader")
+                .accessibilityIdentifier(SCAccessibilityIdentifiers.SettingsView.vibrationTypeHeader.rawValue)
+        ) {
+            ForEach(hapticTypes) { hapticType in
+                Button(action: {
+                    onSelect(hapticType)
+                }, label: {
+                    HStack {
+                        Text(hapticType.rawValue.capitalized)
+                        Spacer()
+                        if hapticType == selectedHapticType {
+                            Image(systemName: "circle.fill")
+                                .foregroundStyle(Color.green.opacity(0.7))
+                                .transition(.opacity)
+                                .animation(.spring(), value: selectedHapticType)
+                        }
+                    }
+                })
+                .accessibilityLabel("VibrationTypeOption\(hapticType.rawValue.capitalized)")
+                .accessibilityIdentifier(accessibilityIdentifier(for: hapticType))
+                .accessibilityAddTraits(hapticType == selectedHapticType ? .isSelected : [])
+            }
+        }
+    }
+
+    private func accessibilityIdentifier(for hapticType: HapticType) -> String {
+        switch hapticType {
+            case .standard:
+                return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStandard.rawValue
+            case .strong:
+                return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionStrong.rawValue
+            case .weak:
+                return SCAccessibilityIdentifiers.SettingsView.vibrationTypeOptionWeak.rawValue
+        }
+    }
+}

@@ -13,19 +13,15 @@ struct SettingsView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }, content: { viewStore in
             List {
-                VibrationTypeSectionView(
+                SelectVibrationTypeSection(
                     hapticTypes: HapticType.allCases,
                     selectedHapticType: viewStore.selectedHapticType,
                     onSelect: { hapticType in
-                        // 設定変更
                         viewStore.send(.selectHapticType(hapticType))
-
-                        // ハプティックスストアでプレビュー
-                        hapticsStore.send(.previewHaptic(hapticType))
                     }
                 )
             }
-            .navigationTitle("Settings")
+            .navigationTitle(SCAccessibilityIdentifiers.SettingsView.navigationBarTitle.rawValue)
             .onAppear {
                 if !viewStore.isSettingsLoaded {
                     viewStore.send(.loadSettings)
