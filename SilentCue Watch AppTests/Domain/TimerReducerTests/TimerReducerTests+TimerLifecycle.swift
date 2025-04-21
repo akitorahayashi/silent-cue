@@ -223,7 +223,7 @@ extension TimerReducerTests {
             // targetEndDate は now + totalSeconds ではなく、計算された目標時刻になるはず
             // Reducer内部で TimeCalculation.calculateTargetEndDate を使う想定
             // 正確な targetEndDate を計算 (Reducerのロジックに合わせる)
-            let calculatedTargetEndDate = try? self.calculateExpectedTargetEndDateAtTime(
+            let calculatedTargetEndDate = self.calculateExpectedTargetEndDateAtTime(
                 selectedHour: initialHour,
                 selectedMinute: initialMinute,
                 now: startDate,
@@ -402,7 +402,7 @@ extension TimerReducerTests {
             XCTFail("Failed to get TimeZone")
             return
         }
-        var components = DateComponents(
+        let components = DateComponents(
             timeZone: timeZone,
             year: 2023,
             month: 10,

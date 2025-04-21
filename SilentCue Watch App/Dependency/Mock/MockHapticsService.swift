@@ -1,6 +1,6 @@
 import Foundation
-@testable import SilentCue_Watch_App
 import WatchKit
+@testable import SilentCue_Watch_App
 
 class MockHapticsService: HapticsServiceProtocol {
     // 呼び出し記録

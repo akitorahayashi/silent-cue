@@ -2,12 +2,8 @@ import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
 
-// MARK: - UserDefaults サービス実装
-
-final class LiveUserDefaultsService: UserDefaultsServiceProtocol { // クラス名を変更、新しいプロトコルに準拠
+final class LiveUserDefaultsService: UserDefaultsServiceProtocol {
     private let defaults = UserDefaults.standard
-
-    // MARK: - プロトコルメソッド
 
     func set(_ value: Any?, forKey defaultName: UserDefaultsKeys) {
         defaults.set(value, forKey: defaultName.rawValue)
@@ -28,25 +24,28 @@ final class LiveUserDefaultsService: UserDefaultsServiceProtocol { // クラス�
     }
 }
 
-// MARK: - TCA 依存関係
-
 extension DependencyValues {
-    var userDefaultsService: UserDefaultsServiceProtocol { // プロパティ名を変更、型とキーを更新
+    var userDefaultsService: UserDefaultsServiceProtocol {
         get { self[UserDefaultsServiceKey.self] }
         set { self[UserDefaultsServiceKey.self] = newValue }
     }
 }
 
-private enum UserDefaultsServiceKey: DependencyKey { // キーenum名を変更
-    static let liveValue: UserDefaultsServiceProtocol = LiveUserDefaultsService() // 新しいクラスとプロトコルを使用
+private enum UserDefaultsServiceKey: DependencyKey {
+    static let liveValue: UserDefaultsServiceProtocol = LiveUserDefaultsService()
 
+    #if DEBUG
     // Use PreviewUserDefaultsService for previews (defined in PreviewUserDefaultsService.swift #if DEBUG)
     static let previewValue: UserDefaultsServiceProtocol = PreviewUserDefaultsService()
+    #else
+    // リリースビルドでは liveValue を使用します (PreviewUserDefaultsService は DEBUG 専用のため)
+    static let previewValue: UserDefaultsServiceProtocol = LiveUserDefaultsService()
+    #endif
 }
 
-extension LiveUserDefaultsService: TestDependencyKey { // 拡張ターゲットを更新
-    static let testValue: UserDefaultsServiceProtocol = { // プロトコル型を更新
-        struct UnimplementedUserDefaultsService: UserDefaultsServiceProtocol { // 構造体名を変更、新しいプロトコルに準拠
+extension LiveUserDefaultsService: TestDependencyKey {
+    static let testValue: UserDefaultsServiceProtocol = {
+        struct UnimplementedUserDefaultsService: UserDefaultsServiceProtocol {
             func set(_: Any?, forKey _: UserDefaultsKeys) {
                 XCTFail("\(Self.self).set は未実装です")
             }

@@ -96,7 +96,6 @@ struct TimerCompletionView: View {
 
     // 通知許可状態を確認
     private func checkNotificationAuthorizationStatus() {
-        // Use the injected dependency
         notificationService.checkAuthorizationStatus { isAuthorized in
             isNotificationAuthorized = isAuthorized
         }
@@ -104,7 +103,6 @@ struct TimerCompletionView: View {
 
     // 通知許可をリクエスト
     private func requestNotificationAuthorization(completion: @escaping (Bool) -> Void = { _ in }) {
-        // Use the injected dependency
         notificationService.requestAuthorization { granted in
             isNotificationAuthorized = granted
             completion(granted)
@@ -112,25 +110,21 @@ struct TimerCompletionView: View {
     }
 }
 
-// MARK: - Preview
+// MARK: - プレビュー
 
+#if DEBUG
 #Preview {
     TimerCompletionView(
         store: Store(
-            // TimerStateを直接初期化 (ビューに必要な最小限の状態を設定)
             initialState: TimerReducer.State(
-                now: Date(), // TimerStateのinitに必要
-                isRunning: false,
-                // TimerCompletionView が表示に使う completionDate を設定
-                completionDate: Date()
-                // 他のプロパティ(selectedMinutesなど)はTimerStateのデフォルトを使用
+                // プレビュー用に適切なデフォルト値を設定（必要に応じて）
+                // e.g., now: Date(), isRunning: false, completionDate: Date() + 60
             )
         ) {
-            // TimerReducerを直接使用
             TimerReducer()
-                // 依存関係を直接Reducerに注入
-                .dependency(\.notificationService, PreviewNotificationService())
-            // ★ AppStateやスコープは使用しない
+        } withDependencies: { dependencies in
+            dependencies.notificationService = PreviewNotificationService()
         }
     )
 }
+#endif

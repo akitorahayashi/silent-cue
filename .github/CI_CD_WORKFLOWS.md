@@ -1,7 +1,5 @@
 # CI/CD Workflows
 
-このディレクトリには SilentCue アプリケーション用の GitHub Actions ワークフローファイルが含まれています
-
 ## ファイル構成
 
 - **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインですPull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します
@@ -123,9 +121,10 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 
 GitHub Actions で実行される主要なCIステップ（テスト、アーカイブ）のコアロジックをローカルで検証するためのスクリプト (`.github/scripts/run-local-ci.sh`) を用意していますこのスクリプトは、`.github/scripts/` 配下の関数定義ファイルを `source` し、コマンドライン引数に基づいて適切な関数を呼び出すことで、CIの主要な処理フローを再現します
 
-初回実行前に、以下のコマンドでスクリプトに実行権限を付与
+初回実行前に、以下のコマンドでスクリプトに実行権限を付与してください
 ```shell
-chmod +x .github/scripts/run-local-ci.sh
+$ chmod +x .github/scripts/find-simulator.sh
+$ chmod +x .github/scripts/run-local-ci.sh
 ```
 
 ### ビルドを含む検証

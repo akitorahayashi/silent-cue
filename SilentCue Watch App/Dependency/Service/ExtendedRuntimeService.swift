@@ -5,8 +5,6 @@ import XCTestDynamicOverlay
 
 /// バックグラウンド実行をサポートする拡張ランタイムセッション管理クラス (ライブ実装)
 final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelegate, ExtendedRuntimeServiceProtocol {
-    // MARK: - Completion Stream
-
     private var completionContinuation: AsyncStream<Void>.Continuation?
     private(set) lazy var completionEvents: AsyncStream<Void> = AsyncStream { continuation in
         self.completionContinuation = continuation
@@ -15,7 +13,7 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
     /// 現在のセッション
     private var session: WKExtendedRuntimeSession?
 
-    /// 拡張ランタイムセッションを開始する (シグネチャ変更)
+    /// 拡張ランタイムセッションを開始する
     func startSession(duration _: TimeInterval, targetEndTime _: Date? = nil) { // completionHandler 削除済
         stopSession() // Ensures any previous session and continuation are cleaned up
 
@@ -23,7 +21,6 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
         let session = WKExtendedRuntimeSession()
         session.delegate = self
         session.start()
-        // self.session は extendedRuntimeSessionDidStart で設定される
 
         print("拡張ランタイムセッションの開始を要求しました")
     }
@@ -60,8 +57,8 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
 
     func extendedRuntimeSessionWillExpire(_: WKExtendedRuntimeSession) {
         print("拡張ランタイムセッションがまもなく期限切れになります -> 完了イベント発行")
-        completionContinuation?.yield(()) // 完了イベント発行
-        completionContinuation?.finish() // ストリーム終了
+        completionContinuation?.yield(())
+        completionContinuation?.finish()
         completionContinuation = nil
         session = nil
     }
@@ -78,7 +75,12 @@ extension DependencyValues {
 
 private enum ExtendedRuntimeServiceKey: DependencyKey {
     static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
+    #if DEBUG
     static let previewValue: ExtendedRuntimeServiceProtocol = PreviewExtendedRuntimeService()
+    #else
+    // リリースビルドでは liveValue を使用します (PreviewExtendedRuntimeService は DEBUG 専用のため)
+    static let previewValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
+    #endif
 }
 
 // TestDependencyKey を使用して testValue を定義
@@ -88,20 +90,20 @@ extension LiveExtendedRuntimeService: TestDependencyKey {
             // unimplemented(_:placeholder:) 形式で修正
             let completionEvents: AsyncStream<Void> = unimplemented(
                 "\(Self.self).completionEvents",
-                placeholder: .finished // AsyncStream<Void>.finished をプレースホルダーに
+                placeholder: .finished
             )
 
             func startSession(duration _: TimeInterval, targetEndTime _: Date?) {
                 unimplemented(
                     "\(Self.self).startSession",
-                    placeholder: () // Void のプレースホルダー
+                    placeholder: ()
                 )
             }
 
             func stopSession() {
                 unimplemented(
                     "\(Self.self).stopSession",
-                    placeholder: () // Void のプレースホルダー
+                    placeholder: ()
                 )
             }
         }
