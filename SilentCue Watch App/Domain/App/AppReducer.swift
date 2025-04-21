@@ -9,13 +9,13 @@ struct AppReducer: Reducer {
 
     var body: some ReducerOf<Self> {
         // 各機能ドメインのReducerをScopeで接続
-        Scope(state: \.timer, action: /AppAction.timer) {
+        Scope(state: \.timer, action: \.timer) {
             TimerReducer()
         }
-        Scope(state: \.settings, action: /AppAction.settings) {
+        Scope(state: \.settings, action: \.settings) {
             SettingsReducer()
         }
-        Scope(state: \.haptics, action: /AppAction.haptics) {
+        Scope(state: \.haptics, action: \.haptics) {
             HapticsReducer()
         }
 

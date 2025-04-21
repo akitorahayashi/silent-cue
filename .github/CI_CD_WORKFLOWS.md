@@ -123,7 +123,8 @@ GitHub Actions で実行される主要なCIステップ（テスト、アーカ
 
 初回実行前に、以下のコマンドでスクリプトに実行権限を付与してください
 ```shell
-chmod +x .github/scripts/run-local-ci.sh
+$ chmod +x .github/scripts/find-simulator.sh
+$ chmod +x .github/scripts/run-local-ci.sh
 ```
 
 ### ビルドを含む検証

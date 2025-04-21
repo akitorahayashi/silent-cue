@@ -129,32 +129,22 @@ extension DependencyValues {
 
 private enum NotificationServiceKey: DependencyKey { // キーenum名を変更
     // ライブ実装を提供
-    static let liveValue: NotificationServiceProtocol = {
-        let service = LiveNotificationService()
-        // service.setupNotificationCategories() // setupNotificationCategories は private なので直接呼べない
-        // 代わりに、LiveNotificationService の (暗黙的な) init 内で setup を呼ぶか、
-        // setupNotificationCategories を internal にしてここで呼ぶ、
-        // または NotificationServiceProtocol に setup メソッドを追加する必要がある。
-        // ここでは LiveNotificationService の暗黙 init で setup を呼ぶことに期待する。
-        // (setupNotificationCategories を init から独立させるリファクタリングも検討可)
-        return service
-    }()
+    static let liveValue: NotificationServiceProtocol = LiveNotificationService()
 
     // Preview実装 - liveValue を使用 (モックはテストターゲット専用)
     #if DEBUG
         // Preview Content にある PreviewNotificationService を使用
         static let previewValue: NotificationServiceProtocol = PreviewNotificationService()
     #else
-        // リリースビルドでは liveValue と同じにする
+        // リリースビルドでは liveValue を使用します (PreviewNotificationService は DEBUG 専用のため)
         static let previewValue: NotificationServiceProtocol = LiveNotificationService()
     #endif
 }
 
 // TestDependencyKey を使用して testValue を定義
-// 注意: プレビューでは previewValue が testValue よりも優先されます。
-extension LiveNotificationService: TestDependencyKey { // 拡張ターゲットを更新
-    static let testValue: NotificationServiceProtocol = { // プロトコル型を更新
-        struct UnimplementedNotificationService: NotificationServiceProtocol { // 構造体名を変更、新しいプロトコルに準拠
+extension LiveNotificationService: TestDependencyKey {
+    static let testValue: NotificationServiceProtocol = {
+        struct UnimplementedNotificationService: NotificationServiceProtocol { 
             func requestAuthorization(completion: @escaping (Bool) -> Void) {
                 XCTFail("\(Self.self).requestAuthorization は未実装です")
                 completion(false)

@@ -22,7 +22,9 @@
                 case .start: return "Start"
                 case .stop: return "Stop"
                 case .click: return "Click"
-                @unknown default: return "Unknown (\(type.rawValue))"
+                @unknown default:
+                    // Handle potential future cases
+                    return "Unknown (\(type.rawValue))"
             }
         }
     }

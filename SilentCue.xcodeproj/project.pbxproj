@@ -42,6 +42,36 @@
 			);
 			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
 		};
+		982CB1982DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Dependency/Mock/MockExtendedRuntimeService.swift,
+				Dependency/Mock/MockHapticsService.swift,
+				Dependency/Mock/MockNotificationService.swift,
+				Dependency/Mock/MockUserDefaultsManager.swift,
+			);
+			target = 98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */;
+		};
+		982CB1992DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Dependency/Mock/MockExtendedRuntimeService.swift,
+				Dependency/Mock/MockHapticsService.swift,
+				Dependency/Mock/MockNotificationService.swift,
+				Dependency/Mock/MockUserDefaultsManager.swift,
+			);
+			target = 98A0AD7A2DADF7DD00A0E3BD /* SilentCue Watch AppTests */;
+		};
+		982CB19A2DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Dependency/Mock/MockExtendedRuntimeService.swift,
+				Dependency/Mock/MockHapticsService.swift,
+				Dependency/Mock/MockNotificationService.swift,
+				Dependency/Mock/MockUserDefaultsManager.swift,
+			);
+			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -55,6 +85,11 @@
 		};
 		98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				982CB1982DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */,
+				982CB1992DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppTests" target */,
+				982CB19A2DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */,
+			);
 			path = "SilentCue Watch App";
 			sourceTree = "<group>";
 		};

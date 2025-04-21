@@ -50,16 +50,14 @@ struct SilentCueWatchApp: App {
 
     var body: some Scene {
         WindowGroup {
+            // WithViewStore を使用して状態を監視し、アクションを送信する
             WithViewStore(store, observe: { $0 }, content: { viewStore in
                 NavigationStack(path: viewStore.binding(
                     get: \.path,
-                    send: AppAction.pathChanged
+                    send: AppAction.pathChanged // 送信には AppAction を使用
                 )) {
                     SetTimerView(
-                        store: store.scope(
-                            state: \.timer,
-                            action: AppAction.timer
-                        ),
+                        store: store.scope(state: \.timer, action: \.timer),
                         onSettingsButtonTapped: {
                             viewStore.send(.pushScreen(.settings))
                         },
@@ -69,38 +67,28 @@ struct SilentCueWatchApp: App {
                     )
                     .navigationDestination(for: NavigationDestination.self) { destination in
                         switch destination {
-                            case .countdown:
-                                CountdownView(
-                                    store: store.scope(
-                                        state: \.timer,
-                                        action: AppAction.timer
-                                    )
-                                )
-                            case .completion:
-                                TimerCompletionView(
-                                    store: store.scope(
-                                        state: \.timer,
-                                        action: AppAction.timer
-                                    )
-                                )
-                                .navigationBarBackButtonHidden(true)
-                                .accessibilityIdentifier(
-                                    SCAccessibilityIdentifiers.TimerCompletionView
-                                        .timerCompletionView.rawValue
-                                )
-                            case .settings:
-                                SettingsView(
-                                    store: store.scope(
-                                        state: \.settings,
-                                        action: AppAction.settings
-                                    ),
-                                    hapticsStore: store.scope(
-                                        state: \.haptics,
-                                        action: AppAction.haptics
-                                    )
-                                )
-                            case .timerStart:
-                                EmptyView()
+                        case .countdown:
+                            CountdownView(
+                                // 新しいキーパス構文を使用
+                                store: store.scope(state: \.timer, action: \.timer)
+                            )
+                        case .completion:
+                            TimerCompletionView(
+                                // 新しいキーパス構文を使用
+                                store: store.scope(state: \.timer, action: \.timer)
+                            )
+                            .navigationBarBackButtonHidden(true)
+                            .accessibilityIdentifier(
+                                SCAccessibilityIdentifiers.TimerCompletionView
+                                    .timerCompletionView.rawValue
+                            )
+                        case .settings:
+                            SettingsView(
+                                // 新しいキーパス構文を使用
+                                store: store.scope(state: \.settings, action: \.settings), hapticsStore: store.scope(state: \.haptics, action: \.haptics)
+                            )
+                        case .timerStart: // 到達しない想定
+                            EmptyView()
                         }
                     }
                 }
@@ -109,8 +97,8 @@ struct SilentCueWatchApp: App {
                 }
                 .onAppear {
                     viewStore.send(.onAppear)
-                    notificationDelegate.setStore(store)
-                    checkNotificationStatus() // Check if this needs conditional execution
+                    notificationDelegate.setStore(store) // メインストアを渡す
+                    checkNotificationStatus()
                 }
                 .alert("通知について", isPresented: $showNotificationExplanationAlert) {
                     Button("許可する") {
@@ -209,7 +197,7 @@ class NotificationDelegate: NSObject, ObservableObject, UNUserNotificationCenter
 
     // タイマー完了通知の処理
     private func handleTimerCompletionNotification() {
-        guard let store else { return }
+        // guard let store else { return } // 未使用のguardを削除
 
         // タイマー完了アクションは不要 (Reducer内で処理される)
         // store.send(.timer(.backgroundTimerFinished))
