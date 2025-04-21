@@ -209,13 +209,12 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
   fi
 fi
 
-# --- Build for Production (Archive & Export) ---
+# --- Build for Production (Archive) ---
 if [ "$run_archive" = true ]; then
   step "Building for Production (Unsigned)"
 
   ARCHIVE_PATH="$ARCHIVE_DIR/SilentCue.xcarchive"
   ARCHIVE_APP_PATH="$ARCHIVE_PATH/Products/Applications/$WATCH_APP_SCHEME.app"
-  # IPA_PATH="$EXPORT_DIR/$WATCH_APP_SCHEME.ipa" # Export step removed for unsigned build
 
   # Archive Build
   echo "Building archive..."

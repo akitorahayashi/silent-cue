@@ -44,14 +44,13 @@ jobs:
       pr_number: ${{ github.event.pull_request.number }}
     secrets: inherit
     
-  # アーカイブビルド検証 (mainブランチプッシュ時のみ)
+  # アーカイブビルド検証
   verify-archive-build:
     name: Verify Archive Build
     needs: [build-and-test, code-quality]
     if: |
       needs.build-and-test.result == 'success' && 
-      needs.code-quality.result == 'success' && 
-      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+      needs.code-quality.result == 'success'
     uses: ./.github/workflows/build-unsigned-archive.yml
     
   # ビルド完了通知
@@ -95,6 +94,6 @@ jobs:
               - ビルドとテスト: ${{ needs.build-and-test.result == 'success' && '✅' || '❌' }}
               - テスト結果レポート: ${{ needs.test-report.result == 'success' && '✅' || (needs.test-report.result == 'skipped' && '⏭️' || '❌') }}
               - コードレビュー: ${{ needs.code-review.result == 'success' && '✅' || (needs.code-review.result == 'skipped' && '⏭️' || '❌') }}
-              - アーカイブビルド検証: ${{ needs.verify-archive-build.result == 'success' && '✅' || (needs.verify-archive-build.result == 'skipped' && '⏭️' || '❌') }}
+              - アーカイブビルド検証: ${{ needs.verify-archive-build.result == 'success' && '✅' || '❌' }}
               `
             }); 
