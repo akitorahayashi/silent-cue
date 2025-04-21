@@ -41,18 +41,17 @@ struct AppReducer: Reducer {
                             effects.append(.send(.timer(.updateTimerDisplay)))
                         }
 
-                        // 変更: 状態を直接チェックして完了画面へ遷移
-                        // タイマーが完了しており (completionDateがある)、
-                        // かつ、まだ完了画面にいない場合
-                        if state.timer.completionDate != nil,
-                           state.path.last != .completion {
-                            // バックグラウンド完了を示すフラグは不要になった
-                            // if wasCompletedInBackground, state.timer.completionDate != nil {
-                            // UI起因ではない完了(バックグラウンドや通知経由)を示唆する
-                            // この場合、自動的に完了画面に遷移させる
-                            print("AppReducer: Detected completed timer on becoming active, navigating to completion.")
-                            effects.append(.send(.pushScreen(.completion)))
+                        // タイマーが完了済みで、かつ完了画面にまだ遷移していない場合、完了画面へ遷移させる
+                        guard state.timer.completionDate != nil else {
+                            return .merge(effects) // タイマー未完了なら何もしない
                         }
+                        guard state.path.last != .completion else {
+                            return .merge(effects) // すでに完了画面なら何もしない
+                        }
+
+                        // 上記ガードを通過した場合のみ実行
+                        print("AppReducer: Detected completed timer on becoming active, navigating to completion.")
+                        effects.append(.send(.pushScreen(.completion)))
 
                         return .merge(effects)
                     }
