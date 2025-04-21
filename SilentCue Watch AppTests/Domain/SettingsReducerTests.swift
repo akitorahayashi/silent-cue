@@ -25,8 +25,8 @@ final class SettingsReducerTests: XCTestCase {
 
         mockUserDefaults.remove(forKey: .hapticType)
         await store.send(SettingsAction.loadSettings)
-        await store.receive(SettingsAction.settingsLoaded(hapticType: .standard)) {
-            $0.selectedHapticType = .standard
+        await store.receive(SettingsAction.settingsLoaded(hapticType: HapticType.standard)) {
+            $0.selectedHapticType = HapticType.standard
             $0.isSettingsLoaded = true
         }
         await store.finish()
@@ -50,8 +50,8 @@ final class SettingsReducerTests: XCTestCase {
 
         mockUserDefaults.set(HapticType.strong.rawValue, forKey: .hapticType)
         await store.send(SettingsAction.loadSettings)
-        await store.receive(SettingsAction.settingsLoaded(hapticType: .strong)) {
-            $0.selectedHapticType = .strong
+        await store.receive(SettingsAction.settingsLoaded(hapticType: HapticType.strong)) {
+            $0.selectedHapticType = HapticType.strong
             $0.isSettingsLoaded = true
         }
         await store.finish()
@@ -129,7 +129,7 @@ final class SettingsReducerTests: XCTestCase {
         if expectedTickCount > 0 {
             for tickCount in 1 ... expectedTickCount {
                 await clock.advance(by: .seconds(interval))
-                await store.receive(.hapticPreviewTick)
+                await store.receive(SettingsAction.hapticPreviewTick)
                 XCTAssertEqual(mockHaptics.playCallCount, tickCount + 1, "ティック \(tickCount) でハプティクスが再生されること")
                 XCTAssertTrue(store.state.isPreviewingHaptic, "ティック \(tickCount) 後もプレビュー中であること")
             }

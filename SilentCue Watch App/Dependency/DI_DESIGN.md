@@ -29,8 +29,8 @@ TCAでは、`DependencyKey` プロトコルと `@Dependency` プロパティラ�
     *   `/Shared/Protocol/` （例: `UserDefaultsServiceProtocol.swift`）
     *   アプリ本体とテストの両方から参照される共通の定義ですが、実装は含みません
 *   **ターゲット設定:**
-    *   **アプリ本体ターゲット (`SilentCue Watch App`) および、そのプロトコルを使用するテストターゲット (`SilentCue Watch AppTests` など)** に所属させます
-    *   これにより、プロトコル定義が各ターゲットのコンパイル時に利用可能になります。(`@testable import` は `internal` シンボルへのアクセスを許可しますが、プロトコル定義自体のリンクは解決しません。)
+    *   **アプリ本体ターゲット (`SilentCue Watch App`) および、そのプロトコルを使用するテストターゲット (`SilentCue Watch AppUITests` など)** に所属させます
+    *   これにより、プロトコル定義が各ターゲットのコンパイル時に利用可能になります。
 
 ### Live 実装 (`Live*Service`)
 

@@ -24,17 +24,17 @@ final class HapticsReducerTests: XCTestCase {
         // 状態変化とキャンセルIDの管理を中心にテストする
         let clock = TestClock() // Add TestClock
 
-        struct NoOpHapticsService: HapticsServiceProtocol {
+        struct MockHapticsService: HapticsServiceProtocol {
             func play(_: WKHapticType) async {}
         }
 
         let store = TestStore(
             initialState: AppState(),
             reducer: { AppReducer() },
-            withDependencies: {
-                $0.hapticsService = NoOpHapticsService()
-                $0.continuousClock = clock // Inject TestClock
-                $0.date = .constant(Date(timeIntervalSince1970: 0)) // Inject constant DateGenerator
+            withDependencies: { dependencies in
+                dependencies.hapticsService = MockHapticsService()
+                dependencies.continuousClock = clock
+                dependencies.date = .constant(Date(timeIntervalSince1970: 0))
             }
         )
 

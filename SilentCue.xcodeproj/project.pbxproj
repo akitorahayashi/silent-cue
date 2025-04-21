@@ -59,10 +59,6 @@
 				Dependency/Mock/MockHapticsService.swift,
 				Dependency/Mock/MockNotificationService.swift,
 				Dependency/Mock/MockUserDefaultsManager.swift,
-				Dependency/Protocol/ExtendedRuntimeServiceProtocol.swift,
-				Dependency/Protocol/HapticsServiceProtocol.swift,
-				Dependency/Protocol/NotificationServiceProtocol.swift,
-				Dependency/Protocol/UserDefaultsServiceProtocol.swift,
 			);
 			target = 98A0AD7A2DADF7DD00A0E3BD /* SilentCue Watch AppTests */;
 		};
