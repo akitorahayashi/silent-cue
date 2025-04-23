@@ -35,11 +35,11 @@ private enum UserDefaultsServiceKey: DependencyKey {
     static let liveValue: UserDefaultsServiceProtocol = LiveUserDefaultsService()
 
     #if DEBUG
-    // Use PreviewUserDefaultsService for previews (defined in PreviewUserDefaultsService.swift #if DEBUG)
-    static let previewValue: UserDefaultsServiceProtocol = PreviewUserDefaultsService()
+        // Use PreviewUserDefaultsService for previews (defined in PreviewUserDefaultsService.swift #if DEBUG)
+        static let previewValue: UserDefaultsServiceProtocol = PreviewUserDefaultsService()
     #else
-    // リリースビルドでは liveValue を使用します (PreviewUserDefaultsService は DEBUG 専用のため)
-    static let previewValue: UserDefaultsServiceProtocol = LiveUserDefaultsService()
+        // リリースビルドでは liveValue を使用します (PreviewUserDefaultsService は DEBUG 専用のため)
+        static let previewValue: UserDefaultsServiceProtocol = LiveUserDefaultsService()
     #endif
 }
 

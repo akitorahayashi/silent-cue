@@ -144,7 +144,7 @@ private enum NotificationServiceKey: DependencyKey { // キーenum名を変更
 // TestDependencyKey を使用して testValue を定義
 extension LiveNotificationService: TestDependencyKey {
     static let testValue: NotificationServiceProtocol = {
-        struct UnimplementedNotificationService: NotificationServiceProtocol { 
+        struct UnimplementedNotificationService: NotificationServiceProtocol {
             func requestAuthorization(completion: @escaping (Bool) -> Void) {
                 XCTFail("\(Self.self).requestAuthorization は未実装です")
                 completion(false)

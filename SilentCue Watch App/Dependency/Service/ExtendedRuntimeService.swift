@@ -76,10 +76,10 @@ extension DependencyValues {
 private enum ExtendedRuntimeServiceKey: DependencyKey {
     static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
     #if DEBUG
-    static let previewValue: ExtendedRuntimeServiceProtocol = PreviewExtendedRuntimeService()
+        static let previewValue: ExtendedRuntimeServiceProtocol = PreviewExtendedRuntimeService()
     #else
-    // リリースビルドでは liveValue を使用します (PreviewExtendedRuntimeService は DEBUG 専用のため)
-    static let previewValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
+        // リリースビルドでは liveValue を使用します (PreviewExtendedRuntimeService は DEBUG 専用のため)
+        static let previewValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
     #endif
 }
 

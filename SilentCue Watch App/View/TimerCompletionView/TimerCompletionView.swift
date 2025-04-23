@@ -113,18 +113,18 @@ struct TimerCompletionView: View {
 // MARK: - プレビュー
 
 #if DEBUG
-#Preview {
-    TimerCompletionView(
-        store: Store(
-            initialState: TimerReducer.State(
-                // プレビュー用に適切なデフォルト値を設定（必要に応じて）
-                // e.g., now: Date(), isRunning: false, completionDate: Date() + 60
-            )
-        ) {
-            TimerReducer()
-        } withDependencies: { dependencies in
-            dependencies.notificationService = PreviewNotificationService()
-        }
-    )
-}
+    #Preview {
+        TimerCompletionView(
+            store: Store(
+                initialState: TimerReducer.State(
+                    // プレビュー用に適切なデフォルト値を設定（必要に応じて）
+                    // e.g., now: Date(), isRunning: false, completionDate: Date() + 60
+                )
+            ) {
+                TimerReducer()
+            } withDependencies: { dependencies in
+                dependencies.notificationService = PreviewNotificationService()
+            }
+        )
+    }
 #endif

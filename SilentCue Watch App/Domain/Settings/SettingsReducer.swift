@@ -101,6 +101,7 @@ struct SettingsReducer: Reducer {
                 case let .previewHapticFeedback(type):
                     // Redirect to new flow
                     return .send(.startHapticPreview(type))
+
                 case .previewHapticCompleted:
                     // Can likely be ignored, or redirect to stop
                     return .send(.stopHapticPreview) // Or just .none

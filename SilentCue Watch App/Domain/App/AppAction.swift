@@ -1,6 +1,6 @@
-import SwiftUI
 import CasePaths
 import ComposableArchitecture
+import SwiftUI
 
 /// アプリ全体のルートアクション
 @CasePathable

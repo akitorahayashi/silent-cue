@@ -67,28 +67,32 @@ struct SilentCueWatchApp: App {
                     )
                     .navigationDestination(for: NavigationDestination.self) { destination in
                         switch destination {
-                        case .countdown:
-                            CountdownView(
-                                // 新しいキーパス構文を使用
-                                store: store.scope(state: \.timer, action: \.timer)
-                            )
-                        case .completion:
-                            TimerCompletionView(
-                                // 新しいキーパス構文を使用
-                                store: store.scope(state: \.timer, action: \.timer)
-                            )
-                            .navigationBarBackButtonHidden(true)
-                            .accessibilityIdentifier(
-                                SCAccessibilityIdentifiers.TimerCompletionView
-                                    .timerCompletionView.rawValue
-                            )
-                        case .settings:
-                            SettingsView(
-                                // 新しいキーパス構文を使用
-                                store: store.scope(state: \.settings, action: \.settings), hapticsStore: store.scope(state: \.haptics, action: \.haptics)
-                            )
-                        case .timerStart: // 到達しない想定
-                            EmptyView()
+                            case .countdown:
+                                CountdownView(
+                                    // 新しいキーパス構文を使用
+                                    store: store.scope(state: \.timer, action: \.timer)
+                                )
+                            case .completion:
+                                TimerCompletionView(
+                                    // 新しいキーパス構文を使用
+                                    store: store.scope(state: \.timer, action: \.timer)
+                                )
+                                .navigationBarBackButtonHidden(true)
+                                .accessibilityIdentifier(
+                                    SCAccessibilityIdentifiers.TimerCompletionView
+                                        .timerCompletionView.rawValue
+                                )
+                            case .settings:
+                                SettingsView(
+                                    // 新しいキーパス構文を使用
+                                    store: store.scope(state: \.settings, action: \.settings),
+                                    hapticsStore: store.scope(
+                                        state: \.haptics,
+                                        action: \.haptics
+                                    )
+                                )
+                            case .timerStart: // 到達しない想定
+                                EmptyView()
                         }
                     }
                 }
