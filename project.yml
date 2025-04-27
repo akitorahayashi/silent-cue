@@ -68,7 +68,7 @@ targets:
         Debug: {}
         Release: {}
     info:
-      path: SilentCue Watch App/Supporting Files/Info.plist
+      path: SilentCue Watch App/Info.plist
       properties:
         CFBundleName: $(PRODUCT_NAME)
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
