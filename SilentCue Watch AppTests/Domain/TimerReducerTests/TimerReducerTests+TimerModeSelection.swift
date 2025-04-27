@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SCMock
 @testable import SilentCue_Watch_App
 import XCTest
 
@@ -26,7 +27,6 @@ extension TimerReducerTests {
             TimerReducer()
         } withDependencies: {
             $0.date = DateGenerator.constant(actionDate)
-            // TestSupport からモックを注入
             $0.notificationService = MockNotificationService()
             $0.extendedRuntimeService = MockExtendedRuntimeService()
         }

@@ -16,6 +16,10 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
     public var getSessionStateCallCount = 0
     public var stopSessionCallCount = 0
 
+    // Parameters passed to startSession(duration:targetEndTime:)
+    public var lastStartSessionDuration: TimeInterval?
+    public var lastStartSessionTargetEndTime: Date?
+
     // 完了イベント用ストリーム (テストで制御可能)
     private let completionStreamContinuation: AsyncStream<Void>.Continuation
     public let completionEvents: AsyncStream<Void>
@@ -37,8 +41,10 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
         return startSessionShouldSucceed
     }
 
-    public func startSession(duration _: TimeInterval, targetEndTime _: Date?) {
+    public func startSession(duration: TimeInterval, targetEndTime: Date?) {
         print("MockExtendedRuntimeService: Legacy startSession(duration:targetEndTime:) called.")
+        lastStartSessionDuration = duration
+        lastStartSessionTargetEndTime = targetEndTime
         Task { let _ = await startSession() }
     }
 
@@ -62,6 +68,12 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
         return mockSessionState.rawValue
     }
 
+    // テストヘルパー: バックグラウンド完了イベントを発行する
+    public func triggerCompletion() {
+        print("MockExtendedRuntimeService: Triggering completion event.")
+        completionStreamContinuation.yield(())
+    }
+
     // テスト用リセット関数
     public func reset() {
         startSessionShouldSucceed = true
@@ -71,6 +83,8 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
         invalidateSessionCallCount = 0
         getSessionStateCallCount = 0
         stopSessionCallCount = 0
+        lastStartSessionDuration = nil
+        lastStartSessionTargetEndTime = nil
         // 注意: ストリーム自体のリセットは複雑なため、通常はモックを再初期化する
     }
 }

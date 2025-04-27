@@ -3,7 +3,6 @@ import Dependencies
 import Foundation
 import SCProtocol
 import WatchKit
-import XCTestDynamicOverlay
 
 public class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelegate, ExtendedRuntimeServiceProtocol {
     private var session: WKExtendedRuntimeSession?

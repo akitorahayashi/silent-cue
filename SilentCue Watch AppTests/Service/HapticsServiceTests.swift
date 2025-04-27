@@ -1,3 +1,4 @@
+import SCMock
 @testable import SilentCue_Watch_App
 import WatchKit
 import XCTest
@@ -16,27 +17,27 @@ final class HapticsServiceTests: XCTestCase {
     }
 
     // ハプティクス再生時にタイプが記録され、呼び出し回数が増加するか
-    func testPlayHaptic_RecordsTypeAndIncrementsCount() async {
+    func testPlayHaptic_RecordsTypeAndIncrementsCount() {
         let hapticType1: WKHapticType = .success
         let hapticType2: WKHapticType = .failure
 
         // 最初の呼び出し
-        await service.play(hapticType1)
+        service.play(hapticType1.rawValue)
         XCTAssertEqual(service.playCallCount, 1)
         XCTAssertEqual(service.lastPlayedHapticType, hapticType1)
-        XCTAssertEqual(service.playedHapticTypes, [hapticType1])
+        XCTAssertEqual(service.playedHapticTypes, [hapticType1.rawValue])
 
         // ２回目の呼び出し
-        await service.play(hapticType2)
+        service.play(hapticType2.rawValue)
         XCTAssertEqual(service.playCallCount, 2)
         XCTAssertEqual(service.lastPlayedHapticType, hapticType2)
-        XCTAssertEqual(service.playedHapticTypes, [hapticType1, hapticType2])
+        XCTAssertEqual(service.playedHapticTypes, [hapticType1.rawValue, hapticType2.rawValue])
     }
 
     // モックの状態がリセットされるか
     func testReset() async {
-        await service.play(.start)
-        await service.play(.stop)
+        service.play(WKHapticType.start.rawValue)
+        service.play(WKHapticType.stop.rawValue)
 
         service.reset()
 

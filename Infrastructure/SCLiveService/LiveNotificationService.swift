@@ -4,7 +4,6 @@ import Foundation
 import SCProtocol
 import UserNotifications
 import WatchKit
-import XCTestDynamicOverlay
 
 public class LiveNotificationService: NotificationServiceProtocol {
     /// 通知カテゴリの識別子

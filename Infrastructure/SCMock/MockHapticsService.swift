@@ -7,7 +7,7 @@ public class MockHapticsService: HapticsServiceProtocol {
     // Track played haptic types for verification
     public var playedHapticTypes: [Int] = []
     public var playCallCount = 0
-    var lastPlayedHapticType: WKHapticType?
+    public var lastPlayedHapticType: WKHapticType?
 
     public init() {}
 
@@ -24,7 +24,7 @@ public class MockHapticsService: HapticsServiceProtocol {
         lastPlayedHapticType = nil
     }
 
-    func play(_ type: WKHapticType) async {
+    public func play(_ type: WKHapticType) async {
         playCallCount += 1
         lastPlayedHapticType = type
         playedHapticTypes.append(type.rawValue)

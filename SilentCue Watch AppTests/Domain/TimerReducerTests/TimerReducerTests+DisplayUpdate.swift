@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SCMock
 @testable import SilentCue_Watch_App
 import XCTest
 

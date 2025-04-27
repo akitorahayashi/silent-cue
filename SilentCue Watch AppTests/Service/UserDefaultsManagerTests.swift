@@ -1,3 +1,5 @@
+import SCMock
+import SCShared
 @testable import SilentCue_Watch_App
 import XCTest
 

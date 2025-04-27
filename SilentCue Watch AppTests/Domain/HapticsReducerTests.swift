@@ -1,4 +1,6 @@
 import ComposableArchitecture
+import SCMock
+import SCProtocol
 @testable import SilentCue_Watch_App
 import WatchKit
 import XCTest
@@ -20,13 +22,7 @@ final class HapticsReducerTests: XCTestCase {
     }
 
     func testStartAndStopHaptic() async {
-        // HapticsのEffect.runの中身（実際の振動）はテスト困難なため、
-        // 状態変化とキャンセルIDの管理を中心にテストする
-        let clock = TestClock() // Add TestClock
-
-        struct MockHapticsService: HapticsServiceProtocol {
-            func play(_: WKHapticType) async {}
-        }
+        let clock = TestClock()
 
         let store = TestStore(
             initialState: CoordinatorState(),
