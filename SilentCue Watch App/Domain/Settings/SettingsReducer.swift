@@ -75,13 +75,9 @@ struct SettingsReducer: Reducer {
                 case .stopHapticPreview:
                     guard state.isPreviewingHaptic else { return .none }
                     state.isPreviewingHaptic = false
-                    let selectedType = state.selectedHapticType
                     return .merge(
                         .cancel(id: CancelID.hapticPreviewTimer),
-                        .cancel(id: CancelID.hapticPreviewTimeout),
-                        .run { _ in hapticsService.play(selectedType.wkHapticType.rawValue) },
-                        .send(SettingsAction.startHapticPreview(selectedType)),
-                        .send(SettingsAction.internal(.saveSettingsEffect))
+                        .cancel(id: CancelID.hapticPreviewTimeout)
                     )
 
                 case let .previewHapticFeedback(type):

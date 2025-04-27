@@ -176,6 +176,8 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
   # Run Unit Tests
   if [ "$run_unit_tests" = true ]; then
     echo "Running unit tests..."
+    # Remove existing result bundle if it exists
+    rm -rf "$TEST_RESULTS_DIR/unit/TestResults.xcresult"
     set -o pipefail && xcodebuild test-without-building \
       -project "$PROJECT_FILE" \
       -scheme "$UNIT_TEST_SCHEME" \
@@ -195,6 +197,8 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
   # Run UI Tests
   if [ "$run_ui_tests" = true ]; then
     echo "Running UI tests..."
+    # Remove existing result bundle if it exists
+    rm -rf "$TEST_RESULTS_DIR/ui/TestResults.xcresult"
     set -o pipefail && xcodebuild test-without-building \
       -project "$PROJECT_FILE" \
       -scheme "$UI_TEST_SCHEME" \

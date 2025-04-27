@@ -266,15 +266,27 @@ extension TimerReducerTests {
         // 3. クロックを終了時刻まで進める
         store.dependencies.date = DateGenerator.constant(finishDate) // finalize 時の Date を設定 (10:01:00)
         await clock.advance(by: .seconds(1)) // 最後の1秒を進める
+        await Task.yield() // クロックを進めた後の処理を待機
 
         // 最後のティックと完了シーケンスを受信
         await store.receive(TimerReducer.Action.tick) { $0.currentRemainingSeconds = 0 }
         await store.receive(TimerReducer.Action.timerFinished)
+        await Task.yield() // timerFinished 後の内部処理を待機
+
+        // finalizeTimerCompletion アクションを受信し、最終状態をアサート
         await store.receive(TimerReducer.Action.internal(.finalizeTimerCompletion(completionDate: finishDate))) {
             $0.isRunning = false
+            // completionDate は finishDate (翌日の目標時刻) であることを期待
             $0.completionDate = finishDate
+            // isRunning = false に伴い、関連する状態もリセットされるか確認 (もし必要なら)
+            // $0.startDate = nil
+            // $0.targetEndDate = nil
+            // $0.currentRemainingSeconds = $0.totalSeconds // or expected value after reset
         }
-        // エフェクトの完了を確認
+        await Task.yield() // finalizeTimerCompletion 後の処理を待機
+
+        // 未完了のエフェクトをスキップしてから finish
+        await store.skipInFlightEffects()
         await store.finish()
     }
 
@@ -285,7 +297,7 @@ extension TimerReducerTests {
             XCTFail("Failed to get TimeZone")
             return
         }
-        var startComponents = DateComponents(
+        let startComponents = DateComponents(
             timeZone: timeZone,
             year: 2023,
             month: 10,

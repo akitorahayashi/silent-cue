@@ -26,19 +26,20 @@ final class CoordinatorReducerTests: XCTestCase {
         // loadSettings アクションを期待
         await store.receive(CoordinatorAction.settings(.loadSettings))
 
-        // settingsLoaded アクションを期待 (デフォルト値 .standard を期待するように戻す)
+        // settingsLoaded アクションとその状態変更を期待
         await store.receive(CoordinatorAction.settings(.settingsLoaded(
-            hapticType: HapticType.standard // <-- Expect .standard again
+            hapticType: HapticType.standard
         ))) { state in
-            state.settings.selectedHapticType = HapticType.standard // <-- Update state assertion back to .standard
+            state.settings.selectedHapticType = HapticType.standard
             state.settings.isSettingsLoaded = true
         }
 
-        // AppReducer内の機能連携による updateHapticSettings アクションを期待
-        // 状態の変更もアサートする
+        // settingsLoaded によって引き起こされる updateHapticSettings アクションとその状態変更を期待
         await store.receive(CoordinatorAction.haptics(.updateHapticSettings(
-            type: HapticType.standard // <-- Expect .standard again
-        )))
+            type: HapticType.standard
+        ))) { state in
+             state.haptics.hapticType = HapticType.standard // <-- HapticsState の変更をアサート
+        }
 
         // エフェクトが完了したことを確認
         await store.finish()

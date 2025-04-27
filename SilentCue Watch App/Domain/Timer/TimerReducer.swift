@@ -114,44 +114,74 @@ struct TimerReducer: Reducer {
     // キャンセルIDを使用するマージされたエフェクトに戻す
     private func handleStartTimer(_ state: inout State) -> Effect<Action> {
         guard !state.isRunning else { return .none }
-        recalculateTimerProperties(&state)
+        recalculateTimerProperties(&state) // 状態に基づいて totalSeconds などを再計算
 
         let now = date()
         state.startDate = now
-        let durationSeconds = state.timerDurationMinutes * 60
-        let targetEndDate = now.addingTimeInterval(Double(durationSeconds))
-        state.targetEndDate = targetEndDate
         state.isRunning = true
-        state.completionDate = nil
+        state.completionDate = nil // 完了日をリセット
+
+        // timerMode に応じて targetEndDate を計算
+        let targetEndDate: Date?
+        if state.timerMode == .minutes {
+            // .minutes モード: 現在時刻 + totalSeconds
+            targetEndDate = now.addingTimeInterval(Double(state.totalSeconds))
+        } else { // .time モード
+            // .time モード: 選択された時刻に基づいて計算 (ユーティリティ関数を使用)
+            targetEndDate = TimeCalculation.calculateTargetEndDate(
+                selectedHour: state.selectedHour,
+                selectedMinute: state.selectedMinute,
+                now: now,
+                calendar: Calendar.current // カレンダーを渡す
+            )
+        }
+        
+        // 計算された targetEndDate を状態に設定
+        state.targetEndDate = targetEndDate
+
+        // guard let unwrappedTargetEndDate = targetEndDate else {
+        //     // targetEndDate が計算できなかった場合のエラーハンドリング (例: ログ出力、エラー状態への移行など)
+        //     // ここでは単純にエフェクトなしで終了する
+        //     print("Error: Could not calculate target end date for .time mode.")
+        //     state.isRunning = false // タイマーを開始できなかったことを示す
+        //     return .none
+        // }
 
         // エフェクトに必要な値をキャプチャ
-        let totalSeconds = state.totalSeconds
+        let totalSeconds = state.totalSeconds // 再計算された最新の値を使用
+        // targetEndDate が nil の場合、デフォルト値やエラー処理が必要になる可能性がある
+        // ここではテストのため、アンラップが必要かもしれないが、Reducer内では Optional のまま扱う方が安全な場合もある
+        let unwrappedTargetEndDateForEffect = targetEndDate ?? now.addingTimeInterval(Double(totalSeconds)) // フォールバック
 
         // エフェクト1: ティッカー
         let tickerEffect = Effect<Action>.run { send in
             for await _ in clock.timer(interval: .seconds(1)) {
+                // タイマーが動作中でなくなったらティックを停止
+                // このチェックは handleTick 内でも行われるが、ここでも追加することでより堅牢になる可能性がある
+                // ただし、状態へのアクセス方法に注意が必要 (キャプチャリストを使うなど)
+                // if !state.isRunning { break } // 簡単な例 (ただし state はキャプチャされない)
                 await send(.tick)
             }
         }
         .cancellable(id: CancelID.timer)
 
         // エフェクト2: バックグラウンドセッション / 通知 / 完了監視
-        let backgroundEffect = Effect<Action>.run { [targetEndDate, state] send in
-            // セッション開始
+        let backgroundEffect = Effect<Action>.run { [unwrappedTargetEndDateForEffect, totalSeconds, timerDurationMinutes = state.timerDurationMinutes] send in
+            // セッション開始 (targetEndTime は Optional ではない想定)
             extendedRuntimeService.startSession(
-                duration: TimeInterval(totalSeconds + 10),
-                targetEndTime: targetEndDate
+                duration: TimeInterval(totalSeconds + 10), // 少し余裕を持たせる
+                targetEndTime: unwrappedTargetEndDateForEffect // アンラップした値を使用
             )
             // 通知をスケジュール
             let content = UNMutableNotificationContent()
             content.title = "タイマー完了"
-            content.body = "\\(state.timerDurationMinutes)分のタイマーが完了しました"
+            content.body = "\\(timerDurationMinutes)分のタイマーが完了しました" // キャプチャした値を使用
             content.sound = .default
 
             // 日付トリガーの作成
             let triggerComponents = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute, .second],
-                from: targetEndDate
+                from: unwrappedTargetEndDateForEffect // アンラップした値を使用
             )
             let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
             let identifier = "TIMER_COMPLETED_NOTIFICATION" // 識別子を定義
