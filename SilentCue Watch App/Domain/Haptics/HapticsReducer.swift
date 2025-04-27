@@ -28,7 +28,6 @@ struct HapticsReducer: Reducer {
                     return .merge(
                         effect,
                         .run { [type] _ in
-                            // TODO: 設定に応じて再生するタイプを変える
                             hapticsService.play(type.wkHapticType.rawValue)
                         }
                         .cancellable(id: CancelID.haptic)

@@ -24,12 +24,12 @@ struct CoordinatorState: Equatable {
     var shouldShowNotificationAlert: Bool = false
 
     init(
-        date: Date = Date() // Can still inject Date if needed
+        date: Date = Date()
     ) {
-        // Initialize TimerState - it no longer needs calendar or calculator
+        // TimerStateを初期化
         timer = TimerState(now: date)
 
-        // Initialize path based on launch arguments
+        // 起動引数に基づいてパスを初期化
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains(SCAppEnvironment.InitialViewOption.countdownView.rawValue) {
             path = [.countdown]
@@ -40,7 +40,7 @@ struct CoordinatorState: Equatable {
         } else if arguments.contains(SCAppEnvironment.InitialViewOption.setTimerView.rawValue) {
             path = []
         } else {
-            // Default launch path
+            // デフォルトの起動パス
             path = []
         }
     }

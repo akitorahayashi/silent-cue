@@ -21,12 +21,11 @@ enum TimerAction: Equatable {
     case startTimer
     case cancelTimer
     case tick
-    case timerFinished // フォアグラウンド完了検出用
+    case timerFinished
     case dismissCompletionView
 
     // バックグラウンド対応
     case updateTimerDisplay
-    // case backgroundTimerFinished // 不要になったため削除
 
     // MARK: - Internal Actions
 
