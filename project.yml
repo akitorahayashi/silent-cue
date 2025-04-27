@@ -23,7 +23,7 @@ packages:
     from: "1.19.0"
 
 targets:
-  SilentCue_Watch_App:
+  "SilentCue Watch App":
     type: application
     platform: watchOS
     sources:
@@ -146,13 +146,13 @@ targets:
         Debug: {}
         Release: {}
 
-  SilentCue_Watch_AppTests:
+  "SilentCue Watch AppTests":
     type: bundle.unit-test
     platform: watchOS
     sources:
       - path: SilentCue Watch AppTests
     dependencies:
-      - target: SilentCue_Watch_App
+      - target: "SilentCue Watch App"
       - target: SCMock
       - target: SCShared
       - target: SCProtocol
@@ -168,25 +168,53 @@ targets:
         Debug: {}
         Release: {}
 
+  "SilentCue Watch AppUITests":
+    type: bundle.ui-testing
+    platform: watchOS
+    sources:
+      - path: SilentCue Watch AppUITests
+    dependencies:
+      - target: "SilentCue Watch App"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchAppUITests
+        DEVELOPMENT_TARGET: $(TARGET_DEVICE_IDENTIFIER)
+        TEST_TARGET_NAME: "SilentCue Watch App"
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_BITCODE: NO
+      configs:
+        Debug: {}
+        Release: {}
+
 schemes:
-  SilentCue_Watch_App:
+  "SilentCue Watch App":
     build:
       targets:
-        SilentCue_Watch_App: all
+        "SilentCue Watch App": all
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - SilentCue_Watch_AppTests
+        - "SilentCue Watch AppTests"
+        - "SilentCue Watch AppUITests"
     archive:
       config: Release
 
-  SilentCue_Watch_App_Tests:
+  "SilentCue Watch AppTests":
     build:
       targets:
-        SilentCue_Watch_AppTests: test
+        "SilentCue Watch AppTests": test
     test:
       config: Debug
       targets:
-        - SilentCue_Watch_AppTests
+        - "SilentCue Watch AppTests"
+
+  "SilentCue Watch AppUITests":
+    build:
+      targets:
+        "SilentCue Watch AppUITests": test
+    test:
+      config: Debug
+      targets:
+        - "SilentCue Watch AppUITests"

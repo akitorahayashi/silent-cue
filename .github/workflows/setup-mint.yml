@@ -1,0 +1,31 @@
+name: Setup Mint Dependencies
+
+on:
+  workflow_call:
+
+jobs:
+  setup:
+    runs-on: macos-latest
+    env:
+      MINT_PATH: ${{ github.workspace }}/.mint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install Mint
+        run: brew install mint
+
+      - name: Cache Mint packages
+        uses: actions/cache@v4
+        id: cache-mint-packages
+        with:
+          path: ${{ env.MINT_PATH }}
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+
+      - name: Bootstrap Mint packages
+        run: mint bootstrap 

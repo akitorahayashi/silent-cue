@@ -10,15 +10,32 @@ on:
 jobs:
   build-and-test:
     runs-on: macos-latest
+    env:
+      MINT_PATH: ${{ github.workspace }}/.mint
     outputs:
       test_result: ${{ steps.test_status.outputs.result }}
     steps:
     - uses: actions/checkout@v4
 
+    - name: Cache Mint packages
+      uses: actions/cache@v4
+      id: cache-mint-packages
+      with:
+        path: ${{ env.MINT_PATH }}
+        key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+        restore-keys: |
+          ${{ runner.os }}-mint-
+
+    - name: Install Mint
+      run: brew install mint
+
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '16.2'
+
+    - name: Generate Xcode Project
+      run: mint run xcodegen generate
 
     - name: Create Test Output Directories
       run: mkdir -p ci-outputs/test-results/unit ci-outputs/test-results/ui ci-outputs/test-results/derived-data

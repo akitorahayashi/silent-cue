@@ -4,6 +4,7 @@
 
 - **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインですPull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します
 - **`run-tests.yml`**: アプリのビルドとテスト（ユニット・UI）を実行する再利用可能ワークフロー`.github/scripts/` 配下の関数定義ファイルを `source` し、必要な関数（シミュレータ選択、ビルド、テスト実行、結果検証など）を直接呼び出します
+- **`setup-mint.yml`**: Mint（Swiftパッケージマネージャ）をセットアップし、依存ライブラリ（SwiftFormat, SwiftLintなど）をインストール・キャッシュする再利用可能ワークフローです
 - **`build-unsigned-archive.yml`**: 署名なしのアーカイブ（.xcarchive）を作成する再利用可能ワークフロー`.github/scripts/` 配下の関数定義ファイルを `source` し、必要な関数（アーカイブビルド、結果検証など）を直接呼び出します
 - **`code-quality.yml`**: コード品質チェック（SwiftFormat, SwiftLint）を実行します
 - **`test-reporter.yml`**: テスト結果のレポートを作成し、PRにコメントします
@@ -44,24 +45,37 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 
 - **トリガー**: `main`/`master`へのPush、`main`/`master`ターゲットのPR、手動実行
 - **処理**:
-    1.  コード品質チェック (`code-quality.yml`)
-    2.  ビルドとテスト実行 (`run-tests.yml`)
-    3.  テスト結果レポート (PR時, `test-reporter.yml`)
-    4.  Copilotレビュー依頼 (PR時, `copilot-review.yml`)
-    5.  アーカイブビルド検証 (`main` Push時, `build-unsigned-archive.yml`)
-    6.  パイプライン完了ステータス通知 (PR時)
+    1.  Mint依存関係セットアップ (`setup-mint.yml`)
+    2.  コード品質チェック (`code-quality.yml` - `setup` に依存)
+    3.  ビルドとテスト実行 (`run-tests.yml` - `setup` に依存)
+    4.  テスト結果レポート (PR時, `test-reporter.yml` - `build-and-test` に依存)
+    5.  Copilotレビュー依頼 (PR時, `copilot-review.yml` - `build-and-test` に依存)
+    6.  アーカイブビルド検証 (`main` Push時, `build-unsigned-archive.yml` - `build-and-test`と`code-quality` に依存)
+    7.  パイプライン完了ステータス通知 (PR時 - 上記ジョブ全てに依存)
+
+### `setup-mint.yml` (Mint依存関係セットアップ)
+
+- **トリガー**: `ci-cd-pipeline.yml` から `workflow_call` で呼び出し
+- **処理**:
+    1.  リポジトリをチェックアウト
+    2.  Homebrewをセットアップ
+    3.  Mintをインストール (`brew install mint`)
+    4.  Mintパッケージをキャッシュ (`actions/cache`)
+    5.  Mintパッケージをブートストラップ (`mint bootstrap`)
 
 ### `run-tests.yml` (テスト実行)
 
 - **トリガー**: `ci-cd-pipeline.yml` から `workflow_call` で呼び出し
 - **処理**:
-    1.  共通・ビルドステップ関数を `source`
-    2.  watchOSシミュレータを選択
-    3.  テスト用ビルド (`build_for_testing`)
-    4.  ユニットテスト実行と結果検証 (`run_unit_tests`, `verify_unit_test_results`)
-    5.  UIテスト実行と結果検証 (`run_ui_tests`, `verify_ui_test_results`)
-    6.  JUnit XMLレポート生成
-    7.  テスト結果 (`.xcresult`, `.xml`) をアーティファクト (`test-results`) としてアップロード
+    1.  Mintキャッシュを復元し、Mintをインストール
+    2.  Xcodeセットアップ
+    3.  Xcodeプロジェクト生成 (`mint run xcodegen generate`)
+    4.  watchOSシミュレータを選択
+    5.  テスト用ビルド (`build_for_testing`)
+    6.  ユニットテスト実行と結果検証 (`run_unit_tests`, `verify_unit_test_results`)
+    7.  UIテスト実行と結果検証 (`run_ui_tests`, `verify_ui_test_results`)
+    8.  JUnit XMLレポート生成
+    9.  テスト結果 (`.xcresult`, `.xml`) をアーティファクト (`test-results`) としてアップロード
 
 ### `build-unsigned-archive.yml` (署名なしアーカイブ作成)
 
@@ -76,9 +90,9 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 
 - **トリガー**: `ci-cd-pipeline.yml` から `workflow_call` で呼び出し
 - **処理**:
-    1.  Mintでツール (SwiftFormat, SwiftLint) をインストール
-    2.  SwiftFormatを実行
-    3.  SwiftLint (`--strict`) を実行
+    1.  Mintキャッシュを復元し、Mintをインストール
+    2.  SwiftFormatを実行 (`mint run swiftformat`)
+    3.  SwiftLint (`--strict`) を実行 (`mint run swiftlint`)
     4.  `git diff` でフォーマット変更がないか確認
 
 ### `test-reporter.yml` (テスト結果レポート)
