@@ -2,9 +2,8 @@ import CasePaths
 import ComposableArchitecture
 import SwiftUI
 
-/// アプリ全体のルートアクション
 @CasePathable
-enum AppAction: Equatable {
+enum CoordinatorAction: Equatable {
     // 各機能ドメインのアクションをラップ
     case timer(TimerAction)
     case settings(SettingsAction)

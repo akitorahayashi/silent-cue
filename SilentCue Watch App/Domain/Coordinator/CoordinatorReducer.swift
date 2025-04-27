@@ -3,9 +3,9 @@ import ComposableArchitecture
 import SwiftUI
 
 /// アプリ全体のルートReducer
-struct AppReducer: Reducer {
-    typealias State = AppState
-    typealias Action = AppAction
+struct CoordinatorReducer: Reducer {
+    typealias State = CoordinatorState
+    typealias Action = CoordinatorAction
 
     var body: some ReducerOf<Self> {
         // 各機能ドメインのReducerをScopeで接続
@@ -69,7 +69,7 @@ struct AppReducer: Reducer {
 
                 case .popScreen:
                     // 戻る前に振動停止などの副作用を実行
-                    let effect = state.haptics.isActive ? Effect<AppAction>
+                    let effect = state.haptics.isActive ? Effect<CoordinatorAction>
                         .send(.haptics(HapticsAction.stopHaptic)) : Effect.none
                     // NavigationStack Bindingが自動でpopするので、state変更は不要な場合が多い
                     // state.path.removeLast() // 必要ならコメント解除

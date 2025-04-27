@@ -5,7 +5,7 @@ import UserNotifications
 @main
 struct SilentCueWatchApp: App {
     // アプリ全体のストア
-    let store: StoreOf<AppReducer>
+    let store: StoreOf<CoordinatorReducer>
 
     // 依存関係
     @Dependency(\.userDefaultsService) var userDefaultsService
@@ -23,8 +23,8 @@ struct SilentCueWatchApp: App {
             if CommandLine.arguments.contains(SCAppEnvironment.LaunchArguments.uiTesting.rawValue) {
                 // --- UIテスト: ストアの依存関係をオーバーライド ---
                 print("--- UI Testing: Initializing Store with overridden dependencies (DEBUG build) ---")
-                store = Store(initialState: AppState()) {
-                    AppReducer()
+                store = Store(initialState: CoordinatorState()) {
+                    CoordinatorReducer()
                 } withDependencies: { dependencies in
                     // UIテスト用に、依存関係をプレビュー用の実装に差し替える
                     // Preview*Service は #if DEBUG でアプリ本体ターゲットに存在するので直接参照可能
@@ -36,8 +36,8 @@ struct SilentCueWatchApp: App {
                 }
             } else {
                 // --- 通常のデバッグビルド: デフォルトの依存関係でストアを初期化 ---
-                store = Store(initialState: AppState()) {
-                    AppReducer()
+                store = Store(initialState: CoordinatorState()) {
+                    CoordinatorReducer()
                 }
             }
         #else
@@ -54,7 +54,7 @@ struct SilentCueWatchApp: App {
             WithViewStore(store, observe: { $0 }, content: { viewStore in
                 NavigationStack(path: viewStore.binding(
                     get: \.path,
-                    send: AppAction.pathChanged // 送信には AppAction を使用
+                    send: CoordinatorAction.pathChanged // 送信には AppAction を使用
                 )) {
                     SetTimerView(
                         store: store.scope(state: \.timer, action: \.timer),
@@ -161,7 +161,7 @@ struct SilentCueWatchApp: App {
 /// 通知デリゲートクラス
 class NotificationDelegate: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     // アプリのストア
-    private var store: Store<AppState, AppAction>?
+    private var store: Store<CoordinatorState, CoordinatorAction>?
 
     override init() {
         super.init()
@@ -169,7 +169,7 @@ class NotificationDelegate: NSObject, ObservableObject, UNUserNotificationCenter
     }
 
     // ストアを設定
-    func setStore(_ store: Store<AppState, AppAction>) {
+    func setStore(_ store: Store<CoordinatorState, CoordinatorAction>) {
         self.store = store
     }
 

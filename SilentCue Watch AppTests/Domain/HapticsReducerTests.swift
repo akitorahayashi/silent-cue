@@ -7,11 +7,11 @@ import XCTest
 final class HapticsReducerTests: XCTestCase {
     func testUpdateSettings() async {
         let store = TestStore(
-            initialState: AppState(),
-            reducer: { AppReducer() }
+            initialState: CoordinatorState(),
+            reducer: { CoordinatorReducer() }
         )
 
-        await store.send(AppAction.haptics(.updateHapticSettings(
+        await store.send(CoordinatorAction.haptics(.updateHapticSettings(
             type: HapticType.strong
         ))) { state in
             state.haptics.hapticType = HapticType.strong
@@ -29,8 +29,8 @@ final class HapticsReducerTests: XCTestCase {
         }
 
         let store = TestStore(
-            initialState: AppState(),
-            reducer: { AppReducer() },
+            initialState: CoordinatorState(),
+            reducer: { CoordinatorReducer() },
             withDependencies: { dependencies in
                 dependencies.hapticsService = MockHapticsService()
                 dependencies.continuousClock = clock
@@ -39,7 +39,7 @@ final class HapticsReducerTests: XCTestCase {
         )
 
         // Hapticを開始
-        await store.send(AppAction.haptics(.startHaptic(HapticType.weak))) { state in
+        await store.send(CoordinatorAction.haptics(.startHaptic(HapticType.weak))) { state in
             state.haptics.isActive = true
             state.haptics.hapticType = HapticType.weak
         }
@@ -48,7 +48,7 @@ final class HapticsReducerTests: XCTestCase {
         await clock.advance(by: .seconds(1)) // Advance time if needed for effects
 
         // Hapticを停止
-        await store.send(AppAction.haptics(.stopHaptic)) { state in
+        await store.send(CoordinatorAction.haptics(.stopHaptic)) { state in
             state.haptics.isActive = false
         }
         // .stopHapticで .cancel(id: .haptic) が発行されることを確認

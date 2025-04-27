@@ -6,18 +6,15 @@ enum NavigationDestination: Hashable {
     case countdown
     case completion
     case settings
-    case timerStart // ルート画面
+    case timerStart
 }
 
-/// アプリ全体のルート状態
-struct AppState: Equatable {
+struct CoordinatorState: Equatable {
     var path: [NavigationDestination]
     var timer: TimerState
     var settings: SettingsState = .init()
     var haptics: HapticsState = .init()
 
-    // Removed calculator dependency
-    // Uses default Date() and implicit Calendar.current for TimerState
     init(
         date: Date = Date() // Can still inject Date if needed
     ) {

@@ -41,7 +41,7 @@ SilentCue/
 │   │   ├── Protocol/
 │   │   └── Service/
 │   ├── Domain/
-│   │   ├── App/
+│   │   ├── Coordinator/
 │   │   ├── Settings/
 │   │   ├── Timer/
 │   │   └── Haptics/
@@ -109,7 +109,7 @@ Apple Watchアプリを閉じた後もタイマーが正確に動作し続けま
 
 - **フォアグラウンド復帰時** アプリを通知以外の方法で直接開いた場合、タイマーが既に完了していれば完了画面が表示されます通知経由でない場合のみ振動が発生する仕組みになっています
 
-## CI/CD パイプライン
+## CI/CD
 
 このプロジェクトでは、GitHub Actions を利用して CI/CD パイプラインを構築しています`.github/workflows/` ディレクトリ以下に設定ファイルが格納されています
 
@@ -119,15 +119,15 @@ Apple Watchアプリを閉じた後もタイマーが正確に動作し続けま
 - **リリース準備** `main` ブランチへのプッシュ時には、署名なしの `.xcarchive` を作成し、アーティファクトとして保存します
 
 **リリースのプロセス**
-- App Store Connect への配布や GitHub Releases への `.ipa` ファイルのアップロードは、**手動トリガー**によるワークフロー (`sign-and-distribute.yml`) で行います
+- App Store Connect への配布や GitHub Releases への `.ipa` ファイルのアップロードは、**手動トリガー**によるワークフロー (`release.yml`) で行います
 - この手動ワークフローは、保存された署名なし `.xcarchive` をダウンロードし、必要な証明書とプロファイルで署名した後、配布を実行します
 
 **主な機能**
-- **Pull Request** PR作成・更新時に、コード品質チェック、ビルド、テストが自動実行されます
-- **Mainブランチ** `main` ブランチへのプッシュ時にも同様のチェックが実行されます
-- **リリース** `vX.Y.Z` 形式のタグがプッシュされると、リリース用のワークフロー (`release.yml`) が自動実行され、ビルド、署名、App Store Connect へのアップロード、GitHub Release の作成が行われます
+- **Pull Request**: PR作成・更新時に、コード品質チェック、ビルド、テストが自動実行されます
+- **Mainブランチ**: `main` ブランチへのプッシュ時にも同様のチェックが実行されます
+- **リリース**: `vX.Y.Z` 形式のタグがプッシュされると、リリース用のワークフロー (`release.yml`) が自動実行され、ビルド、署名、App Store Connect へのアップロード、GitHub Release の作成が行われます
 
-詳細なワークフローの説明は [CI_CD_WORKFLOWS.md](./CI_CD_WORKFLOWS.md) を参照してください
+詳細なワークフローの説明は [CI_CD_WORKFLOWS.md](./.github/CI_CD_WORKFLOWS.md) を参照してください
 
 ## リリース方法
 

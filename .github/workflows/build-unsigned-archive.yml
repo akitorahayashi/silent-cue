@@ -26,9 +26,6 @@ jobs:
           key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
           restore-keys: |
             ${{ runner.os }}-spm-
-          
-      - name: Install xcpretty
-        run: gem install xcpretty
 
       - name: Build Release Version (Unsigned)
         run: |
@@ -54,7 +51,7 @@ jobs:
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             archive \
-          | xcpretty -c
+          | xcbeautify
           
       - name: Verify Archive Contents
         run: |

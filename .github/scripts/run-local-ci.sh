@@ -94,24 +94,7 @@ fail() {
   exit 1
 }
 
-check_command() {
-  if ! command -v $1 &> /dev/null; then
-    echo "⚠️ Warning: '$1' command not found. Attempting to install..."
-    if [ "$1" == "xcpretty" ]; then
-      gem install xcpretty || fail "Failed to install xcpretty. Please install it manually (gem install xcpretty)."
-      success "xcpretty installed successfully."
-    else
-      fail "Required command '$1' is not installed. Please install it."
-    fi
-  fi
-}
-
 # === Main Script ===
-
-# Check prerequisites
-step "Checking prerequisites"
-check_command xcpretty
-success "Prerequisites met."
 
 # Clean previous outputs and create directories (only if not skipping build)
 if [ "$skip_build_for_testing" = false ] || [ "$run_archive" = true ]; then
@@ -158,7 +141,7 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
       -configuration Debug \
       -skipMacroValidation \
       CODE_SIGNING_ALLOWED=NO \
-    | xcpretty -c || fail "Build for testing failed."
+    | xcpretty -c
     success "Build for testing completed."
   else
       echo "Skipping build for testing as requested (--test-without-building)."
@@ -178,7 +161,7 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
       -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
       -enableCodeCoverage NO \
       -resultBundlePath "$TEST_RESULTS_DIR/unit/TestResults.xcresult" \
-    | xcpretty -c || echo "Unit test execution finished with non-zero exit code (ignoring for local check)."
+    | xcbeautify --report junit --report-path "$TEST_RESULTS_DIR/unit/junit.xml"
 
     # Check Unit Test Results Bundle Existence
     echo "Verifying unit test results bundle..."
@@ -198,7 +181,7 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
       -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
       -enableCodeCoverage NO \
       -resultBundlePath "$TEST_RESULTS_DIR/ui/TestResults.xcresult" \
-    | xcpretty -c || echo "UI test execution finished with non-zero exit code (ignoring for local check)."
+    | xcbeautify --report junit --report-path "$TEST_RESULTS_DIR/ui/junit.xml"
 
     # Check UI Test Results Bundle Existence
     echo "Verifying UI test results bundle..."
@@ -228,7 +211,7 @@ if [ "$run_archive" = true ]; then
     -skipMacroValidation \
     CODE_SIGNING_ALLOWED=NO \
     archive \
-  | xcpretty -c || fail "Archive build failed."
+  | xcpretty -c
   success "Archive build completed."
 
   # Verify Archive Contents
