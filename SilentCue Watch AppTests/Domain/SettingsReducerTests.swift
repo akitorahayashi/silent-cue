@@ -120,7 +120,8 @@ final class SettingsReducerTests: XCTestCase {
         let hapticType = HapticType.standard
         let interval = hapticType.interval
         let previewTimeout: Duration = .seconds(3)
-        let previewTimeoutSeconds = Double(previewTimeout.components.seconds) + Double(previewTimeout.components.attoseconds) / 1_000_000_000_000_000_000.0
+        let previewTimeoutSeconds = Double(previewTimeout.components.seconds) +
+            Double(previewTimeout.components.attoseconds) / 1_000_000_000_000_000_000.0
         let expectedTickCount = Int(floor((previewTimeoutSeconds - 0.000001) / interval))
         let expectedTotalPlays = expectedTickCount + 1
 
@@ -143,7 +144,9 @@ final class SettingsReducerTests: XCTestCase {
 
         // タイムアウトまでの残り時間を計算して進める
         let timeElapsed = Double(expectedTickCount) * interval
-        let remainingNanoseconds = previewTimeout.components.attoseconds + (previewTimeout.components.seconds * 1_000_000_000_000_000_000) - Int64(timeElapsed * 1_000_000_000_000_000_000)
+        let remainingNanoseconds = previewTimeout.components
+            .attoseconds + (previewTimeout.components.seconds * 1_000_000_000_000_000_000) -
+            Int64(timeElapsed * 1_000_000_000_000_000_000)
         let remainingDuration = Duration(secondsComponent: 0, attosecondsComponent: remainingNanoseconds)
 
         // タイムアウトする瞬間まで進める (わずかに進める)

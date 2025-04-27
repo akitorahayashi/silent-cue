@@ -90,7 +90,7 @@ struct CoordinatorReducer: Reducer {
                             await send(.notificationStatusChecked(status))
                         }
                     } else {
-                        return .none
+                        return .send(.settings(.loadSettings))
                     }
 
                 case let .notificationStatusChecked(status):
@@ -119,9 +119,12 @@ struct CoordinatorReducer: Reducer {
                     return .send(.markAsLaunched)
 
                 case .markAsLaunched:
-                    return .run { _ in
-                        userDefaultsService.set(false, forKey: .isFirstLaunch)
-                    }
+                    return .merge(
+                        .run { _ in
+                            userDefaultsService.set(false, forKey: .isFirstLaunch)
+                        },
+                        .send(.settings(.loadSettings))
+                    )
 
                 case .internalAction:
                     return .none

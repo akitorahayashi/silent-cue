@@ -60,6 +60,9 @@ extension TimerReducerTests {
             $0.completionDate = finishDate
         }
 
+        // クロックを進めてタイマーエフェクト（キャンセルされるべきもの）を完了させる
+        await clock.advance()
+
         // エフェクトが終了/キャンセルされたことを確認
         await store.finish()
     }
@@ -172,6 +175,9 @@ extension TimerReducerTests {
             $0.isRunning = false
             $0.completionDate = finishDate
         }
+
+        // クロックを進めてタイマーエフェクト（キャンセルされるべきもの）を完了させる
+        await clock.advance()
 
         // エフェクトが終了/キャンセルされたことを確認
         await store.finish()

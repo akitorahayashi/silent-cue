@@ -26,53 +26,104 @@ excluded:
 # Rule Configuration
 #-------------------------------------------------------------------
 disabled_rules:
-  - trailing_whitespace # 行末の空白を許可
-  - line_length # 行の長さは別途カスタマイズ
-  - trailing_newline # 末尾の改行を無視
-  - trailing_comma # SwiftFormatで制御するため無効化
+  # デフォルトで有効だが、現時点では無効化/個別設定するルール
+  # trailing_whitespace # 有効 (削除)
+  # line_length # 個別設定で warning
+  # trailing_newline # 有効 (削除)
+
+  # SwiftFormat との役割分担のため無効化
+  - trailing_comma
+  - closure_parameter_position
+  - opening_brace
+  - closing_brace
+  - statement_position
+  - colon
+  - comma
+  # vertical_whitespace # 個別設定で max_empty_lines: 1
+  - operator_usage_whitespace
+  - return_arrow_whitespace
+  - syntactic_sugar # SwiftFormatが修正する可能性あり
+
+  # その他、現時点で無効化しているルール
+  # implicitly_unwrapped_optional は有効化（個別設定で warning）するため削除
+  - block_based_kvo
+  - force_unwrapping # opt_in_rules に force_unwrapping があれば不要。なければ安全のため有効化推奨
 
 opt_in_rules:
-  - empty_count # count == 0 の代わりに isEmpty を使用
-  - missing_docs # 公開APIにドキュメントを要求
-  - force_unwrapping # 強制アンラップを禁止
-  - sorted_imports # importを整列
-  - vertical_whitespace # 垂直方向の空白行を整理
+  # 基本的な推奨ルール
+  - empty_count # count == 0 より isEmpty
+  - sorted_imports # import をアルファベット順に
+  - closure_spacing # クロージャの空白
+  - first_where # first(where:) を推奨
+  - object_literal # #colorLiteral 等より .red
+  - redundant_nil_coalescing # 不要な ?? nil
+  - strict_fileprivate # fileprivate より private
+  - let_var_whitespace # let/var 後のスペース
+  - unneeded_parentheses_in_closure_argument # 不要な括弧
+  - discouraged_optional_boolean # Bool? 非推奨
+
+  # より厳格なルール (必要に応じて有効化)
+  - missing_docs # 公開 API ドキュメント
+  - explicit_init # 明示的な init
+  # - explicit_type_interface # 型推論より明示 (今回は無効)
+  - fatal_error_message # fatalError にメッセージ
+  - file_header # ファイルヘッダー
+  # - number_separator # 数値区切り文字 (今回は無効)
+  - prohibited_super_call # 禁止された super.call
+  - single_test_class # 1テストファイル1クラス
+  - switch_case_on_newline # case を改行後に
+  - vertical_parameter_alignment_on_call # 関数呼び出し時の引数整列
+  - yoda_condition # ヨーダ記法禁止
+  - unused_optional_binding # 未使用オプショナルバインディング
 
 analyzer_rules:
-  - unused_declaration # 未使用宣言の検出
-  - unused_import # 未使用importの検出
+  - unused_declaration
+  - unused_import
 
 #-------------------------------------------------------------------
 # Individual Rule Settings
 #-------------------------------------------------------------------
-# 関数本体の長さ制限
+# 関数本体の行数
 function_body_length:
   warning: 120
   error: 150
 
-# 型定義の長さ制限
+# 型定義の行数
 type_body_length:
   warning: 300
   error: 500
 
-# ファイルの長さ制限
+# ファイルの行数
 file_length:
   warning: 800
   error: 1000
 
-# 循環的複雑度の制限
+# 循環的複雑度
 cyclomatic_complexity:
   warning: 10
   error: 20
 
-# ネスト制限
+# 行の最大長 (警告のみ)
+line_length:
+  warning: 120
+  ignores_comments: true
+  ignores_urls: true
+
+# 暗黙的アンラップ型 (警告のみ)
+implicitly_unwrapped_optional: warning
+
+# 垂直方向の空白（最大1行まで）
+vertical_whitespace:
+  max_empty_lines: 1
+
+# ネストの深さ
 nesting:
   type_level:
     warning: 3
   function_level:
     warning: 5
 
-# 識別子 (変数名、定数名など) の命名規則
+# 識別子の命名規則
 identifier_name:
   min_length: 2
   max_length: 50
@@ -82,13 +133,14 @@ identifier_name:
     - x
     - y
     - i
+    - j # ループカウンタ用
     - to
     - at
     - of
     - from
     - with
 
-# switch文のcaseのアライメント - SwiftFormatと一致させる
+# switch/case のインデント (SwiftFormatと合わせる)
 switch_case_alignment:
   indented_cases: true
 

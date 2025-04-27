@@ -7,8 +7,8 @@ import XCTest
 
 @MainActor
 final class ExtendedRuntimeServiceTests: XCTestCase {
-    var service: MockExtendedRuntimeService! // モックサービス
-    var cancellables: Set<AnyCancellable> = [] // Combine キャンセル用
+    var service: MockExtendedRuntimeService!
+    var cancellables: Set<AnyCancellable> = []
 
     override func setUp() {
         super.setUp()
@@ -17,7 +17,7 @@ final class ExtendedRuntimeServiceTests: XCTestCase {
 
     override func tearDown() {
         service = nil // サービス解放
-        cancellables.removeAll() // キャンセル可能なものをクリア
+        cancellables.removeAll()
         super.tearDown()
     }
 

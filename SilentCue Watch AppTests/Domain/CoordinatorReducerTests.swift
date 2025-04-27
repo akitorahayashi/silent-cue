@@ -11,6 +11,8 @@ final class CoordinatorReducerTests: XCTestCase {
 
         // モックに期待される初期値を設定
         mockUserDefaults.set(HapticType.standard.rawValue, forKey: UserDefaultsKeys.hapticType)
+        // このテストは初回起動ではないシナリオを想定するため、 isFirstLaunch を false に設定
+        mockUserDefaults.set(false, forKey: UserDefaultsKeys.isFirstLaunch)
 
         let store = TestStore(
             initialState: CoordinatorState(),
@@ -23,8 +25,11 @@ final class CoordinatorReducerTests: XCTestCase {
         // AppAction.onAppear を送信
         await store.send(CoordinatorAction.onAppear)
 
-        // loadSettings アクションを期待
-        await store.receive(CoordinatorAction.settings(.loadSettings))
+        // onAppear はまず checkFirstLaunch をトリガーする
+        await store.receive(.checkFirstLaunch)
+
+        // isFirstLaunch=false なので、次に loadSettings アクションを期待
+        await store.receive(.settings(.loadSettings))
 
         // settingsLoaded アクションとその状態変更を期待
         await store.receive(CoordinatorAction.settings(.settingsLoaded(
@@ -34,12 +39,9 @@ final class CoordinatorReducerTests: XCTestCase {
             state.settings.isSettingsLoaded = true
         }
 
-        // settingsLoaded によって引き起こされる updateHapticSettings アクションとその状態変更を期待
-        await store.receive(CoordinatorAction.haptics(.updateHapticSettings(
-            type: HapticType.standard
-        ))) { state in
-             state.haptics.hapticType = HapticType.standard // <-- HapticsState の変更をアサート
-        }
+        // settingsLoaded によって引き起こされる updateHapticSettings アクションを期待
+        // この時点では HapticsState.hapticType は既に .standard (デフォルト値) なので状態変更は発生しない
+        await store.receive(.haptics(.updateHapticSettings(type: .standard)))
 
         // エフェクトが完了したことを確認
         await store.finish()

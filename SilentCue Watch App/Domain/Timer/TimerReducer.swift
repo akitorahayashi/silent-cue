@@ -106,12 +106,29 @@ struct TimerReducer: Reducer {
         if state.timerMode == .minutes {
             targetEndDate = now.addingTimeInterval(Double(state.totalSeconds))
         } else {
-            targetEndDate = TimeCalculation.calculateTargetEndDate(
-                selectedHour: state.selectedHour,
-                selectedMinute: state.selectedMinute,
-                now: now,
-                calendar: Calendar.current
-            )
+            let calendar = Calendar.current
+            var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
+            dateComponents.hour = state.selectedHour
+            dateComponents.minute = state.selectedMinute
+            dateComponents.second = 0
+
+            guard var calculatedTargetDate = calendar.date(from: dateComponents) else {
+                print("Error: Could not create target date from components in handleStartTimer.")
+                // Fallback or error handling: perhaps set targetEndDate to nil or a default future date
+                state.targetEndDate = now.addingTimeInterval(86400) // Default to 24 hours later as a fallback
+                return .none // Exit if date creation fails
+            }
+
+            if calculatedTargetDate <= now {
+                guard let tomorrowTargetDate = calendar.date(byAdding: .day, value: 1, to: calculatedTargetDate) else {
+                    print("Error: Could not calculate tomorrow's target date in handleStartTimer.")
+                    // Fallback or error handling
+                    state.targetEndDate = now.addingTimeInterval(86400) // Default fallback
+                    return .none // Exit if tomorrow calculation fails
+                }
+                calculatedTargetDate = tomorrowTargetDate
+            }
+            targetEndDate = calculatedTargetDate
         }
 
         state.targetEndDate = targetEndDate
@@ -126,7 +143,11 @@ struct TimerReducer: Reducer {
         }
         .cancellable(id: CancelID.timer)
 
-        let backgroundEffect = Effect<Action>.run { [unwrappedTargetEndDateForEffect, totalSeconds, timerDurationMinutes = state.timerDurationMinutes] send in
+        let backgroundEffect = Effect<Action>.run { [
+            unwrappedTargetEndDateForEffect,
+            totalSeconds,
+            timerDurationMinutes = state.timerDurationMinutes
+        ] send in
             extendedRuntimeService.startSession(
                 duration: TimeInterval(totalSeconds + 10),
                 targetEndTime: unwrappedTargetEndDateForEffect
@@ -228,7 +249,7 @@ struct TimerReducer: Reducer {
         state.isRunning = false
         state.completionDate = completionDate
 
-        extendedRuntimeService.stopSession()
+        extendedRuntimeService.stopSession() // Keep explicit stop for safety
         return .merge(
             .cancel(id: CancelID.timer),
             .cancel(id: CancelID.background)

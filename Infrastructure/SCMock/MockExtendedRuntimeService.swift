@@ -72,6 +72,7 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
     public func triggerCompletion() {
         print("MockExtendedRuntimeService: Triggering completion event.")
         completionStreamContinuation.yield(())
+        completionStreamContinuation.finish() // ストリームを終了させる
     }
 
     // テスト用リセット関数

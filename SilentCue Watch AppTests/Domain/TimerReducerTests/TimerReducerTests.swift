@@ -21,7 +21,7 @@ final class TimerReducerTests: XCTestCase {
             // 日付が形成できない場合の潜在的なエラーを処理
             print("Error: Could not create target date from components in helper.")
             // 要件に応じて、nil またはデフォルトの未来の日付をオプションで返す
-            return calendar.date(byAdding: .day, value: 1, to: now) 
+            return calendar.date(byAdding: .day, value: 1, to: now)
         }
 
         // 計算された目標時刻が 'now' に対して過去の場合、
@@ -30,7 +30,7 @@ final class TimerReducerTests: XCTestCase {
             guard let tomorrowTargetDate = calendar.date(byAdding: .day, value: 1, to: targetDate) else {
                 print("Error: Could not calculate tomorrow's target date in helper.")
                 // 要件に応じて、nil またはデフォルトの未来の日付をオプションで返す
-                return calendar.date(byAdding: .day, value: 1, to: now) 
+                return calendar.date(byAdding: .day, value: 1, to: now)
             }
             targetDate = tomorrowTargetDate
         }
@@ -51,7 +51,7 @@ final class TimerReducerTests: XCTestCase {
         var state = TimerReducer.State(
             timerMode: timerMode,
             selectedMinutes: selectedMinutes,
-            now: now, 
+            now: now,
             isRunning: isRunning,
             startDate: startDate,
             targetEndDate: targetEndDate,
@@ -79,11 +79,11 @@ final class TimerReducerTests: XCTestCase {
                 selectedMinutes: state.selectedMinutes,
                 selectedHour: state.selectedHour,
                 selectedMinute: state.selectedMinute,
-                now: now, 
+                now: now,
                 calendar: .current
             )
             state.totalSeconds = recalculatedSeconds
-            state.currentRemainingSeconds = recalculatedSeconds 
+            state.currentRemainingSeconds = recalculatedSeconds
             state.timerDurationMinutes = recalculatedSeconds / 60
         }
         // モードが .minutes で selectedMinutes のみが提供された場合 (時/分ではなく)、

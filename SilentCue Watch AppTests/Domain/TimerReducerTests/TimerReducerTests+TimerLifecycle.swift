@@ -285,8 +285,7 @@ extension TimerReducerTests {
         }
         await Task.yield() // finalizeTimerCompletion 後の処理を待機
 
-        // 未完了のエフェクトをスキップしてから finish
-        await store.skipInFlightEffects()
+        // Effects should be finished by now
         await store.finish()
     }
 

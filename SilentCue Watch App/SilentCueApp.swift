@@ -12,7 +12,6 @@ struct SilentCueWatchApp: App {
     // アプリ全体のストア
     let store: StoreOf<CoordinatorReducer>
 
-
     // バックグラウンド/フォアグラウンド遷移を監視
     @Environment(\.scenePhase) private var scenePhase
 

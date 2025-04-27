@@ -179,7 +179,9 @@ final class SetTimerViewUITests: XCTestCase {
         // 値変更の確認
         XCTAssertTrue(
             "\(finalHourValue)" != "\(initialHourValue)" || "\(finalMinuteValue)" != "\(initialMinuteValue)",
-            "操作後に時または分の値が変わること (Initial: H=\(initialHourValue), M=\(initialMinuteValue), Final: H=\(finalHourValue), M=\(finalMinuteValue))"
+            "操作後に時または分の値が変わること " +
+                "(Initial: H=\(initialHourValue), M=\(initialMinuteValue), " +
+                "Final: H=\(finalHourValue), M=\(finalMinuteValue))"
         )
     }
 
