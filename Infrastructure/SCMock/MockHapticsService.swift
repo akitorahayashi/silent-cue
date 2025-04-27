@@ -1,6 +1,6 @@
+import Dependencies
 import Foundation
 import SCProtocol
-import Dependencies
 import WatchKit
 
 public class MockHapticsService: HapticsServiceProtocol {

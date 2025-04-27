@@ -1,7 +1,7 @@
 import ComposableArchitecture
 import Foundation
-import SCShared
 import SCProtocol
+import SCShared
 import WatchKit
 
 struct SettingsReducer: Reducer {
@@ -86,6 +86,7 @@ struct SettingsReducer: Reducer {
 
                 case .previewHapticCompleted:
                     return .send(.stopHapticPreview)
+
                 case .saveSettings:
                     return .send(.internal(.saveSettingsEffect))
 

@@ -1,9 +1,9 @@
 #if DEBUG
 
+    import Dependencies
     import Foundation
     import SCProtocol
     import SCShared
-    import Dependencies
 
     /// プレビューおよびUIテストで使用するための軽量なUserDefaultsService実装
     public class PreviewUserDefaultsService: UserDefaultsServiceProtocol {
@@ -14,7 +14,7 @@
             // デフォルト値で初期化
             storage = [
                 UserDefaultsKeys.hapticType.rawValue: HapticFeedbackType.success.rawValue,
-                UserDefaultsKeys.isFirstLaunch.rawValue: true // isFirstLaunchのデフォルトを追加
+                UserDefaultsKeys.isFirstLaunch.rawValue: true, // isFirstLaunchのデフォルトを追加
             ]
             print("💾 [プレビューUserDefaults] 初期化完了: \(storage)")
         }

@@ -1,5 +1,5 @@
-import SwiftUI
 import SCShared
+import SwiftUI
 
 struct MinutesPicker: View {
     let selectedMinutes: Binding<Int>

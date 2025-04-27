@@ -1,7 +1,7 @@
 import ComposableArchitecture
+import SCPreview
 import SwiftUI
 import UserNotifications
-import SCPreview
 
 struct TimerCompletionView: View {
     let store: StoreOf<TimerReducer>
@@ -99,7 +99,8 @@ struct TimerCompletionView: View {
     private func checkNotificationAuthorizationStatus() {
         Task {
             let status = await notificationService.getAuthorizationStatus()
-            isNotificationAuthorized = (status == .authorized || status == .provisional) // Update based on actual status check logic
+            isNotificationAuthorized =
+                (status == .authorized || status == .provisional) // Update based on actual status check logic
         }
     }
 
@@ -109,14 +110,14 @@ struct TimerCompletionView: View {
             let granted = await notificationService.requestAuthorization()
             // UI更新はメインスレッドで行う
             await MainActor.run {
-                self.isNotificationAuthorized = granted
+                isNotificationAuthorized = granted
             }
             // completion ハンドラは不要になったため削除
         }
     }
 }
 
-//#if DEBUG
+// #if DEBUG
 //    #Preview {
 //        // プレビュー用の依存関係インスタンスを作成
 //        let previewNotificationServiceAuthorized = PreviewNotificationService()
@@ -158,4 +159,4 @@ struct TimerCompletionView: View {
 //            }
 //        )
 //    }
-//#endif
+// #endif

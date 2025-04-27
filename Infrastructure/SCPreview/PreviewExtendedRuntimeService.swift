@@ -1,8 +1,8 @@
 #if DEBUG
 
+    import Dependencies
     import Foundation
     import SCProtocol
-    import Dependencies
     import WatchKit // For WKExtendedRuntimeSessionState
 
     // Preview用のExtendedRuntimeService実装
@@ -19,8 +19,8 @@
             sessionState = .running
             return true
         }
-        
-        public func startSession(duration: TimeInterval, targetEndTime: Date?) {
+
+        public func startSession(duration _: TimeInterval, targetEndTime _: Date?) {
             // Handle legacy/alternate signature if necessary
             print("PreviewExtendedRuntimeService: Legacy startSession(duration:targetEndTime:) called.")
             Task { let _ = await startSession() } // Simulate starting via the async method
@@ -31,7 +31,7 @@
             sessionState = .invalid
             // Potentially yield completion event if needed for preview testing
         }
-        
+
         public func stopSession() {
             invalidateSession()
         }

@@ -1,5 +1,5 @@
-import SwiftUI
 import SCShared
+import SwiftUI
 
 struct StartButton: View {
     let action: () -> Void

@@ -1,6 +1,6 @@
 import ComposableArchitecture
-import SwiftUI
 import SCShared
+import SwiftUI
 
 /// ナビゲーションの宛先を示す型
 enum NavigationDestination: Hashable {

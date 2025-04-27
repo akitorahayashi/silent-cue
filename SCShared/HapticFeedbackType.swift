@@ -6,4 +6,4 @@ public enum HapticFeedbackType: String, CaseIterable, Identifiable {
     case failure
 
     public var id: String { rawValue }
-} 
+}

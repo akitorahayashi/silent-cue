@@ -1,5 +1,5 @@
-import Foundation
 import Dependencies
+import Foundation
 
 public protocol ExtendedRuntimeServiceProtocol {
     var completionEvents: AsyncStream<Void> { get }

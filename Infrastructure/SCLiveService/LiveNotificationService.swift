@@ -1,10 +1,10 @@
 import ComposableArchitecture
+import Dependencies
 import Foundation
+import SCProtocol
 import UserNotifications
 import WatchKit
 import XCTestDynamicOverlay
-import Dependencies
-import SCProtocol
 
 public class LiveNotificationService: NotificationServiceProtocol {
     /// 通知カテゴリの識別子
@@ -56,7 +56,12 @@ public class LiveNotificationService: NotificationServiceProtocol {
         do {
             // .provisional オプションは、ユーザーに許可を求めずに暫定的に通知を送信する権限
             // .sound, .alert, .badge は標準的な通知権限
-            let granted = try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge, .provisional])
+            let granted = try await notificationCenter.requestAuthorization(options: [
+                .alert,
+                .sound,
+                .badge,
+                .provisional,
+            ])
             print("通知許可リクエスト結果: \(granted)")
             return granted
         } catch {
@@ -137,10 +142,15 @@ public class LiveNotificationService: NotificationServiceProtocol {
     }
 
     // MARK: - Helper Methods (Private or Internal)
+
     // These might be useful for creating content or triggers if needed internally
 
     // Example: Creates standard notification content
-    private func createNotificationContent(title: String, body: String, sound: UNNotificationSound = .default) -> UNMutableNotificationContent {
+    private func createNotificationContent(
+        title: String,
+        body: String,
+        sound: UNNotificationSound = .default
+    ) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
@@ -149,22 +159,32 @@ public class LiveNotificationService: NotificationServiceProtocol {
     }
 
     // Example: Creates a time interval trigger
-    private func createTimeIntervalTrigger(timeInterval: TimeInterval, repeats: Bool = false) -> UNTimeIntervalNotificationTrigger {
-        return UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: repeats)
+    private func createTimeIntervalTrigger(
+        timeInterval: TimeInterval,
+        repeats: Bool = false
+    ) -> UNTimeIntervalNotificationTrigger {
+        UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: repeats)
     }
 }
 
 // MARK: - UNUserNotificationCenter Extension (Optional)
+
 // If frequently used custom logic is needed, an extension can be helpful.
 extension UNUserNotificationCenter {
     // Convenience method example (consider if it truly simplifies things)
-    func addNotification(identifier: String, title: String, body: String, timeInterval: TimeInterval, sound: UNNotificationSound = .default) async throws {
+    func addNotification(
+        identifier: String,
+        title: String,
+        body: String,
+        timeInterval: TimeInterval,
+        sound: UNNotificationSound = .default
+    ) async throws {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = sound
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
-        try await self.add(request)
+        try await add(request)
     }
 }

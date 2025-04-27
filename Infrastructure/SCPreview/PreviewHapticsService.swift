@@ -1,9 +1,9 @@
 #if DEBUG
 
-    import Foundation
-    import WatchKit
-    import SCProtocol
     import Dependencies
+    import Foundation
+    import SCProtocol
+    import WatchKit
 
     // Preview用のHapticsService実装
     public class PreviewHapticsService: HapticsServiceProtocol {

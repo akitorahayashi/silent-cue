@@ -1,8 +1,8 @@
 import ComposableArchitecture
 import Foundation
-import XCTestDynamicOverlay
 import SCProtocol
 import SCShared
+import XCTestDynamicOverlay
 
 public class LiveUserDefaultsService: UserDefaultsServiceProtocol {
     private let userDefaults: UserDefaults

@@ -1,7 +1,7 @@
 import Combine
+import Dependencies
 import Foundation
 import SCProtocol
-import Dependencies
 import WatchKit
 
 public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
@@ -9,7 +9,7 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
     public var startSessionShouldSucceed: Bool = true
     public var mockSessionState: WKExtendedRuntimeSessionState = .notStarted
     public var shouldYieldCompletionEvent: Bool = false // 完了イベントを発行するかどうか
-    
+
     // 呼び出し回数追跡用
     public var startSessionCallCount = 0
     public var invalidateSessionCallCount = 0
@@ -22,10 +22,10 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
 
     public init() {
         var streamContinuation: AsyncStream<Void>.Continuation?
-        self.completionEvents = AsyncStream { continuation in
+        completionEvents = AsyncStream { continuation in
             streamContinuation = continuation
         }
-        self.completionStreamContinuation = streamContinuation!
+        completionStreamContinuation = streamContinuation!
     }
 
     public func startSession() async -> Bool {
@@ -36,8 +36,8 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
         }
         return startSessionShouldSucceed
     }
-    
-    public func startSession(duration: TimeInterval, targetEndTime: Date?) {
+
+    public func startSession(duration _: TimeInterval, targetEndTime _: Date?) {
         print("MockExtendedRuntimeService: Legacy startSession(duration:targetEndTime:) called.")
         Task { let _ = await startSession() }
     }
@@ -50,7 +50,7 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
             completionStreamContinuation.yield(())
         }
     }
-    
+
     public func stopSession() {
         stopSessionCallCount += 1
         invalidateSession()

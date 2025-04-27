@@ -1,6 +1,6 @@
+import Dependencies
 import Foundation
 import SCProtocol
-import Dependencies
 import UserNotifications
 
 // Mock implementation for NotificationServiceProtocol
@@ -16,7 +16,8 @@ public class MockNotificationService: NotificationServiceProtocol {
     public var addRequestCallCount = 0
     public var removePendingRequestsCallCount = 0
     public var removeAllPendingRequestsCallCount = 0
-    public var addedRequests: [(identifier: String, content: UNNotificationContent, trigger: UNNotificationTrigger)] = []
+    public var addedRequests: [(identifier: String, content: UNNotificationContent, trigger: UNNotificationTrigger)] =
+        []
     public var removedRequestIdentifiers: [String] = []
 
     public init() {}
@@ -55,7 +56,7 @@ public class MockNotificationService: NotificationServiceProtocol {
 
     public func removeAllPendingNotificationRequests() {
         removeAllPendingRequestsCallCount += 1
-        removedRequestIdentifiers.append(contentsOf: addedRequests.map { $0.identifier })
+        removedRequestIdentifiers.append(contentsOf: addedRequests.map(\.identifier))
         addedRequests.removeAll()
         print("MockNotificationService: Removing all pending requests")
     }

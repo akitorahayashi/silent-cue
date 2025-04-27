@@ -1,9 +1,9 @@
 import CasePaths
 import ComposableArchitecture
-import SwiftUI
-import UserNotifications
 import SCProtocol // For services
 import SCShared // For UserDefaultsKeys
+import SwiftUI
+import UserNotifications
 
 /// アプリ全体のルートReducer
 struct CoordinatorReducer: Reducer {
@@ -45,7 +45,8 @@ struct CoordinatorReducer: Reducer {
                     return .none
 
                 case .popScreen:
-                    let effect = state.haptics.isActive ? Effect<CoordinatorAction>.send(.haptics(.stopHaptic)) : Effect.none
+                    let effect = state.haptics.isActive ? Effect<CoordinatorAction>.send(.haptics(.stopHaptic)) : Effect
+                        .none
                     if !state.path.isEmpty {
                         state.path.removeLast()
                     }

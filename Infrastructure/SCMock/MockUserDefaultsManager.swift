@@ -1,16 +1,16 @@
 import Combine
+import Dependencies
 import Foundation
 import SCProtocol
 import SCShared
-import Dependencies
 
 public class MockUserDefaultsManager: UserDefaultsServiceProtocol {
     /// UserDefaultsの代わりとなるインメモリ辞書
     public var storage: [String: Any] = [
         UserDefaultsKeys.hapticType.rawValue: HapticFeedbackType.success.rawValue, // Use enum rawValue
-        UserDefaultsKeys.isFirstLaunch.rawValue: true // Add default for isFirstLaunch
+        UserDefaultsKeys.isFirstLaunch.rawValue: true, // Add default for isFirstLaunch
     ]
-    
+
     // 検証用の呼び出し追跡
     public var saveHapticTypeCallCount = 0
     public var loadHapticTypeCallCount = 0
@@ -90,7 +90,7 @@ public class MockUserDefaultsManager: UserDefaultsServiceProtocol {
     public func reset() {
         storage = [
             UserDefaultsKeys.hapticType.rawValue: HapticFeedbackType.success.rawValue,
-            UserDefaultsKeys.isFirstLaunch.rawValue: true
+            UserDefaultsKeys.isFirstLaunch.rawValue: true,
         ]
         saveHapticTypeCallCount = 0
         loadHapticTypeCallCount = 0

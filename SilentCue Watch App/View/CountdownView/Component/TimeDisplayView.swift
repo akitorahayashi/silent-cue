@@ -1,5 +1,5 @@
-import SwiftUI
 import SCShared
+import SwiftUI
 
 struct TimeDisplayView: View {
     let displayTime: String

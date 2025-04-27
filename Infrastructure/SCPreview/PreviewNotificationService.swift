@@ -1,8 +1,8 @@
 #if DEBUG
 
+    import Dependencies
     import Foundation
     import SCProtocol
-    import Dependencies
     import UserNotifications // Import if needed for types like UNAuthorizationStatus
 
     // Preview用のNotificationService実装
@@ -26,7 +26,11 @@
             return authorizationStatus
         }
 
-        public func add(identifier: String, content: UNNotificationContent, trigger: UNNotificationTrigger) async throws {
+        public func add(
+            identifier: String,
+            content _: UNNotificationContent,
+            trigger _: UNNotificationTrigger
+        ) async throws {
             // プレビューでは実際には追加せず、ログ出力などで代替
             print("PreviewNotificationService: Adding notification request: ID \(identifier)")
             addedRequests.append(identifier)

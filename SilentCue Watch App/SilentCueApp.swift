@@ -1,10 +1,10 @@
 import ComposableArchitecture
+import SCShared
 import SwiftUI
 import UserNotifications
-import SCShared
 
 #if DEBUG
-import SCPreview
+    import SCPreview
 #endif
 
 @main
