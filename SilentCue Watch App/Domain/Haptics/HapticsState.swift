@@ -1,4 +1,4 @@
-import Foundation
+import SCShared
 
 /// ハプティクスの状態を管理する
 struct HapticsState: Equatable {

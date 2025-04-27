@@ -118,14 +118,14 @@ struct TimerReducer: Reducer {
 
         let now = date()
         state.startDate = now
-        state.targetEndDate = now.addingTimeInterval(TimeInterval(state.totalSeconds))
+        let durationSeconds = state.timerDurationMinutes * 60
+        let targetEndDate = now.addingTimeInterval(Double(durationSeconds))
+        state.targetEndDate = targetEndDate
         state.isRunning = true
         state.completionDate = nil
 
         // エフェクトに必要な値をキャプチャ
         let totalSeconds = state.totalSeconds
-        let targetEndDate = state.targetEndDate
-        let durationMinutes = state.timerDurationMinutes
 
         // エフェクト1: ティッカー
         let tickerEffect = Effect<Action>.run { send in
@@ -136,39 +136,35 @@ struct TimerReducer: Reducer {
         .cancellable(id: CancelID.timer)
 
         // エフェクト2: バックグラウンドセッション / 通知 / 完了監視
-        let backgroundEffect = Effect<Action>.run { send in
+        let backgroundEffect = Effect<Action>.run { [targetEndDate, state] send in
             // セッション開始
             extendedRuntimeService.startSession(
                 duration: TimeInterval(totalSeconds + 10),
                 targetEndTime: targetEndDate
             )
             // 通知をスケジュール
-            if let targetDate = targetEndDate {
-                // 通知内容の設定 (TimerReducer内で定義)
-                let content = UNMutableNotificationContent()
-                content.title = "タイマー完了"
-                content.body = "\\(durationMinutes)分のタイマーが完了しました"
-                content.sound = .default
-                // content.categoryIdentifier = "TIMER_COMPLETED_CATEGORY" // 必要であればカテゴリも設定
+            let content = UNMutableNotificationContent()
+            content.title = "タイマー完了"
+            content.body = "\\(state.timerDurationMinutes)分のタイマーが完了しました"
+            content.sound = .default
 
-                // 日付トリガーの作成
-                let triggerComponents = Calendar.current.dateComponents(
-                    [.year, .month, .day, .hour, .minute, .second],
-                    from: targetDate
-                )
-                let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
-                let identifier = "TIMER_COMPLETED_NOTIFICATION" // 識別子を定義
+            // 日付トリガーの作成
+            let triggerComponents = Calendar.current.dateComponents(
+                [.year, .month, .day, .hour, .minute, .second],
+                from: targetEndDate
+            )
+            let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+            let identifier = "TIMER_COMPLETED_NOTIFICATION" // 識別子を定義
 
-                // プロトコルメソッドを使用して通知を追加
-                await Task {
-                    do {
-                        try await notificationService.add(identifier: identifier, content: content, trigger: trigger)
-                    } catch {
-                        // エラーハンドリング (ログ出力など)
-                        print("通知スケジュールエラー: \\(error)")
-                    }
-                }.value // Taskを実行
-            }
+            // プロトコルメソッドを使用して通知を追加
+            await Task {
+                do {
+                    try await notificationService.add(identifier: identifier, content: content, trigger: trigger)
+                } catch {
+                    // エラーハンドリング (ログ出力など)
+                    print("通知スケジュールエラー: \\(error)")
+                }
+            }.value // Taskを実行
             // 完了イベントを監視
             for await _ in extendedRuntimeService.completionEvents {
                 await send(.internal(.backgroundTimerDidComplete))

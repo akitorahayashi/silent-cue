@@ -5,6 +5,6 @@ public protocol UserDefaultsServiceProtocol {
     func object(forKey defaultName: UserDefaultsKeys) -> Any?
     func remove(forKey defaultName: UserDefaultsKeys)
     func removeAll()
-    func saveHapticFeedbackType(_ type: HapticFeedbackType)
-    func loadHapticFeedbackType() -> HapticFeedbackType
+    func saveHapticType(_ type: HapticType)
+    func loadHapticType() -> HapticType
 }

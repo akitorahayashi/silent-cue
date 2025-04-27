@@ -20,7 +20,7 @@
 ### 包括的なビルドプロセスの検証
 Pull Requestや`main`ブランチへのプッシュ時に、以下の自動チェックを実行します
 - コードフォーマット (SwiftFormat) と静的解析 (SwiftLint)
-- ユニットテストとUIテスト、およびそれらの結果（xcresult）の検証
+- UnitテストとUIテスト、およびそれらの結果（xcresult）の検証
 - リリース設定でのアーカイブビルドと結果の検証（`main`ブランチプッシュ時）
 
 ### Pull Request に自動でレビュー
@@ -72,7 +72,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
     3.  Xcodeプロジェクト生成 (`mint run xcodegen generate`)
     4.  watchOSシミュレータを選択
     5.  テスト用ビルド (`build_for_testing`)
-    6.  ユニットテスト実行と結果検証 (`run_unit_tests`, `verify_unit_test_results`)
+    6.  Unitテスト実行と結果検証 (`run_unit_tests`, `verify_unit_test_results`)
     7.  UIテスト実行と結果検証 (`run_ui_tests`, `verify_ui_test_results`)
     8.  JUnit XMLレポート生成
     9.  テスト結果 (`.xcresult`, `.xml`) をアーティファクト (`test-results`) としてアップロード
@@ -146,13 +146,13 @@ $ chmod +x .github/scripts/run-local-ci.sh
 ローカル環境でビルドからテストやアーカイブを実行し、CIワークフローで実行されるコアな処理が期待通りかを確認します
 
 ```shell
-# 全てのステップ (ビルド、単体テスト実行・検証、UIテスト実行・検証、アーカイブビルド・検証) を実行
+# 全てのステップ (ビルド、Unitテスト実行・検証、UIテスト実行・検証、アーカイブビルド・検証) を実行
 $ ./.github/scripts/run-local-ci.sh
 
-# テスト用ビルド + 単体テストとUIテストの両方を実行・検証
+# テスト用ビルド + UnitテストとUIテストの両方を実行・検証
 $ ./.github/scripts/run-local-ci.sh --all-tests
 
-# テスト用ビルド + 単体テストのみを実行・検証
+# テスト用ビルド + Unitテストのみを実行・検証
 $ ./.github/scripts/run-local-ci.sh --unit-test
 
 # テスト用ビルド + UIテストのみを実行・検証
@@ -168,10 +168,10 @@ $ ./.github/scripts/run-local-ci.sh --archive-only
 事前に上記のコマンドで `--all-tests` や `--unit-test` などを実行してビルド成果物を作成しておく必要があります
 
 ```shell
-# 単体テストとUIテストの両方を再実行・検証
+# UnitテストとUIテストの両方を再実行・検証
 $ ./.github/scripts/run-local-ci.sh --test-without-building
 
-# 単体テストのみを再実行・検証
+# Unitテストのみを再実行・検証
 $ ./.github/scripts/run-local-ci.sh --test-without-building --unit-test
 
 # UIテストのみを再実行・検証

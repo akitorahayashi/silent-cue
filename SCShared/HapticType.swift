@@ -1,14 +1,14 @@
 import Foundation
 import WatchKit
 
-enum HapticType: String, Equatable, CaseIterable, Identifiable {
+public enum HapticType: String, Equatable, CaseIterable, Identifiable {
     case standard = "Standard"
     case strong = "Strong"
     case weak = "Weak"
 
-    var id: String { rawValue }
+    public var id: String { rawValue }
 
-    var wkHapticType: WKHapticType {
+    public var wkHapticType: WKHapticType {
         switch self {
             case .standard: return .success
             case .strong: return .retry
@@ -17,7 +17,7 @@ enum HapticType: String, Equatable, CaseIterable, Identifiable {
     }
 
     // 振動の間隔（秒）
-    var interval: TimeInterval {
+    public var interval: TimeInterval {
         switch self {
             case .standard: return 0.5
             case .strong: return 0.7
@@ -26,7 +26,7 @@ enum HapticType: String, Equatable, CaseIterable, Identifiable {
     }
 
     // 振動の強さ（0.0〜1.0）
-    var intensity: Float {
+    public var intensity: Float {
         switch self {
             case .standard: return 0.7
             case .strong: return 1.0

@@ -27,20 +27,9 @@ struct HapticsReducer: Reducer {
 
                     return .merge(
                         effect,
-                        .run { [type = state.hapticType] _ in
-                            let startTime = date() // Date() -> date()
-                            let endTime = startTime.addingTimeInterval(3.0)
-
-                            while date() < endTime { // Date() -> date()
-                                await hapticsService.play(type.wkHapticType.rawValue)
-                                // Task.sleep -> clock.sleep
-                                try? await clock.sleep(for: .seconds(type.interval))
-                                // Task.isCancelled はそのまま
-                                if Task.isCancelled {
-                                    print("Haptic task cancelled in run loop")
-                                    break
-                                }
-                            }
+                        .run { [type] _ in
+                            // TODO: 設定に応じて再生するタイプを変える
+                            hapticsService.play(type.wkHapticType.rawValue)
                         }
                         .cancellable(id: CancelID.haptic)
                     )

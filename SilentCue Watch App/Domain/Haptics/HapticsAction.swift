@@ -1,5 +1,5 @@
 import ComposableArchitecture
-import Foundation
+import SCShared
 
 /// ハプティックスに関連するすべてのアクション
 enum HapticsAction: Equatable {

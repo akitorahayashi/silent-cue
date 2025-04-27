@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SCMock
 import SCProtocol
+import SCShared
 @testable import SilentCue_Watch_App
 import WatchKit
 import XCTest

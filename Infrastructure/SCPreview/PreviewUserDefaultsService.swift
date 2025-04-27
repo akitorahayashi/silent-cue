@@ -13,7 +13,7 @@
         public init() {
             // デフォルト値で初期化
             storage = [
-                UserDefaultsKeys.hapticType.rawValue: HapticFeedbackType.success.rawValue,
+                UserDefaultsKeys.hapticType.rawValue: HapticType.standard.rawValue,
                 UserDefaultsKeys.isFirstLaunch.rawValue: true, // isFirstLaunchのデフォルトを追加
             ]
             print("💾 [プレビューUserDefaults] 初期化完了: \(storage)")
@@ -63,16 +63,16 @@
 
         // --- Protocol Methods (already public or adapted below) ---
 
-        public func saveHapticFeedbackType(_ type: HapticFeedbackType) {
+        public func saveHapticType(_ type: HapticType) {
             let key = UserDefaultsKeys.hapticType.rawValue
             storage[key] = type.rawValue
             print("💾 [プレビューUserDefaults] 保存 hapticType: \(type.rawValue)")
         }
 
-        public func loadHapticFeedbackType() -> HapticFeedbackType {
+        public func loadHapticType() -> HapticType {
             let key = UserDefaultsKeys.hapticType.rawValue
-            let value = storage[key] as? String ?? HapticFeedbackType.success.rawValue
-            let type = HapticFeedbackType(rawValue: value) ?? .success
+            let value = storage[key] as? String ?? HapticType.standard.rawValue
+            let type = HapticType(rawValue: value) ?? .standard
             print("💾 [プレビューUserDefaults] 読込 hapticType: \(type.rawValue)")
             return type
         }

@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SCMock
+import SCShared
 @testable import SilentCue_Watch_App
 import WatchKit
 import XCTest
@@ -91,6 +92,7 @@ final class SettingsReducerTests: XCTestCase {
             $0.isPreviewingHaptic = true // 状態変化を期待
         }
 
+        await Task.yield() // play(_:) async の完了を待機
         XCTAssertEqual(mockHaptics.playCallCount, 1, "開始時にハプティクスが1回再生されること")
         XCTAssertEqual(mockHaptics.lastPlayedHapticType, selectedType.wkHapticType, "正しいハプティクスタイプが再生されること")
 
@@ -192,6 +194,7 @@ final class SettingsReducerTests: XCTestCase {
         await store.receive(SettingsAction.startHapticPreview(newType)) {
             $0.isPreviewingHaptic = true
         }
+        await Task.yield() // play(_:) async の完了を待機
         XCTAssertEqual(mockHaptics.playCallCount, countAfterInitialStart + 1, "新しいプレビュー開始時に再生回数が増加すること")
         XCTAssertEqual(mockHaptics.lastPlayedHapticType, newType.wkHapticType, "正しい新しいハプティクスタイプが再生されること")
 

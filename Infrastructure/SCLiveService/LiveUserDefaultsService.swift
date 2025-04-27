@@ -10,13 +10,13 @@ public class LiveUserDefaultsService: UserDefaultsServiceProtocol {
         self.userDefaults = userDefaults
     }
 
-    public func saveHapticFeedbackType(_ type: HapticFeedbackType) {
+    public func saveHapticType(_ type: HapticType) {
         userDefaults.set(type.rawValue, forKey: "hapticType")
     }
 
-    public func loadHapticFeedbackType() -> HapticFeedbackType {
-        let savedValue = userDefaults.string(forKey: "hapticType") ?? HapticFeedbackType.success.rawValue
-        return HapticFeedbackType(rawValue: savedValue) ?? .success
+    public func loadHapticType() -> HapticType {
+        let savedValue = userDefaults.string(forKey: "hapticType") ?? HapticType.standard.rawValue
+        return HapticType(rawValue: savedValue) ?? .standard
     }
 
     public func set(_ value: Any?, forKey defaultName: UserDefaultsKeys) {

@@ -14,6 +14,10 @@ public class MockHapticsService: HapticsServiceProtocol {
     public func play(_ type: Int) {
         playCallCount += 1
         playedHapticTypes.append(type)
+        // Attempt to convert Int to WKHapticType and update lastPlayedHapticType
+        if let hapticType = WKHapticType(rawValue: type) {
+            lastPlayedHapticType = hapticType
+        }
         print("MockHapticsService: Playing haptic type (Int): \(type)")
     }
 

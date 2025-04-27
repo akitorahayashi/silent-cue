@@ -1,5 +1,5 @@
 import ComposableArchitecture
-import Foundation
+import SCShared
 
 /// 設定画面に関連するアクション
 enum SettingsAction: Equatable {

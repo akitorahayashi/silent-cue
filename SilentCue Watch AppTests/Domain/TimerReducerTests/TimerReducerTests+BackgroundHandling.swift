@@ -67,15 +67,12 @@ extension TimerReducerTests {
     // テスト: .time モードでのバックグラウンド完了
     func testTimerFinishes_AtTime_Background() async throws {
         let calendar = Calendar.current
-        guard let timeZone = TimeZone(identifier: "Asia/Tokyo") else {
-            XCTFail("Failed to get TimeZone")
-            return
-        }
-        var components = DateComponents(
-            timeZone: timeZone,
-            year: 2023,
-            month: 10,
-            day: 27,
+        let now = Date()
+        // 午後11時59分
+        let components = DateComponents(
+            year: calendar.component(.year, from: now),
+            month: calendar.component(.month, from: now),
+            day: calendar.component(.day, from: now),
             hour: 12,
             minute: 30,
             second: 0

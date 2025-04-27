@@ -51,11 +51,11 @@ struct SettingsReducer: Reducer {
                     state.isPreviewingHaptic = true
 
                     return .merge(
-                        .run { _ in await hapticsService.play(hapticType.wkHapticType.rawValue) },
+                        .run { _ in hapticsService.play(hapticType.wkHapticType.rawValue) },
 
-                        .run { send in
+                        .run { [hapticType] send in
                             for await _ in clock.timer(interval: .seconds(hapticType.interval)) {
-                                await send(.hapticPreviewTick)
+                                await send(SettingsAction.hapticPreviewTick)
                             }
                         }
                         .cancellable(id: CancelID.hapticPreviewTimer, cancelInFlight: true),
@@ -69,16 +69,19 @@ struct SettingsReducer: Reducer {
 
                 case .hapticPreviewTick:
                     guard state.isPreviewingHaptic else { return .none }
-                    return .run { [selectedType = state.selectedHapticType] _ in
-                        await hapticsService.play(selectedType.wkHapticType.rawValue)
-                    }
+                    let hapticType = state.selectedHapticType
+                    return .run { _ in hapticsService.play(hapticType.wkHapticType.rawValue) }
 
                 case .stopHapticPreview:
                     guard state.isPreviewingHaptic else { return .none }
                     state.isPreviewingHaptic = false
+                    let selectedType = state.selectedHapticType
                     return .merge(
                         .cancel(id: CancelID.hapticPreviewTimer),
-                        .cancel(id: CancelID.hapticPreviewTimeout)
+                        .cancel(id: CancelID.hapticPreviewTimeout),
+                        .run { _ in hapticsService.play(selectedType.wkHapticType.rawValue) },
+                        .send(SettingsAction.startHapticPreview(selectedType)),
+                        .send(SettingsAction.internal(.saveSettingsEffect))
                     )
 
                 case let .previewHapticFeedback(type):

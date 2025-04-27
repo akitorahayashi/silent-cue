@@ -1,4 +1,4 @@
-import Foundation
+import SCShared
 
 /// 設定画面の状態を管理するクラス
 struct SettingsState: Equatable {

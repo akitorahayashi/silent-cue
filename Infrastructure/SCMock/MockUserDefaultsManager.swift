@@ -6,10 +6,7 @@ import SCShared
 
 public class MockUserDefaultsManager: UserDefaultsServiceProtocol {
     /// UserDefaultsの代わりとなるインメモリ辞書
-    public var storage: [String: Any] = [
-        UserDefaultsKeys.hapticType.rawValue: HapticFeedbackType.success.rawValue, // Use enum rawValue
-        UserDefaultsKeys.isFirstLaunch.rawValue: true, // Add default for isFirstLaunch
-    ]
+    public var storage: [String: Any] = [:]
 
     // 検証用の呼び出し追跡
     public var saveHapticTypeCallCount = 0
@@ -65,18 +62,18 @@ public class MockUserDefaultsManager: UserDefaultsServiceProtocol {
 
     // --- プロトコルメソッド ---
 
-    public func saveHapticFeedbackType(_ type: HapticFeedbackType) {
+    public func saveHapticType(_ type: HapticType) {
         saveHapticTypeCallCount += 1
         let key = UserDefaultsKeys.hapticType.rawValue
         storage[key] = type.rawValue
         print("MockUserDefaultsManager: Saved haptic type: \(type.rawValue)")
     }
 
-    public func loadHapticFeedbackType() -> HapticFeedbackType {
+    public func loadHapticType() -> HapticType {
         loadHapticTypeCallCount += 1
         let key = UserDefaultsKeys.hapticType.rawValue
-        let value = storage[key] as? String ?? HapticFeedbackType.success.rawValue
-        let type = HapticFeedbackType(rawValue: value) ?? .success
+        let value = storage[key] as? String ?? HapticType.standard.rawValue
+        let type = HapticType(rawValue: value) ?? .standard
         print("MockUserDefaultsManager: Loaded haptic type: \(type.rawValue)")
         return type
     }
@@ -88,10 +85,7 @@ public class MockUserDefaultsManager: UserDefaultsServiceProtocol {
 
     // テスト用のリセット関数
     public func reset() {
-        storage = [
-            UserDefaultsKeys.hapticType.rawValue: HapticFeedbackType.success.rawValue,
-            UserDefaultsKeys.isFirstLaunch.rawValue: true,
-        ]
+        storage = [:]
         saveHapticTypeCallCount = 0
         loadHapticTypeCallCount = 0
         setCallCount = 0

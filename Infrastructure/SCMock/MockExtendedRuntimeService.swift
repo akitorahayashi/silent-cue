@@ -42,10 +42,10 @@ public class MockExtendedRuntimeService: ExtendedRuntimeServiceProtocol {
     }
 
     public func startSession(duration: TimeInterval, targetEndTime: Date?) {
+        startSessionCallCount += 1
         print("MockExtendedRuntimeService: Legacy startSession(duration:targetEndTime:) called.")
         lastStartSessionDuration = duration
         lastStartSessionTargetEndTime = targetEndTime
-        Task { let _ = await startSession() }
     }
 
     public func invalidateSession() {
