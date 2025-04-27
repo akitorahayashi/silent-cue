@@ -64,25 +64,6 @@ final class LiveExtendedRuntimeService: NSObject, WKExtendedRuntimeSessionDelega
     }
 }
 
-// MARK: - TCA Dependency
-
-extension DependencyValues {
-    var extendedRuntimeService: ExtendedRuntimeServiceProtocol {
-        get { self[ExtendedRuntimeServiceKey.self] }
-        set { self[ExtendedRuntimeServiceKey.self] = newValue }
-    }
-}
-
-private enum ExtendedRuntimeServiceKey: DependencyKey {
-    static let liveValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
-    #if DEBUG
-        static let previewValue: ExtendedRuntimeServiceProtocol = PreviewExtendedRuntimeService()
-    #else
-        // リリースビルドでは liveValue を使用します (PreviewExtendedRuntimeService は DEBUG 専用のため)
-        static let previewValue: ExtendedRuntimeServiceProtocol = LiveExtendedRuntimeService()
-    #endif
-}
-
 // TestDependencyKey を使用して testValue を定義
 extension LiveExtendedRuntimeService: TestDependencyKey {
     static let testValue: ExtendedRuntimeServiceProtocol = {

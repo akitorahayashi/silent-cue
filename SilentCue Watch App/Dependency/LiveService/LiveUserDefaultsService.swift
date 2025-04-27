@@ -24,25 +24,6 @@ final class LiveUserDefaultsService: UserDefaultsServiceProtocol {
     }
 }
 
-extension DependencyValues {
-    var userDefaultsService: UserDefaultsServiceProtocol {
-        get { self[UserDefaultsServiceKey.self] }
-        set { self[UserDefaultsServiceKey.self] = newValue }
-    }
-}
-
-private enum UserDefaultsServiceKey: DependencyKey {
-    static let liveValue: UserDefaultsServiceProtocol = LiveUserDefaultsService()
-
-    #if DEBUG
-        // Use PreviewUserDefaultsService for previews (defined in PreviewUserDefaultsService.swift #if DEBUG)
-        static let previewValue: UserDefaultsServiceProtocol = PreviewUserDefaultsService()
-    #else
-        // リリースビルドでは liveValue を使用します (PreviewUserDefaultsService は DEBUG 専用のため)
-        static let previewValue: UserDefaultsServiceProtocol = LiveUserDefaultsService()
-    #endif
-}
-
 extension LiveUserDefaultsService: TestDependencyKey {
     static let testValue: UserDefaultsServiceProtocol = {
         struct UnimplementedUserDefaultsService: UserDefaultsServiceProtocol {

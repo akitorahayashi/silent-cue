@@ -118,29 +118,6 @@ final class LiveNotificationService: NotificationServiceProtocol {
     }
 }
 
-// MARK: - TCA 依存関係
-
-extension DependencyValues {
-    var notificationService: NotificationServiceProtocol {
-        get { self[NotificationServiceKey.self] }
-        set { self[NotificationServiceKey.self] = newValue }
-    }
-}
-
-private enum NotificationServiceKey: DependencyKey { // キーenum名を変更
-    // ライブ実装を提供
-    static let liveValue: NotificationServiceProtocol = LiveNotificationService()
-
-    // Preview実装 - liveValue を使用 (モックはテストターゲット専用)
-    #if DEBUG
-        // Preview Content にある PreviewNotificationService を使用
-        static let previewValue: NotificationServiceProtocol = PreviewNotificationService()
-    #else
-        // リリースビルドでは liveValue を使用します (PreviewNotificationService は DEBUG 専用のため)
-        static let previewValue: NotificationServiceProtocol = LiveNotificationService()
-    #endif
-}
-
 // TestDependencyKey を使用して testValue を定義
 extension LiveNotificationService: TestDependencyKey {
     static let testValue: NotificationServiceProtocol = {
