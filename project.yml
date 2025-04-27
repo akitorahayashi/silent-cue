@@ -68,7 +68,7 @@ targets:
     type: library.static
     platform: watchOS
     sources:
-      - path: SCProtocol
+      - path: Infrastructure/SCProtocol
     dependencies:
       - target: SCShared
       - package: ComposableArchitecture
@@ -100,7 +100,7 @@ targets:
     type: library.static
     platform: watchOS
     sources:
-      - path: SCLiveService
+      - path: Infrastructure/SCLiveService
     dependencies:
       - target: SCProtocol
       - target: SCShared
@@ -117,7 +117,7 @@ targets:
     type: library.static
     platform: watchOS
     sources:
-      - path: SCPreview
+      - path: Infrastructure/SCPreview
     dependencies:
       - target: SCProtocol
       - package: ComposableArchitecture
@@ -133,7 +133,7 @@ targets:
     type: library.static
     platform: watchOS
     sources:
-      - path: SCMock
+      - path: Infrastructure/SCMock
     dependencies:
       - target: SCProtocol
       - target: SCShared

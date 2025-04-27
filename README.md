@@ -17,11 +17,14 @@ SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特�
 
 ```plaintext
 SilentCue/
-├── SCProtocol/
+├── .github/
+│   └── workflows/
 ├── SCShared/
-├── SCLiveService/
-├── SCPreview/
-├── SCDependencyMocks/
+├── Infrastructure/
+│   ├── SCLiveService/
+│   ├── SCMock/
+│   ├── SCPreview/
+│   └── SCProtocol/
 ├── SilentCue Watch App/
 │   ├── Assets.xcassets/
 │   ├── Dependency/
@@ -38,13 +41,12 @@ SilentCue/
 │   ├── Extension/
 │   ├── Util/
 │   └── Tests/
-├── .github/
-│   └── workflows/
 ├── .gitignore
 ├── .swiftformat
 ├── .swiftlint.yml
 ├── Mintfile
 ├── project.yml
+├── ARCHITECTURE.md
 └── README.md
 ```
 

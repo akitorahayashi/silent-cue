@@ -19,14 +19,15 @@ TCAでは、`DependencyKey` プロトコルと `@Dependency` プロパティラ�
 
 依存関係管理においては、以下のコンポーネントが独立したモジュールとして構成されます。各モジュールの役割、配置場所、依存関係、ビルド構成におけるリンクの扱いは以下の通りです。
 
-| モジュール名           | 主な役割/内容                         | 配置場所 (ルート直下) | Xcodeターゲット (Type) | 主な依存先                   | ビルド構成リンク           | アクセス制御 |
-| :------------------- | :------------------------------------ | :------------------ | :------------------- | :------------------------- | :----------------------- | :--------- |
-| `SCProtocol`         | サービスインターフェース (プロトコル) | `/SCProtocol/`      | `library.static`     | `Dependencies`           | 常時                     | `public`   |
-| `SCLiveService`      | 本番サービス実装                      | `/SCLiveService/`   | `library.static`     | `SCProtocol`, `ComposableArchitecture` | 常時                     | `public`   |
-| `SCPreview`        | プレビュー用実装・アセット            | `/SCPreview/`       | `library.static`     | `SCProtocol`, `ComposableArchitecture` | Debug のみ (Appリンク時) | `public`   |
-| `SCMock`             | テスト用モック実装                    | `/SCMock/`          | `library.static`     | `SCProtocol`, `ComposableArchitecture` | Debug のみ (Appリンク時), 常時 (Testsリンク時) | `public`   |
-| `SCShared`         | 複数モジュールで共有されるコード      | `/SCShared/`        | `library.static`     | `SCProtocol`, `ComposableArchitecture` | 常時                     | `public`   |
-| `SilentCue_Watch_App` (本体) | UI, Domain, DI設定             | (アプリ内)          | `application.watchapp2`| 各モジュール, `ComposableArchitecture` | -                        | -          |
+| モジュール名           | 主な役割/内容                         | 配置場所 (ルート直下)            | Xcodeターゲット (Type) | 主な依存先                   | ビルド構成リンク           | アクセス制御 |
+| :------------------- | :------------------------------------ | :----------------------------- | :------------------- | :------------------------- | :----------------------- | :--------- |
+| `Infrastructure`     | 低レベル実装詳細 (下記を含む)         | `/Infrastructure/`             | -                    | -                          | -                        | -          |
+|   `SCProtocol`       | サービスインターフェース (プロトコル) | `/Infrastructure/SCProtocol/`  | `library.static`     | `Dependencies`           | 常時                     | `public`   |
+|   `SCLiveService`    | 本番サービス実装                      | `/Infrastructure/SCLiveService/` | `library.static`     | `SCProtocol`, `ComposableArchitecture` | 常時                     | `public`   |
+|   `SCPreview`        | プレビュー用実装・アセット            | `/Infrastructure/SCPreview/`   | `library.static`     | `SCProtocol`, `ComposableArchitecture` | Debug のみ (Appリンク時) | `public`   |
+|   `SCMock`           | テスト用モック実装                    | `/Infrastructure/SCMock/`      | `library.static`     | `SCProtocol`, `ComposableArchitecture` | Debug のみ (Appリンク時), 常時 (Testsリンク時) | `public`   |
+| `SCShared`         | 複数モジュールで共有されるコード      | `/SCShared/`                   | `library.static`     | `SCProtocol`, `ComposableArchitecture` | 常時                     | `public`   |
+| `SilentCue_Watch_App` (本体) | UI, Domain, DI設定             | (アプリ内)                     | `application.watchapp2`| 各モジュール, `ComposableArchitecture` | -                        | -          |
 
 **補足:**
 *   **依存性キー/値:** DIの設定ファイル (`SCDependencyKeys.swift`, `SCDependencyValues.swift`) はアプリケーション本体 (`SilentCue_Watch_App`) の `/Dependency/` ディレクトリ内に配置されます。これらは各実装モジュールに依存します。
@@ -86,7 +87,7 @@ TCAでは、`DependencyKey` プロトコルと `@Dependency` プロパティラ�
 ## 4. 管理戦略
 
 *   **XcodeGen:** プロジェクトファイル (`.xcodeproj`) は `project.yml` から生成されます。モジュール構成や依存関係、ビルド設定は `project.yml` で管理します。
-*   **ディレクトリ構造:** 上記のモジュール構成に従い、ファイルを各モジュールのディレクトリ (`/SCProtocol/`, `/SCShared/`, `/SCLiveService/`, `/SCPreview/`, `/SCMock/`) に配置します。
+*   **ディレクトリ構造:** 上記のモジュール構成に従い、ファイルを各モジュールのディレクトリ (`/Infrastructure/SCProtocol/`, `/SCShared/`, `/Infrastructure/SCLiveService/`, `/Infrastructure/SCPreview/`, `/Infrastructure/SCMock/`) に配置します。
 *   **命名規則:** `*ServiceProtocol`, `Live*Service`, `Preview*Service`, `Mock*Service` の一貫性を保ちます。
 *   **`DependencyKey` 設定:** `SCDependencyKeys.swift` で各依存関係の `liveValue`, `previewValue`, `testValue` を適切に設定し、`#if DEBUG` を用いてビルド構成に応じた実装を参照します。モジュール名をプレフィックスとして付与します (例: `SCLiveService.LiveUserDefaultsService`, `SCMock.MockUserDefaultsManager`)。
 *   **アクセス制御:** モジュール間で共有される `protocol`, `class`, `struct`, `enum`, `init` などには `public` 修飾子を適用します。
@@ -97,41 +98,28 @@ TCAでは、`DependencyKey` プロトコルと `@Dependency` プロパティラ�
 ## 管理されている主な依存関係
 
 *   **`userDefaultsService: UserDefaultsServiceProtocol`**: `UserDefaults` へのアクセス
-    *   プロトコル: `/SCProtocol/UserDefaultsServiceProtocol.swift` (`SCProtocol`)
-    *   ライブ実装: `LiveUserDefaultsService` (in `/SCLiveService/LiveUserDefaultsService.swift`, `SCLiveService`)
-    *   プレビュー実装: `PreviewUserDefaultsService` (in `/SCPreview/PreviewUserDefaultsService.swift`, `SCPreview`)
-    *   テスト用デフォルト/モック実装: `MockUserDefaultsManager` (in `/SCMock/MockUserDefaultsManager.swift`, `SCMock`)
+    *   プロトコル: `/Infrastructure/SCProtocol/UserDefaultsServiceProtocol.swift` (`SCProtocol`)
+    *   ライブ実装: `LiveUserDefaultsService` (in `/Infrastructure/SCLiveService/LiveUserDefaultsService.swift`, `SCLiveService`)
+    *   プレビュー実装: `PreviewUserDefaultsService` (in `/Infrastructure/SCPreview/PreviewUserDefaultsService.swift`, `SCPreview`)
+    *   テスト用デフォルト/モック実装: `MockUserDefaultsManager` (in `/Infrastructure/SCMock/MockUserDefaultsManager.swift`, `SCMock`)
 *   **`notificationService: NotificationServiceProtocol`**: 通知の許可確認、リクエスト、スケジュール、キャンセル
-    *   プロトコル: `/SCProtocol/NotificationServiceProtocol.swift` (`SCProtocol`)
-    *   ライブ実装: `LiveNotificationService` (in `/SCLiveService/LiveNotificationService.swift`, `SCLiveService`)
-    *   プレビュー実装: `PreviewNotificationService` (in `/SCPreview/PreviewNotificationService.swift`, `SCPreview`)
-    *   テスト用デフォルト/モック実装: `MockNotificationService` (in `/SCMock/MockNotificationService.swift`, `SCMock`)
+    *   プロトコル: `/Infrastructure/SCProtocol/NotificationServiceProtocol.swift` (`SCProtocol`)
+    *   ライブ実装: `LiveNotificationService` (in `/Infrastructure/SCLiveService/LiveNotificationService.swift`, `SCLiveService`)
+    *   プレビュー実装: `PreviewNotificationService` (in `/Infrastructure/SCPreview/PreviewNotificationService.swift`, `SCPreview`)
+    *   テスト用デフォルト/モック実装: `MockNotificationService` (in `/Infrastructure/SCMock/MockNotificationService.swift`, `SCMock`)
 *   **`extendedRuntimeService: ExtendedRuntimeServiceProtocol`**: 拡張ランタイムセッションの管理
-    *   プロトコル: `/SCProtocol/ExtendedRuntimeServiceProtocol.swift` (`SCProtocol`)
-    *   ライブ実装: `LiveExtendedRuntimeService` (in `/SCLiveService/LiveExtendedRuntimeService.swift`, `SCLiveService`)
-    *   プレビュー実装: `PreviewExtendedRuntimeService` (in `/SCPreview/PreviewExtendedRuntimeService.swift`, `SCPreview`)
-    *   テスト用デフォルト/モック実装: `MockExtendedRuntimeService` (in `/SCMock/MockExtendedRuntimeService.swift`, `SCMock`)
+    *   プロトコル: `/Infrastructure/SCProtocol/ExtendedRuntimeServiceProtocol.swift` (`SCProtocol`)
+    *   ライブ実装: `LiveExtendedRuntimeService` (in `/Infrastructure/SCLiveService/LiveExtendedRuntimeService.swift`, `SCLiveService`)
+    *   プレビュー実装: `PreviewExtendedRuntimeService` (in `/Infrastructure/SCPreview/PreviewExtendedRuntimeService.swift`, `SCPreview`)
+    *   テスト用デフォルト/モック実装: `MockExtendedRuntimeService` (in `/Infrastructure/SCMock/MockExtendedRuntimeService.swift`, `SCMock`)
 *   **`hapticsService: HapticsServiceProtocol`**: 触覚フィードバックの再生
-    *   プロトコル: `/SCProtocol/HapticsServiceProtocol.swift` (`SCProtocol`)
-    *   ライブ実装: `LiveHapticsService` (in `/SCLiveService/LiveHapticsService.swift`, `SCLiveService`)
-    *   プレビュー実装: `PreviewHapticsService` (in `/SCPreview/PreviewHapticsService.swift`, `SCPreview`)
-    *   テスト用デフォルト/モック実装: `MockHapticsService` (in `/SCMock/MockHapticsService.swift`, `SCMock`)
+    *   プロトコル: `/Infrastructure/SCProtocol/HapticsServiceProtocol.swift` (`SCProtocol`)
+    *   ライブ実装: `LiveHapticsService` (in `/Infrastructure/SCLiveService/LiveHapticsService.swift`, `SCLiveService`)
+    *   プレビュー実装: `PreviewHapticsService` (in `/Infrastructure/SCPreview/PreviewHapticsService.swift`, `SCPreview`)
+    *   テスト用デフォルト/モック実装: `MockHapticsService` (in `/Infrastructure/SCMock/MockHapticsService.swift`, `SCMock`)
 *   **`continuousClock: any Clock<Duration>`**: 時間の経過 (タイマー用)
     *   (TCA標準の依存関係)
 
 ## UIテストのオーバーライド (`SilentCueApp.swift`)
 
 (現在は未サポート) UIテスト実行時には、アプリ起動時のコマンドライン引数 (`uiTesting`) を検知し、`SilentCueApp.swift` の `init()` 内で `withDependencies` を使用して、依存関係をテスト用のモック (`SCMock` 内の実装) に差し替えます。このコードは **`#if DEBUG` による条件付きコンパイル** で囲まれ、リリースビルドには含まれません。
-
-## 設計の進化
-
-当初の構成から、TCAの依存性注入システムを活用し、段階的にマルチモジュールアーキテクチャへとリファクタリングされました。
-
-*   依存関係をプロトコルベースに統一。
-*   プロトコル、ライブ実装、プレビュー実装、モック実装、共有コードをそれぞれ独立したモジュール (`SCProtocol`, `SCLiveService`, `SCPreview`, `SCMock`, `SCShared`) に分離。
-*   テスト時のデフォルト依存性として `TestDependencyKey` (`unimplemented`) を使用する方式から、`DependencyKey` の `testValue` で明示的にモック実装 (`SCMock` 内) を指定する方式へ変更。
-*   プロジェクト管理にXcodeGenを導入。
-*   モジュール名とディレクトリ名を一致させ、一貫性を向上 (例: `SCProtocol` モジュールは `/SCProtocol/` ディレクトリに対応)。
-*   モジュールタイプを `framework` から `library.static` に変更し、静的リンクを利用。
-
-これにより、モジュール間の依存関係が明確になり、ビルド時間の改善やテスト容易性の向上が期待されます。
