@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 import UserNotifications
+import SCPreview
 
 struct TimerCompletionView: View {
     let store: StoreOf<TimerReducer>
@@ -96,35 +97,65 @@ struct TimerCompletionView: View {
 
     // 通知許可状態を確認
     private func checkNotificationAuthorizationStatus() {
-        notificationService.checkAuthorizationStatus { isAuthorized in
-            isNotificationAuthorized = isAuthorized
+        Task {
+            let status = await notificationService.getAuthorizationStatus()
+            isNotificationAuthorized = (status == .authorized || status == .provisional) // Update based on actual status check logic
         }
     }
 
-    // 通知許可をリクエスト
-    private func requestNotificationAuthorization(completion: @escaping (Bool) -> Void = { _ in }) {
-        notificationService.requestAuthorization { granted in
-            isNotificationAuthorized = granted
-            completion(granted)
+    // 通知許可をリクエスト (async/awaitを使用)
+    private func requestNotificationAuthorization() {
+        Task {
+            let granted = await notificationService.requestAuthorization()
+            // UI更新はメインスレッドで行う
+            await MainActor.run {
+                self.isNotificationAuthorized = granted
+            }
+            // completion ハンドラは不要になったため削除
         }
     }
 }
 
-// MARK: - プレビュー
-
-#if DEBUG
-    #Preview {
-        TimerCompletionView(
-            store: Store(
-                initialState: TimerReducer.State(
-                    // プレビュー用に適切なデフォルト値を設定（必要に応じて）
-                    // e.g., now: Date(), isRunning: false, completionDate: Date() + 60
-                )
-            ) {
-                TimerReducer()
-            } withDependencies: { dependencies in
-                dependencies.notificationService = PreviewNotificationService()
-            }
-        )
-    }
-#endif
+//#if DEBUG
+//    #Preview {
+//        // プレビュー用の依存関係インスタンスを作成
+//        let previewNotificationServiceAuthorized = PreviewNotificationService()
+//        previewNotificationServiceAuthorized.authorizationStatus = .authorized // 状態を設定
+//
+//        TimerCompletionView(
+//            store: Store(
+//                // TimerState を引数なしで初期化し、必要なプロパティを設定
+//                initialState: TimerState(timerDurationMinutes: 5, startDate: Date() - 300, completionDate: Date())
+//            ) {
+//                TimerReducer()
+//            } withDependencies: { dependencies in
+//                dependencies.notificationService = previewNotificationServiceAuthorized // 設定済みのインスタンスを使用
+//                dependencies.userDefaultsService = PreviewUserDefaultsService()
+//                dependencies.extendedRuntimeService = PreviewExtendedRuntimeService()
+//                dependencies.hapticsService = PreviewHapticsService()
+//                dependencies.continuousClock = ImmediateClock()
+//            }
+//        )
+//    }
+//
+//    #Preview("Notification Not Authorized") {
+//        // プレビュー用の依存関係インスタンスを作成
+//        let previewNotificationServiceDenied = PreviewNotificationService()
+//        previewNotificationServiceDenied.authorizationStatus = .denied // 状態を設定
+//
+//        TimerCompletionView(
+//            store: Store(
+//                // TimerState を引数なしで初期化し、必要なプロパティを設定
+//                initialState: TimerState(timerDurationMinutes: 10, startDate: Date() - 600, completionDate: Date())
+//            ) {
+//                TimerReducer()
+//            } withDependencies: { dependencies in
+//                dependencies.notificationService = previewNotificationServiceDenied // 設定済みのインスタンスを使用
+//                dependencies.userDefaultsService = PreviewUserDefaultsService()
+//                dependencies.extendedRuntimeService = PreviewExtendedRuntimeService()
+//                dependencies.hapticsService = PreviewHapticsService()
+//                dependencies.continuousClock = ImmediateClock()
+//            }
+//        )
+//    }
+//#endif

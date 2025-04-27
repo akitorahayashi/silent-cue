@@ -1,0 +1,192 @@
+# $ mint run xcodegen generate
+
+name: SilentCue
+options:
+  bundleIdPrefix: com.akitorahayashi
+  deploymentTarget:
+    watchOS: 10.0
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+    MARKETING_VERSION: 1.0
+    CURRENT_PROJECT_VERSION: 1
+    ENABLE_BITCODE: NO
+
+packages:
+  ComposableArchitecture:
+    url: https://github.com/pointfreeco/swift-composable-architecture
+    from: "1.19.0"
+
+targets:
+  SilentCue_Watch_App:
+    type: application
+    platform: watchOS
+    sources:
+      - path: SilentCue Watch App
+    dependencies:
+      - package: ComposableArchitecture
+      - target: SCProtocol
+      - target: SCShared
+      - target: SCLiveService
+      - target: SCPreview
+        condition: { config: Debug }
+      - target: SCMock
+        condition: { config: Debug }
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp
+        DEVELOPMENT_LANGUAGE: en
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_BITCODE: NO
+      configs:
+        Debug: {}
+        Release: {}
+    info:
+      path: SilentCue Watch App/Supporting Files/Info.plist
+      properties:
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleDisplayName: SilentCue
+        WKApplicationRefreshBackgroundTaskModes:
+          - background-refresh-on-schedule
+        WKBackgroundTasks:
+          - background-fetch
+          - background-processing
+        WKBackgroundRefresh: true
+        WKCompanionAppBundleIdentifier: ""
+        WKApplication: true
+
+  SCProtocol:
+    type: library.static
+    platform: watchOS
+    sources:
+      - path: SCProtocol
+    dependencies:
+      - target: SCShared
+      - package: ComposableArchitecture
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCProtocol
+        GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Debug: {}
+        Release: {}
+
+  SCShared:
+    type: library.static
+    platform: watchOS
+    sources:
+      - path: SCShared
+    # dependencies:
+    #   - target: SCProtocol
+    #   - package: ComposableArchitecture
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCShared
+        GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Debug: {}
+        Release: {}
+
+  SCLiveService:
+    type: library.static
+    platform: watchOS
+    sources:
+      - path: SCLiveService
+    dependencies:
+      - target: SCProtocol
+      - target: SCShared
+      - package: ComposableArchitecture
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCLiveService
+        GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Debug: {}
+        Release: {}
+
+  SCPreview:
+    type: library.static
+    platform: watchOS
+    sources:
+      - path: SCPreview
+    dependencies:
+      - target: SCProtocol
+      - package: ComposableArchitecture
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCPreview
+        GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Debug: {}
+        Release: {}
+
+  SCMock:
+    type: library.static
+    platform: watchOS
+    sources:
+      - path: SCMock
+    dependencies:
+      - target: SCProtocol
+      - target: SCShared
+      - package: ComposableArchitecture
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCMock
+        GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Debug: {}
+        Release: {}
+
+  SilentCue_Watch_AppTests:
+    type: bundle.unit-test
+    platform: watchOS
+    sources:
+      - path: SilentCue Watch AppTests
+    dependencies:
+      - target: SilentCue_Watch_App
+      - target: SCMock
+      - target: SCShared
+      - target: SCProtocol
+      - target: SCLiveService
+      - target: SCPreview
+      - package: ComposableArchitecture
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchAppTests
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_BITCODE: NO
+      configs:
+        Debug: {}
+        Release: {}
+
+schemes:
+  SilentCue_Watch_App:
+    build:
+      targets:
+        SilentCue_Watch_App: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - SilentCue_Watch_AppTests
+    archive:
+      config: Release
+
+  SilentCue_Watch_App_Tests:
+    build:
+      targets:
+        SilentCue_Watch_AppTests: test
+    test:
+      config: Debug
+      targets:
+        - SilentCue_Watch_AppTests

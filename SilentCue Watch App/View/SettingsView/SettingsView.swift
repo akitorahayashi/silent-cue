@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
+import SCShared
 
 struct SettingsView: View {
     let store: StoreOf<SettingsReducer>

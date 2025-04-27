@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import Foundation
+import UserNotifications
 
 /// タイマー関連のすべての機能を管理するReducer
 struct TimerReducer: Reducer {
@@ -143,10 +144,30 @@ struct TimerReducer: Reducer {
             )
             // 通知をスケジュール
             if let targetDate = targetEndDate {
-                notificationService.scheduleTimerCompletionNotification(
-                    at: targetDate,
-                    minutes: durationMinutes
+                // 通知内容の設定 (TimerReducer内で定義)
+                let content = UNMutableNotificationContent()
+                content.title = "タイマー完了"
+                content.body = "\\(durationMinutes)分のタイマーが完了しました"
+                content.sound = .default
+                // content.categoryIdentifier = "TIMER_COMPLETED_CATEGORY" // 必要であればカテゴリも設定
+
+                // 日付トリガーの作成
+                let triggerComponents = Calendar.current.dateComponents(
+                    [.year, .month, .day, .hour, .minute, .second],
+                    from: targetDate
                 )
+                let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+                let identifier = "TIMER_COMPLETED_NOTIFICATION" // 識別子を定義
+
+                // プロトコルメソッドを使用して通知を追加
+                await Task {
+                    do {
+                        try await notificationService.add(identifier: identifier, content: content, trigger: trigger)
+                    } catch {
+                        // エラーハンドリング (ログ出力など)
+                        print("通知スケジュールエラー: \\(error)")
+                    }
+                }.value // Taskを実行
             }
             // 完了イベントを監視
             for await _ in extendedRuntimeService.completionEvents {
@@ -171,7 +192,9 @@ struct TimerReducer: Reducer {
 
         // 明示的にセッションを停止し、通知をキャンセル
         extendedRuntimeService.stopSession()
-        notificationService.cancelTimerCompletionNotification()
+        // プロトコルメソッドを使用して通知を削除
+        let identifier = "TIMER_COMPLETED_NOTIFICATION" // 識別子を定義
+        notificationService.removePendingNotificationRequests(withIdentifiers: [identifier])
 
         // 実行中のエフェクトをIDでキャンセル
         return .merge(
@@ -200,7 +223,10 @@ struct TimerReducer: Reducer {
     private func handleTimerFinished(_: inout State) -> Effect<Action> {
         // バックグラウンドエフェクト（セッション/通知/監視）をキャンセル
         // 通知も明示的にキャンセル
-        notificationService.cancelTimerCompletionNotification()
+        // notificationService.cancelTimerCompletionNotification()
+        // プロトコルメソッドを使用して通知を削除
+        let identifier = "TIMER_COMPLETED_NOTIFICATION" // 識別子を定義
+        notificationService.removePendingNotificationRequests(withIdentifiers: [identifier])
         // 注意: extendedRuntimeService.stopSession() は finalize で呼び出される
 
         return .concatenate(

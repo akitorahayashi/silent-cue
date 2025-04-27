@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct HourMinutePicker: View {
     let selectedHour: Binding<Int>

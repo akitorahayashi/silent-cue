@@ -1,5 +1,6 @@
-import ComposableArchitecture // Import TCA for @Dependency
+import ComposableArchitecture
 import SwiftUI
+import SCShared
 
 /// ナビゲーションの宛先を示す型
 enum NavigationDestination: Hashable {
@@ -9,11 +10,18 @@ enum NavigationDestination: Hashable {
     case timerStart
 }
 
+/// アプリ全体のナビゲーションと状態を管理する
 struct CoordinatorState: Equatable {
-    var path: [NavigationDestination]
-    var timer: TimerState
-    var settings: SettingsState = .init()
-    var haptics: HapticsState = .init()
+    // 各画面の状態
+    var timer = TimerState()
+    var settings = SettingsState()
+    var haptics = HapticsState()
+
+    // ナビゲーションパス
+    var path: [NavigationDestination] = []
+
+    // 通知アラート表示状態
+    var shouldShowNotificationAlert: Bool = false
 
     init(
         date: Date = Date() // Can still inject Date if needed
@@ -38,7 +46,7 @@ struct CoordinatorState: Equatable {
     }
 
     // ナビゲーションの現在の画面を判断する
-    var currentDestination: NavigationDestination? {
-        path.last
-    }
+    // var currentDestination: NavigationDestination? { // Reverted
+    //     path.last // Array already has .last
+    // }
 }

@@ -2,8 +2,21 @@
 
     import Foundation
     import WatchKit
+    import SCProtocol
+    import Dependencies
 
-    struct PreviewHapticsService: HapticsServiceProtocol {
+    // Preview用のHapticsService実装
+    public class PreviewHapticsService: HapticsServiceProtocol {
+        // public var hapticEvents: [Int] = [] // Record played types if needed for preview inspection
+
+        public init() {}
+
+        public func play(_ type: Int) {
+            // プレビューでは実際の触覚フィードバックを再生せず、ログ出力などで代替
+            print("PreviewHapticsService: Playing haptic type (Int): \(type)")
+            // hapticEvents.append(type)
+        }
+
         func play(_ type: WKHapticType) async {
             // 実際の振動は行わず、コンソールにログを出力する
             let typeName = hapticTypeName(type)

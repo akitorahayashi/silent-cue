@@ -1,7 +1,7 @@
 import Foundation
 
-enum SCAccessibilityIdentifiers {
-    enum SetTimerView: String {
+public enum SCAccessibilityIdentifiers {
+    public enum SetTimerView: String {
         case openSettingsButton
         case navigationBarTitle = "Silent Cue"
         case minutesModeButton
@@ -13,7 +13,7 @@ enum SCAccessibilityIdentifiers {
         case startTimerButton
     }
 
-    enum SettingsView: String {
+    public enum SettingsView: String {
         case navigationBarTitle = "Settings"
         case vibrationTypeHeader
         case vibrationTypeOptionStandard
@@ -21,13 +21,13 @@ enum SCAccessibilityIdentifiers {
         case vibrationTypeOptionWeak
     }
 
-    enum CountdownView: String {
+    public enum CountdownView: String {
         case timeFormatLabel
         case countdownTimeDisplay
         case cancelTimerButton
     }
 
-    enum TimerCompletionView: String {
+    public enum TimerCompletionView: String {
         case timerCompletionView
         case closeTimeCompletionViewButton
         case notifyEndTimeViewVStack

@@ -1,11 +1,10 @@
-enum UserDefaultsKeys: String, CaseIterable {
-    case hapticType
-    case isFirstLaunch
-}
+import SCShared
 
-protocol UserDefaultsServiceProtocol {
+public protocol UserDefaultsServiceProtocol {
     func set(_ value: Any?, forKey defaultName: UserDefaultsKeys)
     func object(forKey defaultName: UserDefaultsKeys) -> Any?
     func remove(forKey defaultName: UserDefaultsKeys)
     func removeAll()
+    func saveHapticFeedbackType(_ type: HapticFeedbackType)
+    func loadHapticFeedbackType() -> HapticFeedbackType
 }

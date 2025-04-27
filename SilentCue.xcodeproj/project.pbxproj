@@ -3,349 +3,1151 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		98A0AE032DADF8FC00A0E3BD /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 98A0AE022DADF8FC00A0E3BD /* ComposableArchitecture */; };
+		01FDD05775C958B6E2E968EB /* CoordinatorAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 899C1551666B387B8E40F740 /* CoordinatorAction.swift */; };
+		05188459B914FB290840F96A /* SCAppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE4009DA110195E63FC5C45 /* SCAppEnvironment.swift */; };
+		07DFAC18674CDEC4283A84D8 /* SCDependencyKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA19912F040A2734AFA8864 /* SCDependencyKeys.swift */; };
+		0C7D4E504B89E44D0F05A6F7 /* PreviewUserDefaultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0D97B24DE48AF4B27401B6 /* PreviewUserDefaultsService.swift */; };
+		0DF4F13951A9105DFC73C6B0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E68E8BB51278AC4B4C6D8C /* SettingsView.swift */; };
+		0F4E2EF6F0CFC1CC0A9D1B6C /* libSCMock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4D98D7D3EA3F23B221404B3 /* libSCMock.a */; };
+		113BAB38080777B4FB16A868 /* CancelButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF8F94ADE1A1A4D461F8DB2F /* CancelButtonView.swift */; };
+		162C8B4742EC3C44B66E7840 /* HapticsServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1045985665C15691236F28A1 /* HapticsServiceProtocol.swift */; };
+		1659ABC38FBE0962FD5C7D3F /* MockHapticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6FCA11794343634AB79F617 /* MockHapticsService.swift */; };
+		184A695D6A08466023F44509 /* MinutesPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EF9BD43B7F177EA716B8A1 /* MinutesPicker.swift */; };
+		192C6DF8E398384E0E7F7DE9 /* TimerSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44BB3FF868F35690617FE59 /* TimerSummaryView.swift */; };
+		1EC3811A44878F01E95FD18C /* TimerReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962FD15C6C8BED1609954FA8 /* TimerReducerTests.swift */; };
+		1ECC5FFAF00D969BF9EE4506 /* HourMinutePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A003CD362871D048E87AF912 /* HourMinutePicker.swift */; };
+		2B558F53D561FA9DA7503312 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24C86F62381B2DBF83EC4B2F /* Preview Assets.xcassets */; };
+		35D65B7051ADEF4F2AFC8901 /* SettingsAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545B81946E3A0C5A46B335E6 /* SettingsAction.swift */; };
+		3BED072EA42D56F1DA702A53 /* SCTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A760FF35BE03C87C1D7FC471 /* SCTimeFormatter.swift */; };
+		3EC0A090676D2B233070B49E /* MockExtendedRuntimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E0C5BD0B02624FEE22353DE /* MockExtendedRuntimeService.swift */; };
+		47C526D3713CDCE050A174CE /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = B35D57FA49A353553144AE29 /* ComposableArchitecture */; };
+		4A11D6D90AEE44C29AA23E05 /* MockUserDefaultsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A80FF0CAEEBA3FFD4D9A2D /* MockUserDefaultsManager.swift */; };
+		50570D81C49BBED03A03168E /* libSCMock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4D98D7D3EA3F23B221404B3 /* libSCMock.a */; };
+		5406CE0B9023F4F474D06E1A /* HapticFeedbackType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF29C965EE917A4019B59B71 /* HapticFeedbackType.swift */; };
+		5793C3590D67E2079C6EBB30 /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FFAE312631390A1034BCB62 /* UserDefaultsKeys.swift */; };
+		595D85CB8D0F4FADA814ED43 /* CountdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0864408E79C6496056977EB /* CountdownView.swift */; };
+		59C1741E3E80FD0A7ECD7B6E /* CoordinatorReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0721D6BE10A20B3082ECCCEB /* CoordinatorReducer.swift */; };
+		5BDCB410624466BB8562627B /* libSCProtocol.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 20D21661F15127414E81D982 /* libSCProtocol.a */; };
+		5F6C9C0B66184EF18FA1FF05 /* HapticsReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5354A6D4BBBCBEC8FD12CC82 /* HapticsReducer.swift */; };
+		61DFC5A48161472C27B4ED49 /* TimeCalculation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A6A20F5A0B2AE724716F0E /* TimeCalculation.swift */; };
+		6455F21C9401009FE7D168DA /* SCAccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE25A552D82B71EEF48429A9 /* SCAccessibilityIdentifiers.swift */; };
+		6548DD52089297678E02A02D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E3E23A203CACDD834928EFB /* Assets.xcassets */; };
+		67884F238D8A225DEC735028 /* HapticsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BCA025482BA6C2C233F2DB /* HapticsServiceTests.swift */; };
+		67F55C589D320DF9562D302C /* HapticsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0604ED9C38B04E368642CFF /* HapticsState.swift */; };
+		68DD6631341139158D17006F /* CoordinatorReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67616CEE1AC0ADB724F474F /* CoordinatorReducerTests.swift */; };
+		6A521699974829C163394965 /* TimerCompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3AC92476861AC29D845B0 /* TimerCompletionView.swift */; };
+		6BE63202ED62C5381D381896 /* LiveExtendedRuntimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D9A16AB280177A13634DDD /* LiveExtendedRuntimeService.swift */; };
+		6C174763CCA1408EF4D93440 /* PreviewHapticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CE1C64DC2FAABAA544BD857 /* PreviewHapticsService.swift */; };
+		6DE2B4FC5798085A991AC350 /* UserDefaultsServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = BABB31F0E814292E9DF37786 /* UserDefaultsServiceProtocol.swift */; };
+		706D9C073D04D85D1236ADC3 /* TimerReducerTests+DisplayUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9432F85910084ADA4942E9FF /* TimerReducerTests+DisplayUpdate.swift */; };
+		7112B0FAE0E558CA526BD16E /* PreviewExtendedRuntimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078D94366CDC8F9720AC3E49 /* PreviewExtendedRuntimeService.swift */; };
+		713821542D5984F5E81D7ED2 /* TimerReducerTests+BackgroundHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F69805C84C570F9744D1BB8 /* TimerReducerTests+BackgroundHandling.swift */; };
+		7768626B315A1E3DEE548C0E /* LiveUserDefaultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E496A6F9F1AE83C79CAFED85 /* LiveUserDefaultsService.swift */; };
+		7EB3C29303763BC64950F1FA /* MockNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D884C80CBAA3CBDA69381FC /* MockNotificationService.swift */; };
+		7EFA4D91B4123BFE60910B06 /* NotificationServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EE0F2DD24A1147ABD394B /* NotificationServiceProtocol.swift */; };
+		82F64740F24F98A49426C301 /* ExtendedRuntimeServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0616119A076844825142AF8 /* ExtendedRuntimeServiceTests.swift */; };
+		895895ADB050CFDBBBB422EB /* libSCLiveService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 389378222CD8F4FD6AC07D57 /* libSCLiveService.a */; };
+		8C8832758CAE9338F2906BE1 /* CoordinatorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24A65DB25B871341CB271FF /* CoordinatorState.swift */; };
+		8ECC7B1BEDEFA50F0A7DF2FE /* TimerReducerTests+TimerModeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53A212EB68647BFED8F10BD /* TimerReducerTests+TimerModeSelection.swift */; };
+		8F87A0C7757BE1CCE8979174 /* TimeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4F97D83D623385C3A772FB /* TimeDisplayView.swift */; };
+		8FB80B92BF26702D0C733E8C /* libSCPreview.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 79951B65E7861C6352FAD4D5 /* libSCPreview.a */; };
+		920E85C42C41343C71298068 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 13762342B4BE0B0590B4294B /* ComposableArchitecture */; };
+		97A9F6F99B48A29D0AB59733 /* SettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B7DE21A06E54242D483802E /* SettingsState.swift */; };
+		987D0A63095A200574CE2FCB /* SelectVibrationTypeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B50B803856857B4EE3F117E /* SelectVibrationTypeSection.swift */; };
+		9886F2C045E0C283F3D4FBF3 /* ExtendedRuntimeServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8EA03A54861C00E7F625C61 /* ExtendedRuntimeServiceProtocol.swift */; };
+		9E24A139E351257E88EBCAA4 /* NotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A813F076396C5AB12D122344 /* NotificationServiceTests.swift */; };
+		9F78E0BAF0C6E57A95B8B4F3 /* NotifyEndTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4AFBFE0E9930DDBF5F6D0C9 /* NotifyEndTimeView.swift */; };
+		A644354B87BF429338CD8472 /* SCDependencyValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87B11F1B09F369E17EF404F /* SCDependencyValues.swift */; };
+		ABCE8E50CFBFC79F04232DFF /* TimerReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67EFAB606E7DD917D75F453 /* TimerReducer.swift */; };
+		ADCF7B3CB14C19DC215D0E2C /* SetTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF20F430E34F63178AFA8C1 /* SetTimerView.swift */; };
+		B2D732BD3B8A8DE14CDE306F /* HapticsAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1D137616C7ACE222C76FEB /* HapticsAction.swift */; };
+		B6C8B462F8FF53A873BE11D5 /* CloseTimeCompletionViewButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E6BFC529894F2DFE5405CA /* CloseTimeCompletionViewButton.swift */; };
+		C012A0C199B27CDB2B434627 /* HapticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED09EE7F6657B2E9B82273A /* HapticType.swift */; };
+		C750CF83BDAEB66FABF18D51 /* libSCProtocol.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 20D21661F15127414E81D982 /* libSCProtocol.a */; };
+		C887350194866E9E8B9C8963 /* SettingsReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76C6CC4817CA171549B93C6 /* SettingsReducer.swift */; };
+		CBC5A7082B820B95C8E19A77 /* libSCPreview.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 79951B65E7861C6352FAD4D5 /* libSCPreview.a */; };
+		CE4B97CC6CAC1E16227BE185 /* LiveHapticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB63E7C90AE564D4E3A43510 /* LiveHapticsService.swift */; };
+		D6C19F003AB9ED405C5CAFE3 /* HapticsReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC557274F694FD16841AB7A /* HapticsReducerTests.swift */; };
+		DB0F7679059CC137A14BF08E /* UserDefaultsManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AE8ED94DD7C4CAF4CF3399 /* UserDefaultsManagerTests.swift */; };
+		DE855E00048F17DD154730EE /* TimerModeSelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EE78B27D27652342DF5329 /* TimerModeSelectionButton.swift */; };
+		DF81271D95612FA854BC6DE7 /* StartButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EEAE47F2C190ACF7B38AB07 /* StartButton.swift */; };
+		E28633AB19A5853BBC37A695 /* TimerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8DFDA882772380925FC0F3 /* TimerState.swift */; };
+		E4064E496F29E8A711E60B21 /* libSCLiveService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 389378222CD8F4FD6AC07D57 /* libSCLiveService.a */; };
+		E951863EC18E0CC5F4F1AE30 /* TimerAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25046AE82F17FD4B8960B36E /* TimerAction.swift */; };
+		E987FC4BFDF78DC437CCFAF1 /* SilentCueApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 617F86A9DD7693E7E2A4B54A /* SilentCueApp.swift */; };
+		EB89FC7F5ACC80F994A98B83 /* SettingsReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E72A431A863840B28EF6CF4 /* SettingsReducerTests.swift */; };
+		EDFAD4A4A22C8BFBE0A5A9E6 /* libSCShared.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C529A14235FFC54093DF0472 /* libSCShared.a */; };
+		EEB985AB7ED1213467BF381C /* PreviewNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B86E8E4D577B3C07A706724B /* PreviewNotificationService.swift */; };
+		F3592B5EDB219CBD74F333D9 /* TimerReducerTests+TimerLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35D881E7878202D4F150346D /* TimerReducerTests+TimerLifecycle.swift */; };
+		F9600537CE3347D9830731F0 /* libSCShared.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C529A14235FFC54093DF0472 /* libSCShared.a */; };
+		FBA1B1B02776F931EA7F6E40 /* LiveNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6761D8FFF743E506E5919EF9 /* LiveNotificationService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		98A0AD7C2DADF7DD00A0E3BD /* PBXContainerItemProxy */ = {
+		108A8CB0AD2807A3047E8F46 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 98A0AD5D2DADF7DB00A0E3BD /* Project object */;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 98A0AD682DADF7DC00A0E3BD;
-			remoteInfo = "SilentCue Watch App";
+			remoteGlobalIDString = 8FBDA5632C5D0D1723B739FE;
+			remoteInfo = SCMock;
 		};
-		98A0AD862DADF7DD00A0E3BD /* PBXContainerItemProxy */ = {
+		156D115D9162815E5F4545DE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 98A0AD5D2DADF7DB00A0E3BD /* Project object */;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 98A0AD682DADF7DC00A0E3BD;
-			remoteInfo = "SilentCue Watch App";
+			remoteGlobalIDString = 9CA7B0EB2EC35328DEE1C42D;
+			remoteInfo = SCProtocol;
+		};
+		4360A4BBC9A463DF6E55844B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9CA7B0EB2EC35328DEE1C42D;
+			remoteInfo = SCProtocol;
+		};
+		44E29417CCF1D2BAA01E89B5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AE2B2658B0A29E1AFD2CA73;
+			remoteInfo = SCLiveService;
+		};
+		464BD06CA1C213483149E80E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2385A2461E5988B9EBF27A57;
+			remoteInfo = SCShared;
+		};
+		54A505E137442036C0CC3ECB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2385A2461E5988B9EBF27A57;
+			remoteInfo = SCShared;
+		};
+		58A05B3109EB89A485396B2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 96DA4B3B784EDFF3A1DF182D;
+			remoteInfo = SCPreview;
+		};
+		5C3D1D6531030D8B295D0183 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9CA7B0EB2EC35328DEE1C42D;
+			remoteInfo = SCProtocol;
+		};
+		70E106EE240BFF10D1F600EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 96DA4B3B784EDFF3A1DF182D;
+			remoteInfo = SCPreview;
+		};
+		75B80DCA76A7964BA6D14DAC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9CA7B0EB2EC35328DEE1C42D;
+			remoteInfo = SCProtocol;
+		};
+		87E4F991DC6A6BD2DB89F809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BA8D9483904C2F92EA0ADC02;
+			remoteInfo = SilentCue_Watch_App;
+		};
+		ABB993C11C68C177355D9215 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2385A2461E5988B9EBF27A57;
+			remoteInfo = SCShared;
+		};
+		B8DADA1B0A22CD515B1A538A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2385A2461E5988B9EBF27A57;
+			remoteInfo = SCShared;
+		};
+		BC60C5B3EE8E0DFBF7AB1465 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8FBDA5632C5D0D1723B739FE;
+			remoteInfo = SCMock;
+		};
+		D2D03A72C39E741B7861C47D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2385A2461E5988B9EBF27A57;
+			remoteInfo = SCShared;
+		};
+		E050CA2290049C215591BFA2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AE2B2658B0A29E1AFD2CA73;
+			remoteInfo = SCLiveService;
+		};
+		F100C953638799B11D38A07E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9AAEB8889BA1C33720890C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9CA7B0EB2EC35328DEE1C42D;
+			remoteInfo = SCProtocol;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		98A0AD692DADF7DC00A0E3BD /* SilentCue Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SilentCue Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		98A0AD7B2DADF7DD00A0E3BD /* SilentCue Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SilentCue Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		98A0AD852DADF7DD00A0E3BD /* SilentCue Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SilentCue Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		01EE78B27D27652342DF5329 /* TimerModeSelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerModeSelectionButton.swift; sourceTree = "<group>"; };
+		05E68E8BB51278AC4B4C6D8C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		064249F73992D43770609135 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0721D6BE10A20B3082ECCCEB /* CoordinatorReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorReducer.swift; sourceTree = "<group>"; };
+		078D94366CDC8F9720AC3E49 /* PreviewExtendedRuntimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewExtendedRuntimeService.swift; sourceTree = "<group>"; };
+		0B50B803856857B4EE3F117E /* SelectVibrationTypeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectVibrationTypeSection.swift; sourceTree = "<group>"; };
+		1045985665C15691236F28A1 /* HapticsServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsServiceProtocol.swift; sourceTree = "<group>"; };
+		20D21661F15127414E81D982 /* libSCProtocol.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSCProtocol.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		24C86F62381B2DBF83EC4B2F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		25046AE82F17FD4B8960B36E /* TimerAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerAction.swift; sourceTree = "<group>"; };
+		30A6A20F5A0B2AE724716F0E /* TimeCalculation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCalculation.swift; sourceTree = "<group>"; };
+		35D881E7878202D4F150346D /* TimerReducerTests+TimerLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimerReducerTests+TimerLifecycle.swift"; sourceTree = "<group>"; };
+		389378222CD8F4FD6AC07D57 /* libSCLiveService.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSCLiveService.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B8DFDA882772380925FC0F3 /* TimerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerState.swift; sourceTree = "<group>"; };
+		43C3AC92476861AC29D845B0 /* TimerCompletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerCompletionView.swift; sourceTree = "<group>"; };
+		4E3E23A203CACDD834928EFB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4FFAE312631390A1034BCB62 /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
+		5354A6D4BBBCBEC8FD12CC82 /* HapticsReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsReducer.swift; sourceTree = "<group>"; };
+		545B81946E3A0C5A46B335E6 /* SettingsAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAction.swift; sourceTree = "<group>"; };
+		617F86A9DD7693E7E2A4B54A /* SilentCueApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentCueApp.swift; sourceTree = "<group>"; };
+		6761D8FFF743E506E5919EF9 /* LiveNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveNotificationService.swift; sourceTree = "<group>"; };
+		69E6BFC529894F2DFE5405CA /* CloseTimeCompletionViewButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseTimeCompletionViewButton.swift; sourceTree = "<group>"; };
+		6AE4009DA110195E63FC5C45 /* SCAppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCAppEnvironment.swift; sourceTree = "<group>"; };
+		6E0C5BD0B02624FEE22353DE /* MockExtendedRuntimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockExtendedRuntimeService.swift; sourceTree = "<group>"; };
+		79951B65E7861C6352FAD4D5 /* libSCPreview.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSCPreview.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7AA19912F040A2734AFA8864 /* SCDependencyKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCDependencyKeys.swift; sourceTree = "<group>"; };
+		7D884C80CBAA3CBDA69381FC /* MockNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNotificationService.swift; sourceTree = "<group>"; };
+		7EEAE47F2C190ACF7B38AB07 /* StartButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartButton.swift; sourceTree = "<group>"; };
+		804E6F34C45867B886EA1E33 /* SilentCue_Watch_AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SilentCue_Watch_AppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		899C1551666B387B8E40F740 /* CoordinatorAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorAction.swift; sourceTree = "<group>"; };
+		8FC557274F694FD16841AB7A /* HapticsReducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsReducerTests.swift; sourceTree = "<group>"; };
+		9432F85910084ADA4942E9FF /* TimerReducerTests+DisplayUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimerReducerTests+DisplayUpdate.swift"; sourceTree = "<group>"; };
+		962FD15C6C8BED1609954FA8 /* TimerReducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerReducerTests.swift; sourceTree = "<group>"; };
+		9B7DE21A06E54242D483802E /* SettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsState.swift; sourceTree = "<group>"; };
+		9CE1C64DC2FAABAA544BD857 /* PreviewHapticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewHapticsService.swift; sourceTree = "<group>"; };
+		9DF20F430E34F63178AFA8C1 /* SetTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetTimerView.swift; sourceTree = "<group>"; };
+		9E72A431A863840B28EF6CF4 /* SettingsReducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsReducerTests.swift; sourceTree = "<group>"; };
+		9ED09EE7F6657B2E9B82273A /* HapticType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticType.swift; sourceTree = "<group>"; };
+		9F69805C84C570F9744D1BB8 /* TimerReducerTests+BackgroundHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimerReducerTests+BackgroundHandling.swift"; sourceTree = "<group>"; };
+		A003CD362871D048E87AF912 /* HourMinutePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourMinutePicker.swift; sourceTree = "<group>"; };
+		A2EF9BD43B7F177EA716B8A1 /* MinutesPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinutesPicker.swift; sourceTree = "<group>"; };
+		A760FF35BE03C87C1D7FC471 /* SCTimeFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCTimeFormatter.swift; sourceTree = "<group>"; };
+		A813F076396C5AB12D122344 /* NotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceTests.swift; sourceTree = "<group>"; };
+		AA1D137616C7ACE222C76FEB /* HapticsAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsAction.swift; sourceTree = "<group>"; };
+		B0616119A076844825142AF8 /* ExtendedRuntimeServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedRuntimeServiceTests.swift; sourceTree = "<group>"; };
+		B41EE0F2DD24A1147ABD394B /* NotificationServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceProtocol.swift; sourceTree = "<group>"; };
+		B44BB3FF868F35690617FE59 /* TimerSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerSummaryView.swift; sourceTree = "<group>"; };
+		B53A212EB68647BFED8F10BD /* TimerReducerTests+TimerModeSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimerReducerTests+TimerModeSelection.swift"; sourceTree = "<group>"; };
+		B67EFAB606E7DD917D75F453 /* TimerReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerReducer.swift; sourceTree = "<group>"; };
+		B76C6CC4817CA171549B93C6 /* SettingsReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsReducer.swift; sourceTree = "<group>"; };
+		B86E8E4D577B3C07A706724B /* PreviewNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewNotificationService.swift; sourceTree = "<group>"; };
+		B8EA03A54861C00E7F625C61 /* ExtendedRuntimeServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedRuntimeServiceProtocol.swift; sourceTree = "<group>"; };
+		BABB31F0E814292E9DF37786 /* UserDefaultsServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsServiceProtocol.swift; sourceTree = "<group>"; };
+		BF0D97B24DE48AF4B27401B6 /* PreviewUserDefaultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewUserDefaultsService.swift; sourceTree = "<group>"; };
+		BF8F94ADE1A1A4D461F8DB2F /* CancelButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancelButtonView.swift; sourceTree = "<group>"; };
+		C4AFBFE0E9930DDBF5F6D0C9 /* NotifyEndTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyEndTimeView.swift; sourceTree = "<group>"; };
+		C529A14235FFC54093DF0472 /* libSCShared.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSCShared.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6D9A16AB280177A13634DDD /* LiveExtendedRuntimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveExtendedRuntimeService.swift; sourceTree = "<group>"; };
+		C87B11F1B09F369E17EF404F /* SCDependencyValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCDependencyValues.swift; sourceTree = "<group>"; };
+		CFF8ED1CF5A79523D901E733 /* SilentCue_Watch_App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SilentCue_Watch_App.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0604ED9C38B04E368642CFF /* HapticsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsState.swift; sourceTree = "<group>"; };
+		D6FCA11794343634AB79F617 /* MockHapticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockHapticsService.swift; sourceTree = "<group>"; };
+		DC4F97D83D623385C3A772FB /* TimeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeDisplayView.swift; sourceTree = "<group>"; };
+		E24A65DB25B871341CB271FF /* CoordinatorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorState.swift; sourceTree = "<group>"; };
+		E496A6F9F1AE83C79CAFED85 /* LiveUserDefaultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveUserDefaultsService.swift; sourceTree = "<group>"; };
+		E4D98D7D3EA3F23B221404B3 /* libSCMock.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSCMock.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		EF29C965EE917A4019B59B71 /* HapticFeedbackType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticFeedbackType.swift; sourceTree = "<group>"; };
+		F0864408E79C6496056977EB /* CountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownView.swift; sourceTree = "<group>"; };
+		F1A80FF0CAEEBA3FFD4D9A2D /* MockUserDefaultsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockUserDefaultsManager.swift; sourceTree = "<group>"; };
+		F2BCA025482BA6C2C233F2DB /* HapticsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsServiceTests.swift; sourceTree = "<group>"; };
+		F3AE8ED94DD7C4CAF4CF3399 /* UserDefaultsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsManagerTests.swift; sourceTree = "<group>"; };
+		F67616CEE1AC0ADB724F474F /* CoordinatorReducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorReducerTests.swift; sourceTree = "<group>"; };
+		FB63E7C90AE564D4E3A43510 /* LiveHapticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveHapticsService.swift; sourceTree = "<group>"; };
+		FE25A552D82B71EEF48429A9 /* SCAccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCAccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		982CB0402DB5B4E7003C9D29 /* Exceptions for "Shared" folder in "SilentCue Watch AppUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				SCAccessibilityIdentifiers.swift,
-				SCAppEnvironment.swift,
-			);
-			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
-		};
-		982CB1982DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Dependency/Mock/MockExtendedRuntimeService.swift,
-				Dependency/Mock/MockHapticsService.swift,
-				Dependency/Mock/MockNotificationService.swift,
-				Dependency/Mock/MockUserDefaultsManager.swift,
-			);
-			target = 98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */;
-		};
-		982CB1992DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Dependency/Mock/MockExtendedRuntimeService.swift,
-				Dependency/Mock/MockHapticsService.swift,
-				Dependency/Mock/MockNotificationService.swift,
-				Dependency/Mock/MockUserDefaultsManager.swift,
-			);
-			target = 98A0AD7A2DADF7DD00A0E3BD /* SilentCue Watch AppTests */;
-		};
-		982CB19A2DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Dependency/Mock/MockExtendedRuntimeService.swift,
-				Dependency/Mock/MockHapticsService.swift,
-				Dependency/Mock/MockNotificationService.swift,
-				Dependency/Mock/MockUserDefaultsManager.swift,
-				Dependency/Protocol/ExtendedRuntimeServiceProtocol.swift,
-				Dependency/Protocol/HapticsServiceProtocol.swift,
-				Dependency/Protocol/NotificationServiceProtocol.swift,
-				Dependency/Protocol/UserDefaultsServiceProtocol.swift,
-			);
-			target = 98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		982CB03F2DB5B4D5003C9D29 /* Shared */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				982CB0402DB5B4E7003C9D29 /* Exceptions for "Shared" folder in "SilentCue Watch AppUITests" target */,
-			);
-			path = Shared;
-			sourceTree = "<group>";
-		};
-		98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				982CB1982DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch App" target */,
-				982CB1992DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppTests" target */,
-				982CB19A2DB5F5B1003C9D29 /* Exceptions for "SilentCue Watch App" folder in "SilentCue Watch AppUITests" target */,
-			);
-			path = "SilentCue Watch App";
-			sourceTree = "<group>";
-		};
-		98A0AD7E2DADF7DD00A0E3BD /* SilentCue Watch AppTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "SilentCue Watch AppTests";
-			sourceTree = "<group>";
-		};
-		98A0AD882DADF7DD00A0E3BD /* SilentCue Watch AppUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "SilentCue Watch AppUITests";
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
-
 /* Begin PBXFrameworksBuildPhase section */
-		98A0AD662DADF7DC00A0E3BD /* Frameworks */ = {
+		590C32C24CA705725918E63A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				98A0AE032DADF8FC00A0E3BD /* ComposableArchitecture in Frameworks */,
+				920E85C42C41343C71298068 /* ComposableArchitecture in Frameworks */,
+				C750CF83BDAEB66FABF18D51 /* libSCProtocol.a in Frameworks */,
+				F9600537CE3347D9830731F0 /* libSCShared.a in Frameworks */,
+				E4064E496F29E8A711E60B21 /* libSCLiveService.a in Frameworks */,
+				CBC5A7082B820B95C8E19A77 /* libSCPreview.a in Frameworks */,
+				0F4E2EF6F0CFC1CC0A9D1B6C /* libSCMock.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		98A0AD782DADF7DD00A0E3BD /* Frameworks */ = {
+		D175C18FA34014646C3E22D2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		98A0AD822DADF7DD00A0E3BD /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				50570D81C49BBED03A03168E /* libSCMock.a in Frameworks */,
+				EDFAD4A4A22C8BFBE0A5A9E6 /* libSCShared.a in Frameworks */,
+				5BDCB410624466BB8562627B /* libSCProtocol.a in Frameworks */,
+				895895ADB050CFDBBBB422EB /* libSCLiveService.a in Frameworks */,
+				8FB80B92BF26702D0C733E8C /* libSCPreview.a in Frameworks */,
+				47C526D3713CDCE050A174CE /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		98A0AD5C2DADF7DB00A0E3BD = {
+		14880FE1A2B52F87118DD79C /* View */ = {
 			isa = PBXGroup;
 			children = (
-				982CB03F2DB5B4D5003C9D29 /* Shared */,
-				98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */,
-				98A0AD7E2DADF7DD00A0E3BD /* SilentCue Watch AppTests */,
-				98A0AD882DADF7DD00A0E3BD /* SilentCue Watch AppUITests */,
-				98A0AD642DADF7DC00A0E3BD /* Products */,
+				9A73C06BF6A513F9BA5C9C58 /* CountdownView */,
+				175B515E9551BC8BD43F4114 /* SetTimerView */,
+				E0C507626ACAF2D66F0F5998 /* SettingsView */,
+				9FBB81A7373D098529F8085F /* TimerCompletionView */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		1744BC1911C9BF120258D1AB /* Dependency */ = {
+			isa = PBXGroup;
+			children = (
+				7AA19912F040A2734AFA8864 /* SCDependencyKeys.swift */,
+				C87B11F1B09F369E17EF404F /* SCDependencyValues.swift */,
+			);
+			path = Dependency;
+			sourceTree = "<group>";
+		};
+		175B515E9551BC8BD43F4114 /* SetTimerView */ = {
+			isa = PBXGroup;
+			children = (
+				9DF20F430E34F63178AFA8C1 /* SetTimerView.swift */,
+				3F4AF2C293D9432B1D33AB96 /* Component */,
+			);
+			path = SetTimerView;
+			sourceTree = "<group>";
+		};
+		23CC863FA830E45558356D53 /* Haptics */ = {
+			isa = PBXGroup;
+			children = (
+				AA1D137616C7ACE222C76FEB /* HapticsAction.swift */,
+				5354A6D4BBBCBEC8FD12CC82 /* HapticsReducer.swift */,
+				D0604ED9C38B04E368642CFF /* HapticsState.swift */,
+				9ED09EE7F6657B2E9B82273A /* HapticType.swift */,
+			);
+			path = Haptics;
+			sourceTree = "<group>";
+		};
+		260A51F387B6D356B5CBBE3F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				064249F73992D43770609135 /* Info.plist */,
+			);
+			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		2C0725DA42AA7B3F64579B65 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				B0616119A076844825142AF8 /* ExtendedRuntimeServiceTests.swift */,
+				F2BCA025482BA6C2C233F2DB /* HapticsServiceTests.swift */,
+				A813F076396C5AB12D122344 /* NotificationServiceTests.swift */,
+				F3AE8ED94DD7C4CAF4CF3399 /* UserDefaultsManagerTests.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		305888CE70E55F9FAE8015F8 /* Coordinator */ = {
+			isa = PBXGroup;
+			children = (
+				899C1551666B387B8E40F740 /* CoordinatorAction.swift */,
+				0721D6BE10A20B3082ECCCEB /* CoordinatorReducer.swift */,
+				E24A65DB25B871341CB271FF /* CoordinatorState.swift */,
+			);
+			path = Coordinator;
+			sourceTree = "<group>";
+		};
+		3F4AF2C293D9432B1D33AB96 /* Component */ = {
+			isa = PBXGroup;
+			children = (
+				A003CD362871D048E87AF912 /* HourMinutePicker.swift */,
+				A2EF9BD43B7F177EA716B8A1 /* MinutesPicker.swift */,
+				7EEAE47F2C190ACF7B38AB07 /* StartButton.swift */,
+				01EE78B27D27652342DF5329 /* TimerModeSelectionButton.swift */,
+			);
+			path = Component;
+			sourceTree = "<group>";
+		};
+		5324BCF487760441C841564C /* SilentCue Watch AppTests */ = {
+			isa = PBXGroup;
+			children = (
+				752DF88573C80D45345DB5A3 /* Domain */,
+				2C0725DA42AA7B3F64579B65 /* Service */,
+			);
+			path = "SilentCue Watch AppTests";
+			sourceTree = "<group>";
+		};
+		535B2E16F607FD554BE32825 /* SCPreview */ = {
+			isa = PBXGroup;
+			children = (
+				24C86F62381B2DBF83EC4B2F /* Preview Assets.xcassets */,
+				078D94366CDC8F9720AC3E49 /* PreviewExtendedRuntimeService.swift */,
+				9CE1C64DC2FAABAA544BD857 /* PreviewHapticsService.swift */,
+				B86E8E4D577B3C07A706724B /* PreviewNotificationService.swift */,
+				BF0D97B24DE48AF4B27401B6 /* PreviewUserDefaultsService.swift */,
+			);
+			path = SCPreview;
+			sourceTree = "<group>";
+		};
+		5775ACD49C058637F5530C37 /* SCShared */ = {
+			isa = PBXGroup;
+			children = (
+				EF29C965EE917A4019B59B71 /* HapticFeedbackType.swift */,
+				FE25A552D82B71EEF48429A9 /* SCAccessibilityIdentifiers.swift */,
+				6AE4009DA110195E63FC5C45 /* SCAppEnvironment.swift */,
+				4FFAE312631390A1034BCB62 /* UserDefaultsKeys.swift */,
+			);
+			path = SCShared;
+			sourceTree = "<group>";
+		};
+		710B875A8BEC12D95979F616 /* Component */ = {
+			isa = PBXGroup;
+			children = (
+				BF8F94ADE1A1A4D461F8DB2F /* CancelButtonView.swift */,
+				DC4F97D83D623385C3A772FB /* TimeDisplayView.swift */,
+			);
+			path = Component;
+			sourceTree = "<group>";
+		};
+		734EA986A83E8FD5FF9B65FE /* Component */ = {
+			isa = PBXGroup;
+			children = (
+				69E6BFC529894F2DFE5405CA /* CloseTimeCompletionViewButton.swift */,
+				C4AFBFE0E9930DDBF5F6D0C9 /* NotifyEndTimeView.swift */,
+				B44BB3FF868F35690617FE59 /* TimerSummaryView.swift */,
+			);
+			path = Component;
+			sourceTree = "<group>";
+		};
+		752DF88573C80D45345DB5A3 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				F67616CEE1AC0ADB724F474F /* CoordinatorReducerTests.swift */,
+				8FC557274F694FD16841AB7A /* HapticsReducerTests.swift */,
+				9E72A431A863840B28EF6CF4 /* SettingsReducerTests.swift */,
+				926727EAFE556B3446F9426E /* TimerReducerTests */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		7612163675FD47030116C1BA /* SilentCue Watch App */ = {
+			isa = PBXGroup;
+			children = (
+				4E3E23A203CACDD834928EFB /* Assets.xcassets */,
+				617F86A9DD7693E7E2A4B54A /* SilentCueApp.swift */,
+				1744BC1911C9BF120258D1AB /* Dependency */,
+				CE7E26BB05E95CB9212DFE68 /* Domain */,
+				260A51F387B6D356B5CBBE3F /* Supporting Files */,
+				797FD4A31D5B3CEE2E5C107D /* Util */,
+				14880FE1A2B52F87118DD79C /* View */,
+			);
+			path = "SilentCue Watch App";
+			sourceTree = "<group>";
+		};
+		797FD4A31D5B3CEE2E5C107D /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				A760FF35BE03C87C1D7FC471 /* SCTimeFormatter.swift */,
+				30A6A20F5A0B2AE724716F0E /* TimeCalculation.swift */,
+			);
+			path = Util;
+			sourceTree = "<group>";
+		};
+		7A7D3A376D8C774C66F807F7 = {
+			isa = PBXGroup;
+			children = (
+				94232675D1728B70BB6CC66A /* SCLiveService */,
+				AA9798B061C504C696DCDDBE /* SCMock */,
+				535B2E16F607FD554BE32825 /* SCPreview */,
+				D9BF18CFD66686857906CA65 /* SCProtocol */,
+				5775ACD49C058637F5530C37 /* SCShared */,
+				7612163675FD47030116C1BA /* SilentCue Watch App */,
+				5324BCF487760441C841564C /* SilentCue Watch AppTests */,
+				8E7BDD325A37C0BC9DA44473 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		98A0AD642DADF7DC00A0E3BD /* Products */ = {
+		7F650BA2323AD16EE927F9B5 /* Timer */ = {
 			isa = PBXGroup;
 			children = (
-				98A0AD692DADF7DC00A0E3BD /* SilentCue Watch App.app */,
-				98A0AD7B2DADF7DD00A0E3BD /* SilentCue Watch AppTests.xctest */,
-				98A0AD852DADF7DD00A0E3BD /* SilentCue Watch AppUITests.xctest */,
+				25046AE82F17FD4B8960B36E /* TimerAction.swift */,
+				B67EFAB606E7DD917D75F453 /* TimerReducer.swift */,
+				3B8DFDA882772380925FC0F3 /* TimerState.swift */,
+			);
+			path = Timer;
+			sourceTree = "<group>";
+		};
+		8E7BDD325A37C0BC9DA44473 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				389378222CD8F4FD6AC07D57 /* libSCLiveService.a */,
+				E4D98D7D3EA3F23B221404B3 /* libSCMock.a */,
+				79951B65E7861C6352FAD4D5 /* libSCPreview.a */,
+				20D21661F15127414E81D982 /* libSCProtocol.a */,
+				C529A14235FFC54093DF0472 /* libSCShared.a */,
+				CFF8ED1CF5A79523D901E733 /* SilentCue_Watch_App.app */,
+				804E6F34C45867B886EA1E33 /* SilentCue_Watch_AppTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		926727EAFE556B3446F9426E /* TimerReducerTests */ = {
+			isa = PBXGroup;
+			children = (
+				962FD15C6C8BED1609954FA8 /* TimerReducerTests.swift */,
+				9F69805C84C570F9744D1BB8 /* TimerReducerTests+BackgroundHandling.swift */,
+				9432F85910084ADA4942E9FF /* TimerReducerTests+DisplayUpdate.swift */,
+				35D881E7878202D4F150346D /* TimerReducerTests+TimerLifecycle.swift */,
+				B53A212EB68647BFED8F10BD /* TimerReducerTests+TimerModeSelection.swift */,
+			);
+			path = TimerReducerTests;
+			sourceTree = "<group>";
+		};
+		94232675D1728B70BB6CC66A /* SCLiveService */ = {
+			isa = PBXGroup;
+			children = (
+				C6D9A16AB280177A13634DDD /* LiveExtendedRuntimeService.swift */,
+				FB63E7C90AE564D4E3A43510 /* LiveHapticsService.swift */,
+				6761D8FFF743E506E5919EF9 /* LiveNotificationService.swift */,
+				E496A6F9F1AE83C79CAFED85 /* LiveUserDefaultsService.swift */,
+			);
+			path = SCLiveService;
+			sourceTree = "<group>";
+		};
+		9A73C06BF6A513F9BA5C9C58 /* CountdownView */ = {
+			isa = PBXGroup;
+			children = (
+				F0864408E79C6496056977EB /* CountdownView.swift */,
+				710B875A8BEC12D95979F616 /* Component */,
+			);
+			path = CountdownView;
+			sourceTree = "<group>";
+		};
+		9FBB81A7373D098529F8085F /* TimerCompletionView */ = {
+			isa = PBXGroup;
+			children = (
+				43C3AC92476861AC29D845B0 /* TimerCompletionView.swift */,
+				734EA986A83E8FD5FF9B65FE /* Component */,
+			);
+			path = TimerCompletionView;
+			sourceTree = "<group>";
+		};
+		AA9798B061C504C696DCDDBE /* SCMock */ = {
+			isa = PBXGroup;
+			children = (
+				6E0C5BD0B02624FEE22353DE /* MockExtendedRuntimeService.swift */,
+				D6FCA11794343634AB79F617 /* MockHapticsService.swift */,
+				7D884C80CBAA3CBDA69381FC /* MockNotificationService.swift */,
+				F1A80FF0CAEEBA3FFD4D9A2D /* MockUserDefaultsManager.swift */,
+			);
+			path = SCMock;
+			sourceTree = "<group>";
+		};
+		CE7E26BB05E95CB9212DFE68 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				305888CE70E55F9FAE8015F8 /* Coordinator */,
+				23CC863FA830E45558356D53 /* Haptics */,
+				F808E7D1DD28DFC3598D8B58 /* Settings */,
+				7F650BA2323AD16EE927F9B5 /* Timer */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		D9BF18CFD66686857906CA65 /* SCProtocol */ = {
+			isa = PBXGroup;
+			children = (
+				B8EA03A54861C00E7F625C61 /* ExtendedRuntimeServiceProtocol.swift */,
+				1045985665C15691236F28A1 /* HapticsServiceProtocol.swift */,
+				B41EE0F2DD24A1147ABD394B /* NotificationServiceProtocol.swift */,
+				BABB31F0E814292E9DF37786 /* UserDefaultsServiceProtocol.swift */,
+			);
+			path = SCProtocol;
+			sourceTree = "<group>";
+		};
+		E0C507626ACAF2D66F0F5998 /* SettingsView */ = {
+			isa = PBXGroup;
+			children = (
+				05E68E8BB51278AC4B4C6D8C /* SettingsView.swift */,
+				E22D2A36CBA795791D228DB5 /* Section */,
+			);
+			path = SettingsView;
+			sourceTree = "<group>";
+		};
+		E22D2A36CBA795791D228DB5 /* Section */ = {
+			isa = PBXGroup;
+			children = (
+				0B50B803856857B4EE3F117E /* SelectVibrationTypeSection.swift */,
+			);
+			path = Section;
+			sourceTree = "<group>";
+		};
+		F808E7D1DD28DFC3598D8B58 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				545B81946E3A0C5A46B335E6 /* SettingsAction.swift */,
+				B76C6CC4817CA171549B93C6 /* SettingsReducer.swift */,
+				9B7DE21A06E54242D483802E /* SettingsState.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */ = {
+		2385A2461E5988B9EBF27A57 /* SCShared */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 98A0AD8F2DADF7DD00A0E3BD /* Build configuration list for PBXNativeTarget "SilentCue Watch App" */;
+			buildConfigurationList = 439CCA6D37BAB7BF242D56B4 /* Build configuration list for PBXNativeTarget "SCShared" */;
 			buildPhases = (
-				98A0AD652DADF7DC00A0E3BD /* Sources */,
-				98A0AD662DADF7DC00A0E3BD /* Frameworks */,
-				98A0AD672DADF7DC00A0E3BD /* Resources */,
+				1E33AA2F30033561526033B7 /* Sources */,
+				9F3C2DD91BE46B8AF517ACBA /* Copy Swift Objective-C Interface Header */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				982CB03F2DB5B4D5003C9D29 /* Shared */,
-				98A0AD6D2DADF7DC00A0E3BD /* SilentCue Watch App */,
-			);
-			name = "SilentCue Watch App";
+			name = SCShared;
 			packageProductDependencies = (
-				98A0AE022DADF8FC00A0E3BD /* ComposableArchitecture */,
 			);
-			productName = "SilentCue Watch App";
-			productReference = 98A0AD692DADF7DC00A0E3BD /* SilentCue Watch App.app */;
-			productType = "com.apple.product-type.application";
+			productName = SCShared;
+			productReference = C529A14235FFC54093DF0472 /* libSCShared.a */;
+			productType = "com.apple.product-type.library.static";
 		};
-		98A0AD7A2DADF7DD00A0E3BD /* SilentCue Watch AppTests */ = {
+		2AE2B2658B0A29E1AFD2CA73 /* SCLiveService */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 98A0AD962DADF7DD00A0E3BD /* Build configuration list for PBXNativeTarget "SilentCue Watch AppTests" */;
+			buildConfigurationList = A69FE0EF6B65C30DF0695246 /* Build configuration list for PBXNativeTarget "SCLiveService" */;
 			buildPhases = (
-				98A0AD772DADF7DD00A0E3BD /* Sources */,
-				98A0AD782DADF7DD00A0E3BD /* Frameworks */,
-				98A0AD792DADF7DD00A0E3BD /* Resources */,
+				BFB36A4F9A8DB02697BEBBED /* Sources */,
+				CF637DA5E89530A073245A1B /* Copy Swift Objective-C Interface Header */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				98A0AD7D2DADF7DD00A0E3BD /* PBXTargetDependency */,
+				91CB5D31B9EE49A51EF33903 /* PBXTargetDependency */,
+				D09408AF58861D80DCC28B75 /* PBXTargetDependency */,
+				355C27A815FA90C4F650FED6 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				98A0AD7E2DADF7DD00A0E3BD /* SilentCue Watch AppTests */,
-			);
-			name = "SilentCue Watch AppTests";
+			name = SCLiveService;
 			packageProductDependencies = (
+				F813D8874AA2A4C0A6621B7C /* ComposableArchitecture */,
 			);
-			productName = "SilentCue Watch AppTests";
-			productReference = 98A0AD7B2DADF7DD00A0E3BD /* SilentCue Watch AppTests.xctest */;
+			productName = SCLiveService;
+			productReference = 389378222CD8F4FD6AC07D57 /* libSCLiveService.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		2AECCB7765992EBEB26C8822 /* SilentCue_Watch_AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B77AA18C39580397F45E27C2 /* Build configuration list for PBXNativeTarget "SilentCue_Watch_AppTests" */;
+			buildPhases = (
+				4F27204F6C4659D94E041C04 /* Sources */,
+				D175C18FA34014646C3E22D2 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D89A3D0EF9EAA0EC899665D1 /* PBXTargetDependency */,
+				27F8A121EEB5543892A0EF23 /* PBXTargetDependency */,
+				EDE2040503314593F7E56781 /* PBXTargetDependency */,
+				787DDECB5A5B1737C5EB49F7 /* PBXTargetDependency */,
+				DD3C27D1826B39998788E325 /* PBXTargetDependency */,
+				57E798EA5DE2D61712450608 /* PBXTargetDependency */,
+			);
+			name = SilentCue_Watch_AppTests;
+			packageProductDependencies = (
+				B35D57FA49A353553144AE29 /* ComposableArchitecture */,
+			);
+			productName = SilentCue_Watch_AppTests;
+			productReference = 804E6F34C45867B886EA1E33 /* SilentCue_Watch_AppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */ = {
+		8FBDA5632C5D0D1723B739FE /* SCMock */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 98A0AD992DADF7DD00A0E3BD /* Build configuration list for PBXNativeTarget "SilentCue Watch AppUITests" */;
+			buildConfigurationList = 0B609195A1673E01FB4B055D /* Build configuration list for PBXNativeTarget "SCMock" */;
 			buildPhases = (
-				98A0AD812DADF7DD00A0E3BD /* Sources */,
-				98A0AD822DADF7DD00A0E3BD /* Frameworks */,
-				98A0AD832DADF7DD00A0E3BD /* Resources */,
+				AEEFB468B4203EFE121523DA /* Sources */,
+				6BE947AF47481346911F54E8 /* Copy Swift Objective-C Interface Header */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				98A0AD872DADF7DD00A0E3BD /* PBXTargetDependency */,
+				549B165B30EB5C95624BE840 /* PBXTargetDependency */,
+				821146EB24BE18672D413CBC /* PBXTargetDependency */,
+				52EF161485F85609A3465648 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				98A0AD882DADF7DD00A0E3BD /* SilentCue Watch AppUITests */,
-			);
-			name = "SilentCue Watch AppUITests";
+			name = SCMock;
 			packageProductDependencies = (
+				C2ECA2AFFABA64C434B702F3 /* ComposableArchitecture */,
 			);
-			productName = "SilentCue Watch AppUITests";
-			productReference = 98A0AD852DADF7DD00A0E3BD /* SilentCue Watch AppUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
+			productName = SCMock;
+			productReference = E4D98D7D3EA3F23B221404B3 /* libSCMock.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		96DA4B3B784EDFF3A1DF182D /* SCPreview */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0C0BD547608100D3AF112901 /* Build configuration list for PBXNativeTarget "SCPreview" */;
+			buildPhases = (
+				69174795138DEFAE701C7387 /* Sources */,
+				CDFDBECE6FF76841620C9D00 /* Resources */,
+				AAF29C2EDE923092546C771A /* Copy Swift Objective-C Interface Header */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				99E9C9F68F8FA2083C455B7D /* PBXTargetDependency */,
+				DFC7474653DB58A4F2B28323 /* PBXTargetDependency */,
+			);
+			name = SCPreview;
+			packageProductDependencies = (
+				35B7199AA3AF2335C32D2815 /* ComposableArchitecture */,
+			);
+			productName = SCPreview;
+			productReference = 79951B65E7861C6352FAD4D5 /* libSCPreview.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		9CA7B0EB2EC35328DEE1C42D /* SCProtocol */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A67746B6907B4A9DF1BA6337 /* Build configuration list for PBXNativeTarget "SCProtocol" */;
+			buildPhases = (
+				793FFD31D34B5B272418F1EF /* Sources */,
+				165849FD32925D8672DFD62C /* Copy Swift Objective-C Interface Header */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D5B93A106365EE960FCBB994 /* PBXTargetDependency */,
+				4A65C9481F5CA5893504BA9B /* PBXTargetDependency */,
+			);
+			name = SCProtocol;
+			packageProductDependencies = (
+				48E5EA794888477790CC6BAA /* ComposableArchitecture */,
+			);
+			productName = SCProtocol;
+			productReference = 20D21661F15127414E81D982 /* libSCProtocol.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		BA8D9483904C2F92EA0ADC02 /* SilentCue_Watch_App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FE2FF0A64AE08D4CFE1FF59E /* Build configuration list for PBXNativeTarget "SilentCue_Watch_App" */;
+			buildPhases = (
+				473811C8F1E2E2A1CCA148A2 /* Sources */,
+				C12DFC26F72AF9FD1FFAC489 /* Resources */,
+				590C32C24CA705725918E63A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FD349C6061BC813BF9288486 /* PBXTargetDependency */,
+				DC2A279D01E711368D84D8D0 /* PBXTargetDependency */,
+				213472F4E191B45FA2F52C2B /* PBXTargetDependency */,
+				70464770D8DFA8AA90B4590A /* PBXTargetDependency */,
+				67767CA2D22CCFB98E606D14 /* PBXTargetDependency */,
+			);
+			name = SilentCue_Watch_App;
+			packageProductDependencies = (
+				13762342B4BE0B0590B4294B /* ComposableArchitecture */,
+			);
+			productName = SilentCue_Watch_App;
+			productReference = CFF8ED1CF5A79523D901E733 /* SilentCue_Watch_App.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		98A0AD5D2DADF7DB00A0E3BD /* Project object */ = {
+		B9AAEB8889BA1C33720890C2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
-					98A0AD682DADF7DC00A0E3BD = {
-						CreatedOnToolsVersion = 16.2;
-					};
-					98A0AD7A2DADF7DD00A0E3BD = {
-						CreatedOnToolsVersion = 16.2;
-						TestTargetID = 98A0AD682DADF7DC00A0E3BD;
-					};
-					98A0AD842DADF7DD00A0E3BD = {
-						CreatedOnToolsVersion = 16.2;
-						TestTargetID = 98A0AD682DADF7DC00A0E3BD;
-					};
 				};
 			};
-			buildConfigurationList = 98A0AD602DADF7DB00A0E3BD /* Build configuration list for PBXProject "SilentCue" */;
+			buildConfigurationList = 04D4782E3EDDD8667A2C35AB /* Build configuration list for PBXProject "SilentCue" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
-			mainGroup = 98A0AD5C2DADF7DB00A0E3BD;
+			mainGroup = 7A7D3A376D8C774C66F807F7;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				98A0AE012DADF8FC00A0E3BD /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 			);
-			preferredProjectObjectVersion = 77;
-			productRefGroup = 98A0AD642DADF7DC00A0E3BD /* Products */;
+			preferredProjectObjectVersion = 54;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */,
-				98A0AD7A2DADF7DD00A0E3BD /* SilentCue Watch AppTests */,
-				98A0AD842DADF7DD00A0E3BD /* SilentCue Watch AppUITests */,
+				2AE2B2658B0A29E1AFD2CA73 /* SCLiveService */,
+				8FBDA5632C5D0D1723B739FE /* SCMock */,
+				96DA4B3B784EDFF3A1DF182D /* SCPreview */,
+				9CA7B0EB2EC35328DEE1C42D /* SCProtocol */,
+				2385A2461E5988B9EBF27A57 /* SCShared */,
+				BA8D9483904C2F92EA0ADC02 /* SilentCue_Watch_App */,
+				2AECCB7765992EBEB26C8822 /* SilentCue_Watch_AppTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		98A0AD672DADF7DC00A0E3BD /* Resources */ = {
+		C12DFC26F72AF9FD1FFAC489 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6548DD52089297678E02A02D /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		98A0AD792DADF7DD00A0E3BD /* Resources */ = {
+		CDFDBECE6FF76841620C9D00 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		98A0AD832DADF7DD00A0E3BD /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				2B558F53D561FA9DA7503312 /* Preview Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		165849FD32925D8672DFD62C /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		6BE947AF47481346911F54E8 /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		9F3C2DD91BE46B8AF517ACBA /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		AAF29C2EDE923092546C771A /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		CF637DA5E89530A073245A1B /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-		98A0AD652DADF7DC00A0E3BD /* Sources */ = {
+		1E33AA2F30033561526033B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5406CE0B9023F4F474D06E1A /* HapticFeedbackType.swift in Sources */,
+				6455F21C9401009FE7D168DA /* SCAccessibilityIdentifiers.swift in Sources */,
+				05188459B914FB290840F96A /* SCAppEnvironment.swift in Sources */,
+				5793C3590D67E2079C6EBB30 /* UserDefaultsKeys.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		98A0AD772DADF7DD00A0E3BD /* Sources */ = {
+		473811C8F1E2E2A1CCA148A2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				113BAB38080777B4FB16A868 /* CancelButtonView.swift in Sources */,
+				B6C8B462F8FF53A873BE11D5 /* CloseTimeCompletionViewButton.swift in Sources */,
+				01FDD05775C958B6E2E968EB /* CoordinatorAction.swift in Sources */,
+				59C1741E3E80FD0A7ECD7B6E /* CoordinatorReducer.swift in Sources */,
+				8C8832758CAE9338F2906BE1 /* CoordinatorState.swift in Sources */,
+				595D85CB8D0F4FADA814ED43 /* CountdownView.swift in Sources */,
+				C012A0C199B27CDB2B434627 /* HapticType.swift in Sources */,
+				B2D732BD3B8A8DE14CDE306F /* HapticsAction.swift in Sources */,
+				5F6C9C0B66184EF18FA1FF05 /* HapticsReducer.swift in Sources */,
+				67F55C589D320DF9562D302C /* HapticsState.swift in Sources */,
+				1ECC5FFAF00D969BF9EE4506 /* HourMinutePicker.swift in Sources */,
+				184A695D6A08466023F44509 /* MinutesPicker.swift in Sources */,
+				9F78E0BAF0C6E57A95B8B4F3 /* NotifyEndTimeView.swift in Sources */,
+				07DFAC18674CDEC4283A84D8 /* SCDependencyKeys.swift in Sources */,
+				A644354B87BF429338CD8472 /* SCDependencyValues.swift in Sources */,
+				3BED072EA42D56F1DA702A53 /* SCTimeFormatter.swift in Sources */,
+				987D0A63095A200574CE2FCB /* SelectVibrationTypeSection.swift in Sources */,
+				ADCF7B3CB14C19DC215D0E2C /* SetTimerView.swift in Sources */,
+				35D65B7051ADEF4F2AFC8901 /* SettingsAction.swift in Sources */,
+				C887350194866E9E8B9C8963 /* SettingsReducer.swift in Sources */,
+				97A9F6F99B48A29D0AB59733 /* SettingsState.swift in Sources */,
+				0DF4F13951A9105DFC73C6B0 /* SettingsView.swift in Sources */,
+				E987FC4BFDF78DC437CCFAF1 /* SilentCueApp.swift in Sources */,
+				DF81271D95612FA854BC6DE7 /* StartButton.swift in Sources */,
+				61DFC5A48161472C27B4ED49 /* TimeCalculation.swift in Sources */,
+				8F87A0C7757BE1CCE8979174 /* TimeDisplayView.swift in Sources */,
+				E951863EC18E0CC5F4F1AE30 /* TimerAction.swift in Sources */,
+				6A521699974829C163394965 /* TimerCompletionView.swift in Sources */,
+				DE855E00048F17DD154730EE /* TimerModeSelectionButton.swift in Sources */,
+				ABCE8E50CFBFC79F04232DFF /* TimerReducer.swift in Sources */,
+				E28633AB19A5853BBC37A695 /* TimerState.swift in Sources */,
+				192C6DF8E398384E0E7F7DE9 /* TimerSummaryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		98A0AD812DADF7DD00A0E3BD /* Sources */ = {
+		4F27204F6C4659D94E041C04 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68DD6631341139158D17006F /* CoordinatorReducerTests.swift in Sources */,
+				82F64740F24F98A49426C301 /* ExtendedRuntimeServiceTests.swift in Sources */,
+				D6C19F003AB9ED405C5CAFE3 /* HapticsReducerTests.swift in Sources */,
+				67884F238D8A225DEC735028 /* HapticsServiceTests.swift in Sources */,
+				9E24A139E351257E88EBCAA4 /* NotificationServiceTests.swift in Sources */,
+				EB89FC7F5ACC80F994A98B83 /* SettingsReducerTests.swift in Sources */,
+				713821542D5984F5E81D7ED2 /* TimerReducerTests+BackgroundHandling.swift in Sources */,
+				706D9C073D04D85D1236ADC3 /* TimerReducerTests+DisplayUpdate.swift in Sources */,
+				F3592B5EDB219CBD74F333D9 /* TimerReducerTests+TimerLifecycle.swift in Sources */,
+				8ECC7B1BEDEFA50F0A7DF2FE /* TimerReducerTests+TimerModeSelection.swift in Sources */,
+				1EC3811A44878F01E95FD18C /* TimerReducerTests.swift in Sources */,
+				DB0F7679059CC137A14BF08E /* UserDefaultsManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		69174795138DEFAE701C7387 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7112B0FAE0E558CA526BD16E /* PreviewExtendedRuntimeService.swift in Sources */,
+				6C174763CCA1408EF4D93440 /* PreviewHapticsService.swift in Sources */,
+				EEB985AB7ED1213467BF381C /* PreviewNotificationService.swift in Sources */,
+				0C7D4E504B89E44D0F05A6F7 /* PreviewUserDefaultsService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		793FFD31D34B5B272418F1EF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9886F2C045E0C283F3D4FBF3 /* ExtendedRuntimeServiceProtocol.swift in Sources */,
+				162C8B4742EC3C44B66E7840 /* HapticsServiceProtocol.swift in Sources */,
+				7EFA4D91B4123BFE60910B06 /* NotificationServiceProtocol.swift in Sources */,
+				6DE2B4FC5798085A991AC350 /* UserDefaultsServiceProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AEEFB468B4203EFE121523DA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EC0A090676D2B233070B49E /* MockExtendedRuntimeService.swift in Sources */,
+				1659ABC38FBE0962FD5C7D3F /* MockHapticsService.swift in Sources */,
+				7EB3C29303763BC64950F1FA /* MockNotificationService.swift in Sources */,
+				4A11D6D90AEE44C29AA23E05 /* MockUserDefaultsManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFB36A4F9A8DB02697BEBBED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6BE63202ED62C5381D381896 /* LiveExtendedRuntimeService.swift in Sources */,
+				CE4B97CC6CAC1E16227BE185 /* LiveHapticsService.swift in Sources */,
+				FBA1B1B02776F931EA7F6E40 /* LiveNotificationService.swift in Sources */,
+				7768626B315A1E3DEE548C0E /* LiveUserDefaultsService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		98A0AD7D2DADF7DD00A0E3BD /* PBXTargetDependency */ = {
+		213472F4E191B45FA2F52C2B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */;
-			targetProxy = 98A0AD7C2DADF7DD00A0E3BD /* PBXContainerItemProxy */;
+			target = 2AE2B2658B0A29E1AFD2CA73 /* SCLiveService */;
+			targetProxy = E050CA2290049C215591BFA2 /* PBXContainerItemProxy */;
 		};
-		98A0AD872DADF7DD00A0E3BD /* PBXTargetDependency */ = {
+		27F8A121EEB5543892A0EF23 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 98A0AD682DADF7DC00A0E3BD /* SilentCue Watch App */;
-			targetProxy = 98A0AD862DADF7DD00A0E3BD /* PBXContainerItemProxy */;
+			target = 8FBDA5632C5D0D1723B739FE /* SCMock */;
+			targetProxy = BC60C5B3EE8E0DFBF7AB1465 /* PBXContainerItemProxy */;
+		};
+		355C27A815FA90C4F650FED6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = F813D8874AA2A4C0A6621B7C /* ComposableArchitecture */;
+		};
+		4A65C9481F5CA5893504BA9B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 48E5EA794888477790CC6BAA /* ComposableArchitecture */;
+		};
+		52EF161485F85609A3465648 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = C2ECA2AFFABA64C434B702F3 /* ComposableArchitecture */;
+		};
+		549B165B30EB5C95624BE840 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9CA7B0EB2EC35328DEE1C42D /* SCProtocol */;
+			targetProxy = 75B80DCA76A7964BA6D14DAC /* PBXContainerItemProxy */;
+		};
+		57E798EA5DE2D61712450608 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 96DA4B3B784EDFF3A1DF182D /* SCPreview */;
+			targetProxy = 70E106EE240BFF10D1F600EC /* PBXContainerItemProxy */;
+		};
+		67767CA2D22CCFB98E606D14 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8FBDA5632C5D0D1723B739FE /* SCMock */;
+			targetProxy = 108A8CB0AD2807A3047E8F46 /* PBXContainerItemProxy */;
+		};
+		70464770D8DFA8AA90B4590A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 96DA4B3B784EDFF3A1DF182D /* SCPreview */;
+			targetProxy = 58A05B3109EB89A485396B2C /* PBXContainerItemProxy */;
+		};
+		787DDECB5A5B1737C5EB49F7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9CA7B0EB2EC35328DEE1C42D /* SCProtocol */;
+			targetProxy = F100C953638799B11D38A07E /* PBXContainerItemProxy */;
+		};
+		821146EB24BE18672D413CBC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2385A2461E5988B9EBF27A57 /* SCShared */;
+			targetProxy = D2D03A72C39E741B7861C47D /* PBXContainerItemProxy */;
+		};
+		91CB5D31B9EE49A51EF33903 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9CA7B0EB2EC35328DEE1C42D /* SCProtocol */;
+			targetProxy = 5C3D1D6531030D8B295D0183 /* PBXContainerItemProxy */;
+		};
+		99E9C9F68F8FA2083C455B7D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9CA7B0EB2EC35328DEE1C42D /* SCProtocol */;
+			targetProxy = 156D115D9162815E5F4545DE /* PBXContainerItemProxy */;
+		};
+		D09408AF58861D80DCC28B75 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2385A2461E5988B9EBF27A57 /* SCShared */;
+			targetProxy = 54A505E137442036C0CC3ECB /* PBXContainerItemProxy */;
+		};
+		D5B93A106365EE960FCBB994 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2385A2461E5988B9EBF27A57 /* SCShared */;
+			targetProxy = B8DADA1B0A22CD515B1A538A /* PBXContainerItemProxy */;
+		};
+		D89A3D0EF9EAA0EC899665D1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BA8D9483904C2F92EA0ADC02 /* SilentCue_Watch_App */;
+			targetProxy = 87E4F991DC6A6BD2DB89F809 /* PBXContainerItemProxy */;
+		};
+		DC2A279D01E711368D84D8D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2385A2461E5988B9EBF27A57 /* SCShared */;
+			targetProxy = ABB993C11C68C177355D9215 /* PBXContainerItemProxy */;
+		};
+		DD3C27D1826B39998788E325 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2AE2B2658B0A29E1AFD2CA73 /* SCLiveService */;
+			targetProxy = 44E29417CCF1D2BAA01E89B5 /* PBXContainerItemProxy */;
+		};
+		DFC7474653DB58A4F2B28323 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 35B7199AA3AF2335C32D2815 /* ComposableArchitecture */;
+		};
+		EDE2040503314593F7E56781 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2385A2461E5988B9EBF27A57 /* SCShared */;
+			targetProxy = 464BD06CA1C213483149E80E /* PBXContainerItemProxy */;
+		};
+		FD349C6061BC813BF9288486 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9CA7B0EB2EC35328DEE1C42D /* SCProtocol */;
+			targetProxy = 4360A4BBC9A463DF6E55844B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		98A0AD8D2DADF7DD00A0E3BD /* Debug */ = {
+		250AA1C062AB9F5BFCF0DB39 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -372,17 +1174,18 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
 					"$(inherited)",
+					"DEBUG=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -390,23 +1193,221 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
-		98A0AD8E2DADF7DD00A0E3BD /* Release */ = {
+		273839E8C29905E0029EB546 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchAppTests";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SilentCue_Watch_App.app/SilentCue_Watch_App";
+			};
+			name = Release;
+		};
+		3530BC338A51D14CD4F5674F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCMock";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		3974EBCDD7ED038C1D38B537 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCProtocol";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		4722AE0D33879430710A2F57 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCLiveService";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		54F5C780250D010717466409 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCMock";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		685E334FCBE6CEE9052CF800 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_LANGUAGE = en;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "SilentCue Watch App/Supporting Files/Info.plist";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		6F9CB7E37C4AEF0E2E806B21 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_LANGUAGE = en;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "SilentCue Watch App/Supporting Files/Info.plist";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		7B8E882A8217A4DC4983F265 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCShared";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		8F29193C69029F74B78BF1CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCLiveService";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		9E9C70CA48F4D3540447CD0A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCPreview";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		9F0AC48404A03414092037BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCShared";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		B184B12AF22EA9A2977C5BE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCProtocol";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		BAB52F805051D744C91302EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchAppTests";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SilentCue_Watch_App.app/SilentCue_Watch_App";
+			};
+			name = Debug;
+		};
+		BB681CD0A1F67801F6812B92 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(bundleIdPrefix).SilentCueWatchApp.SCPreview";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		E7DC91C07C137800C296A96C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -433,11 +1434,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -445,215 +1447,138 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-			};
-			name = Release;
-		};
-		98A0AD902DADF7DD00A0E3BD /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SilentCue Watch App/Dependency/Preview Content\"";
-				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "SilentCue-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = SilentCue;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKWatchOnly = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.akitorahayashi.SilentCue.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
-			};
-			name = Debug;
-		};
-		98A0AD912DADF7DD00A0E3BD /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SilentCue Watch App/Dependency/Preview Content\"";
-				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "SilentCue-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = SilentCue;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKWatchOnly = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.akitorahayashi.SilentCue.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
-			};
-			name = Release;
-		};
-		98A0AD972DADF7DD00A0E3BD /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SilentCue Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SilentCue Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
-			};
-			name = Debug;
-		};
-		98A0AD982DADF7DD00A0E3BD /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SilentCue Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SilentCue Watch App";
-				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
-			};
-			name = Release;
-		};
-		98A0AD9A2DADF7DD00A0E3BD /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "SilentCue Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
-			};
-			name = Debug;
-		};
-		98A0AD9B2DADF7DD00A0E3BD /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2A7R4ZP8WU;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.akitorahayashi.SilentCue-Watch-AppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "SilentCue Watch App";
-				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		98A0AD602DADF7DB00A0E3BD /* Build configuration list for PBXProject "SilentCue" */ = {
+		04D4782E3EDDD8667A2C35AB /* Build configuration list for PBXProject "SilentCue" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				98A0AD8D2DADF7DD00A0E3BD /* Debug */,
-				98A0AD8E2DADF7DD00A0E3BD /* Release */,
+				250AA1C062AB9F5BFCF0DB39 /* Debug */,
+				E7DC91C07C137800C296A96C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		98A0AD8F2DADF7DD00A0E3BD /* Build configuration list for PBXNativeTarget "SilentCue Watch App" */ = {
+		0B609195A1673E01FB4B055D /* Build configuration list for PBXNativeTarget "SCMock" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				98A0AD902DADF7DD00A0E3BD /* Debug */,
-				98A0AD912DADF7DD00A0E3BD /* Release */,
+				3530BC338A51D14CD4F5674F /* Debug */,
+				54F5C780250D010717466409 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		98A0AD962DADF7DD00A0E3BD /* Build configuration list for PBXNativeTarget "SilentCue Watch AppTests" */ = {
+		0C0BD547608100D3AF112901 /* Build configuration list for PBXNativeTarget "SCPreview" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				98A0AD972DADF7DD00A0E3BD /* Debug */,
-				98A0AD982DADF7DD00A0E3BD /* Release */,
+				BB681CD0A1F67801F6812B92 /* Debug */,
+				9E9C70CA48F4D3540447CD0A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		98A0AD992DADF7DD00A0E3BD /* Build configuration list for PBXNativeTarget "SilentCue Watch AppUITests" */ = {
+		439CCA6D37BAB7BF242D56B4 /* Build configuration list for PBXNativeTarget "SCShared" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				98A0AD9A2DADF7DD00A0E3BD /* Debug */,
-				98A0AD9B2DADF7DD00A0E3BD /* Release */,
+				7B8E882A8217A4DC4983F265 /* Debug */,
+				9F0AC48404A03414092037BC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
+		};
+		A67746B6907B4A9DF1BA6337 /* Build configuration list for PBXNativeTarget "SCProtocol" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3974EBCDD7ED038C1D38B537 /* Debug */,
+				B184B12AF22EA9A2977C5BE4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A69FE0EF6B65C30DF0695246 /* Build configuration list for PBXNativeTarget "SCLiveService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F29193C69029F74B78BF1CA /* Debug */,
+				4722AE0D33879430710A2F57 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B77AA18C39580397F45E27C2 /* Build configuration list for PBXNativeTarget "SilentCue_Watch_AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BAB52F805051D744C91302EC /* Debug */,
+				273839E8C29905E0029EB546 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FE2FF0A64AE08D4CFE1FF59E /* Build configuration list for PBXNativeTarget "SilentCue_Watch_App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F9CB7E37C4AEF0E2E806B21 /* Debug */,
+				685E334FCBE6CEE9052CF800 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		98A0AE012DADF8FC00A0E3BD /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+		AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.8.1;
+				minimumVersion = 1.19.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		98A0AE022DADF8FC00A0E3BD /* ComposableArchitecture */ = {
+		13762342B4BE0B0590B4294B /* ComposableArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 98A0AE012DADF8FC00A0E3BD /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			package = AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		35B7199AA3AF2335C32D2815 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		48E5EA794888477790CC6BAA /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		B35D57FA49A353553144AE29 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		C2ECA2AFFABA64C434B702F3 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		F813D8874AA2A4C0A6621B7C /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF36C5C72DF69DF0B9013233 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 98A0AD5D2DADF7DB00A0E3BD /* Project object */;
+	rootObject = B9AAEB8889BA1C33720890C2 /* Project object */;
 }

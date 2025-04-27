@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct NotifyEndTimeView: View {
     let completionDate: Date?

@@ -1,56 +1,34 @@
+# SilentCue
+
 ## プロジェクト概要
 
-SilentCueは、Apple Watch専用のタイマーアプリですApple Watch特有の触覚フィードバックで通知するため、音を出さずにタイマーを使用できます
-
-従来のiPhoneタイマーアプリと異なり、腕に装着しているApple Watchだけで完結するため、デバイスを取り出す手間がありませんまた、デフォルトでは振動が3秒後に自動停止するため、タイマーが終了した際は、アプリを開いて操作する必要がなく、より快適なユーザー体験を提供します
-
-振動の強さや停止機能のオン・オフなど、各種設定は好みに合わせてカスタマイズできます
+SilentCueは、Apple Watch専用のタイマーアプリです。Apple Watch特有の触覚フィードバックで通知するため、音を出さずにタイマーを使用できます。また、振動が3秒後に自動停止するため、タイマーが終了した際は、アプリを開いて操作する必要がなく、より快適なユーザー体験を提供します。
 
 ## アーキテクチャ
 
-このアプリは The Composable Architecture (TCA) を基盤とし、関心を明確に分離したアーキテクチャを採用しています
+このアプリは The Composable Architecture (TCA) を基盤とし、マルチモジュールアーキテクチャを採用しています。
+各モジュールは特定の責務（プロトコル定義、ライブ実装、プレビュー実装、モック実装、共有コードなど）に分離されており、XcodeGen で管理されています。
 
-具体的には、UIを担当する**プレゼンテーション層**、ビジネスロジックと状態を管理する**ドメイン層**、そして外部依存を抽象化する**サービス層**に分けられますこの構成は、TCAの状態管理と依存性注入の強みを活かし、保守性の高いコードベースを実現します
-
-### プレゼンテーション層 (`View/`)
-SwiftUI View で構成され、ユーザーインターフェースの表示とユーザー操作の受付を担当しますTCA の `ViewStore` を介して状態を監視し、`Action` を `Store` に送信します
-
-### ドメイン層 (`Domain/`)
-TCA の主要コンポーネント (`State`, `Action`, `Reducer`) で構成されます各機能（`App`, `Timer`, `Settings`, `Haptics`）が独立したドメインとして定義され、それぞれの状態管理とビジネスロジックを担当します副作用（永続化、通知、触覚フィードバックなど）の実行は、直接行わず、注入された **サービス層** に委譲します
-
-`AppReducer` がルートとなり、各ドメインの Reducer を統合し、アプリ全体の状態遷移や機能間の連携を管理します
-
-### サービス層 (`Dependency/Service/`)
-システムのAPI（`UNUserNotificationCenter`, `WKExtendedRuntimeSession`, `WKInterfaceDevice`, `UserDefaults` など）や外部依存関係へのアクセスを抽象化する層です
-
-#### 依存性注入 (DI)
-サービス層ではTCA の依存性注入システム (`@Dependency`) を採用しています
-*   各サービスは `Dependency/Protocol/` に定義されたプロトコルに基づいて実装され、ドメイン層は具体的な実装詳細から分離されます
-*   各サービスは、TCA の `DependencyKey` を通じて、本番用の `liveValue`、プレビュー用の `previewValue` (No-op 実装など)、テスト用の `testValue` が提供されます
+詳細なアーキテクチャ設計、モジュール構成、依存関係については [ARCHITECTURE.md](./ARCHITECTURE.md) を参照してください。
 
 ## ディレクトリ構成
 
-```md
+このプロジェクトは **XcodeGen** を使用して `.xcodeproj` ファイルを生成・管理しています。ディレクトリ構成とモジュール構造は以下の通りです。
+
+```plaintext
 SilentCue/
-├── Shared/
+├── SCProtocol/
+├── SCShared/
+├── SCLiveService/
+├── SCPreview/
+├── SCDependencyMocks/
 ├── SilentCue Watch App/
-│   ├── Util/
-│   ├── Dependency/
-│   │   ├── Preview Content/
-│   │   ├── Mock/
-│   │   ├── Protocol/
-│   │   └── Service/
-│   ├── Domain/
-│   │   ├── Coordinator/
-│   │   ├── Settings/
-│   │   ├── Timer/
-│   │   └── Haptics/
-│   ├── View/
-│   │   ├── CountdownView/
-│   │   ├── SetTimerView/
-│   │   ├── SettingsView/
-│   │   └── TimerCompletionView/
 │   ├── Assets.xcassets/
+│   ├── Dependency/
+│   ├── Domain/
+│   ├── View/
+│   ├── Util/
+│   ├── Supporting Files/
 │   └── SilentCueApp.swift
 ├── SilentCue Watch AppTests/
 │   ├── Domain/
@@ -60,28 +38,24 @@ SilentCue/
 │   ├── Extension/
 │   ├── Util/
 │   └── Tests/
-├── SilentCue.xcodeproj/
+├── .github/
+│   └── workflows/
 ├── .gitignore
 ├── .swiftformat
 ├── .swiftlint.yml
 ├── Mintfile
-├── README.md
-└── SilentCue-Watch-App-Info.plist
+├── project.yml
+└── README.md
 ```
 
 ## 技術スタック
 
-- **言語とフレームワーク**
-  - Swift
-  - SwiftUI
-  - WatchKit
-
-- **状態管理**
-  - The Composable Architecture
-
-- **ネイティブ機能**
-  - WKExtendedRuntimeSession
-  - WKHapticType
+- **言語とフレームワーク**: Swift, SwiftUI, WatchKit
+- **状態管理**: The Composable Architecture (TCA)
+- **依存性管理**: swift-dependencies, Swift Package Manager (SPM)
+- **プロジェクト生成**: XcodeGen
+- **リンター/フォーマッター**: SwiftLint, SwiftFormat (Mintで管理)
+- **ネイティブ機能**: WKExtendedRuntimeSession, WKHapticType
 
 ## 主要機能
 
@@ -160,21 +134,22 @@ Apple Watchアプリを閉じた後もタイマーが正確に動作し続けま
      ```
 これにより、GitHub Actions の `release.yml` ワークフローが自動的にトリガーされ、App Store Connect へのアップロードと GitHub Release の作成が行われます
 
-## 開発環境
+## 開発環境セットアップ
 
-プロジェクトのビルドと開発に必要なツールとそのバージョンは `Mintfile` で管理されています
-以下のコマンドで必要なツール (`SwiftFormat`, `SwiftLint`) をインストールできます
-
-```bash
-# Mintをインストール（未導入の場合）
-brew install mint
-
-# Mintfileに記載されたツールをインストール/アップデート
-mint bootstrap
-```
-
-TCAなどの依存パッケージはSwift Package Managerによって自動的に管理されるため、Xcodeがプロジェクトを開く際に必要なパッケージを自動的にダウンロードします
-
-これにより、プロジェクトで使用している以下のツールが自動的にインストール、またはバージョン管理されます
-- SwiftLint (`0.59.1`)
-- SwiftFormat (`0.55.5`)
+1.  **Mintのインストール (未導入の場合):**
+    ```bash
+    brew install mint
+    ```
+2.  **開発ツールのインストール:**
+    `Mintfile` で管理されているSwiftLintとSwiftFormatをインストールします。
+    ```bash
+    mint bootstrap
+    ```
+3.  **Xcodeプロジェクトファイルの生成:**
+    XcodeGenを使用して `.xcodeproj` ファイルを生成します。プロジェクトを開く前に必ず実行してください。
+    ```bash
+    mint run xcodegen generate
+    # または xcodegen generate (XcodeGenが直接インストールされている場合)
+    ```
+4.  **プロジェクトを開く:** 生成された `SilentCue.xcodeproj` をXcodeで開きます。
+    依存パッケージ (TCAなど) はSPMによって自動的に解決・ダウンロードされます。

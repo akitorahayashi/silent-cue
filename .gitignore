@@ -32,4 +32,11 @@ DerivedData/
 /.cursor/
 
 # CI/CD output directory
-ci-outputs/ 
+ci-outputs/
+
+*.xcodeproj
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+*.xcuserdatad/
+*.xcuserdata/

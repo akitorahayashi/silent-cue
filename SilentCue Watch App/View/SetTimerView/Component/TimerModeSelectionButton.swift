@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct TimerModeSelectionButton: View {
     let mode: TimerMode

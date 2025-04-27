@@ -1,6 +1,11 @@
 import ComposableArchitecture
 import SwiftUI
 import UserNotifications
+import SCShared
+
+#if DEBUG
+import SCPreview
+#endif
 
 @main
 struct SilentCueWatchApp: App {
@@ -8,14 +13,14 @@ struct SilentCueWatchApp: App {
     let store: StoreOf<CoordinatorReducer>
 
     // 依存関係
-    @Dependency(\.userDefaultsService) var userDefaultsService
-    @Dependency(\.notificationService) var notificationService
+    // @Dependency(\.userDefaultsService) var userDefaultsService // Removed: Should be injected into Reducer
+    // @Dependency(\.notificationService) var notificationService // Removed: Should be injected into Reducer
 
     // バックグラウンド/フォアグラウンド遷移を監視
     @Environment(\.scenePhase) private var scenePhase
 
     @StateObject private var notificationDelegate = NotificationDelegate()
-    @State private var showNotificationExplanationAlert = false
+    // @State private var showNotificationExplanationAlert = false // Removed: State should be managed in Reducer
 
     init() {
         // Storeの初期化を行う
@@ -69,12 +74,10 @@ struct SilentCueWatchApp: App {
                         switch destination {
                             case .countdown:
                                 CountdownView(
-                                    // 新しいキーパス構文を使用
                                     store: store.scope(state: \.timer, action: \.timer)
                                 )
                             case .completion:
                                 TimerCompletionView(
-                                    // 新しいキーパス構文を使用
                                     store: store.scope(state: \.timer, action: \.timer)
                                 )
                                 .navigationBarBackButtonHidden(true)
@@ -84,14 +87,13 @@ struct SilentCueWatchApp: App {
                                 )
                             case .settings:
                                 SettingsView(
-                                    // 新しいキーパス構文を使用
                                     store: store.scope(state: \.settings, action: \.settings),
                                     hapticsStore: store.scope(
                                         state: \.haptics,
                                         action: \.haptics
                                     )
                                 )
-                            case .timerStart: // 到達しない想定
+                            case .timerStart:
                                 EmptyView()
                         }
                     }
@@ -102,58 +104,25 @@ struct SilentCueWatchApp: App {
                 .onAppear {
                     viewStore.send(.onAppear)
                     notificationDelegate.setStore(store) // メインストアを渡す
-                    checkNotificationStatus()
+                    // checkNotificationStatus() // Removed: Logic moved to Reducer triggered by .onAppear
                 }
-                .alert("通知について", isPresented: $showNotificationExplanationAlert) {
+                .alert("通知について", isPresented: viewStore.binding(
+                    get: \.shouldShowNotificationAlert, // State from Reducer
+                    send: { .setNotificationAlert(isPresented: $0) } // Action to Reducer
+                )) {
                     Button("許可する") {
-                        requestNotificationPermission()
-                        markAsLaunched()
+                        // requestNotificationPermission() // Removed: Should be triggered by Reducer
+                        // markAsLaunched() // Removed: Should be triggered by Reducer
+                        viewStore.send(.notificationAlertPermitTapped) // Send action to Reducer
                     }
                     Button("許可しない", role: .cancel) {
-                        markAsLaunched()
+                        // markAsLaunched() // Removed: Should be triggered by Reducer
+                        viewStore.send(.notificationAlertDenyTapped) // Send action to Reducer
                     }
                 } message: {
                     Text("\nタイマー完了時に通知を受け取りますか？\n\n通知を許可すると、アプリが閉じていても完了をお知らせします。\n")
                 }
             })
-        }
-    }
-
-    // 通知許可状態を確認し、必要に応じて説明アラートを表示
-    private func checkNotificationStatus() {
-        // 初回起動かどうかを確認
-        if isFirstLaunch() {
-            notificationService.checkAuthorizationStatus { isAuthorized in
-                // まだ通知許可の選択をしていない場合
-                if !isAuthorized {
-                    // 説明アラートを表示
-                    DispatchQueue.main.async {
-                        showNotificationExplanationAlert = true
-                    }
-                } else {
-                    // すでに許可されている場合も初回起動フラグを更新
-                    markAsLaunched()
-                }
-            }
-        }
-    }
-
-    // 初回起動かどうかを確認
-    private func isFirstLaunch() -> Bool {
-        // isFirstLaunchの値を取得、デフォルトはtrue
-        userDefaultsService.object(forKey: .isFirstLaunch) as? Bool ?? true
-    }
-
-    // 初回起動フラグをfalseに設定
-    private func markAsLaunched() {
-        // userDefaultsService を使用するように変更
-        userDefaultsService.set(false, forKey: .isFirstLaunch)
-    }
-
-    // 通知許可をリクエストする
-    private func requestNotificationPermission() {
-        notificationService.requestAuthorization { granted in
-            print("通知許可: \(granted)")
         }
     }
 }

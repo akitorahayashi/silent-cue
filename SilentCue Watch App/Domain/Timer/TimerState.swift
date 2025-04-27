@@ -1,4 +1,5 @@
 import Foundation
+import ComposableArchitecture
 
 /// タイマーのモード（分後か時刻指定か）
 enum TimerMode: String, Equatable, CaseIterable, Identifiable {

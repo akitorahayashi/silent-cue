@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct SelectVibrationTypeSection: View {
     let hapticTypes: [HapticType]

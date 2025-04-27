@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct TimerSummaryView: View {
     let startDate: Date?

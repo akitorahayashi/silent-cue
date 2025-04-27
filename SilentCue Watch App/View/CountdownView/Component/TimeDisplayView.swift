@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct TimeDisplayView: View {
     let displayTime: String

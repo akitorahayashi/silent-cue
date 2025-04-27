@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct CancelButtonView: View {
     let action: () -> Void

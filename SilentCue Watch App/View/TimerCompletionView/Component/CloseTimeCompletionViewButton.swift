@@ -1,4 +1,5 @@
 import SwiftUI
+import SCShared
 
 struct CloseTimeCompletionViewButton: View {
     let action: () -> Void
