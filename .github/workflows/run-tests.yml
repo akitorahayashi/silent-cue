@@ -51,6 +51,8 @@ jobs:
         echo "simulator_id=$SIMULATOR_ID" >> $GITHUB_OUTPUT
 
     - name: Build for Testing
+      env:
+        TZ: Asia/Tokyo
       run: |
         set -o pipefail
         echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用してテスト用にビルドします"
@@ -67,6 +69,8 @@ jobs:
       
     - name: Run Unit Tests
       id: unit_tests
+      env:
+        TZ: Asia/Tokyo
       run: |
         set -o pipefail
         echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用してユニットテストを実行します"
@@ -99,6 +103,8 @@ jobs:
 
     - name: Run UI Tests
       id: ui_tests
+      env:
+        TZ: Asia/Tokyo
       run: |
         set -o pipefail
         echo "シミュレータ ID (${{ steps.select_simulator.outputs.simulator_id }}) を使用して UI テストを実行します"
