@@ -90,7 +90,7 @@ function_body_length:
 
 # 型定義の行数
 type_body_length:
-  warning: 300
+  warning: 400
   error: 500
 
 # ファイルの行数

@@ -94,7 +94,7 @@ final class TimerDisplayUpdateTests: XCTestCase {
         )
 
         await store.send(.updateTimerDisplay) { state in
-             state.currentRemainingSeconds = 240 // 300 - 60
+            state.currentRemainingSeconds = 240 // 300 - 60
         }
         await store.finish()
     }
@@ -161,7 +161,7 @@ final class TimerDisplayUpdateTests: XCTestCase {
         )
 
         await store.send(.updateTimerDisplay) { state in
-             state.currentRemainingSeconds = 0
+            state.currentRemainingSeconds = 0
         }
         await store.receive(.timerFinished)
 

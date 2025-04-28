@@ -207,4 +207,4 @@ final class TimerBackgroundHandlingTests: XCTestCase {
         // エフェクトの完了を確認
         await store.finish()
     }
-} 
+}

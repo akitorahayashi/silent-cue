@@ -282,4 +282,4 @@ final class TimerModeSelectionTests: XCTestCase {
 
         await store.finish()
     }
-} 
+}

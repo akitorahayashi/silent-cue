@@ -282,14 +282,15 @@ final class TimerLifecycleTests: XCTestCase {
         await clock.advance(by: .seconds(1))
         await store.receive(TimerReducer.Action.tick) { $0.currentRemainingSeconds = 0 }
         await store.receive(TimerReducer.Action.timerFinished)
-        await store.receive(TimerReducer.Action.internal(.finalizeTimerCompletion(completionDate: finishDate))) { state in
-            state.isRunning = false
-            state.completionDate = finishDate
-            state.currentRemainingSeconds = 0
-            let completedSeconds = Int(finishDate.timeIntervalSince(state.startDate!))
-            state.totalSeconds = completedSeconds
-            state.timerDurationMinutes = max(1, (completedSeconds + 59) / 60)
-        }
+        await store
+            .receive(TimerReducer.Action.internal(.finalizeTimerCompletion(completionDate: finishDate))) { state in
+                state.isRunning = false
+                state.completionDate = finishDate
+                state.currentRemainingSeconds = 0
+                let completedSeconds = Int(finishDate.timeIntervalSince(state.startDate!))
+                state.totalSeconds = completedSeconds
+                state.timerDurationMinutes = max(1, (completedSeconds + 59) / 60)
+            }
         await store.finish()
     }
 

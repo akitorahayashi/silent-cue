@@ -1,5 +1,5 @@
-import Foundation
 import ComposableArchitecture
+import Foundation
 @testable import SilentCue_Watch_App // Needed for TimerReducer.State and TimerMode
 
 enum TimerReducerTestUtil {
@@ -88,4 +88,4 @@ enum TimerReducerTestUtil {
 
         return state
     }
-} 
+}
