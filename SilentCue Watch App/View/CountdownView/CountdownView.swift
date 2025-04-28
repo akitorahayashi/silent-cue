@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
+import SCShared
 
 struct CountdownView: View {
     let store: StoreOf<TimerReducer>
@@ -10,12 +11,16 @@ struct CountdownView: View {
                 Spacer()
 
                 TimeDisplayView(displayTime: viewStore.displayTime, remainingSeconds: viewStore.currentRemainingSeconds)
+                    .accessibilityLabel(SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue)
+                    .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue)
 
                 Spacer()
 
                 CancelButtonView {
                     viewStore.send(.cancelTimer)
                 }
+                .accessibilityLabel(SCAccessibilityIdentifiers.CountdownView.cancelTimerButton.rawValue)
+                .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.cancelTimerButton.rawValue)
             }
             .navigationBarBackButtonHidden(true)
             .onAppear {

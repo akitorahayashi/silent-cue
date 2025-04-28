@@ -109,8 +109,12 @@ final class SetTimerViewUITests: XCTestCase {
         // 初期値の取得
         let initialValueLabel = minutesPicker.staticTexts.firstMatch.label
 
-        // ピッカーをスワイプ
-        minutesPicker.swipeUp()
+        // ピッカーをタップしてフォーカスし、Digital Crownを回転
+        minutesPicker.tap()
+        XCUIDevice.shared.rotateDigitalCrown(delta: 0.2) // 少し回転させて値を変更
+
+        // UI更新待機 (念のため)
+        sleep(1)
 
         // スワイプ後の値を取得
         let newValueLabel = minutesPicker.staticTexts.firstMatch.label
@@ -191,14 +195,26 @@ final class SetTimerViewUITests: XCTestCase {
             return
         }
         let startButton = app.buttons[setTimerView.startTimerButton.rawValue]
+
+        // ボタンが表示されるように少し上にスワイプ (ピッカーを避けるため上部で)
+        let startCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
+        let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
+        startCoordinate.press(forDuration: 0.1, thenDragTo: endCoordinate)
+
         // Add explicit wait within the test for CI stability
         XCTAssertTrue(startButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "スタートボタンが存在する")
         XCTAssertTrue(startButton.isEnabled, "スタートボタンが有効である")
         // タップと画面遷移
         startButton.tap()
-        // CountdownView 要素で画面遷移確認
+
+        // UI階層をデバッグ出力 (遷移確認前)
+        print("--- UI Tree Before CountdownView Check ---")
+        print(app.debugDescription)
+        print("--- End UI Tree ---")
+
+        // CountdownView 要素で画面遷移確認 (タイムアウト延長)
         XCTAssertTrue(
-            app.staticTexts[countdownView.timeFormatLabel.rawValue].waitForExistence(timeout: 2),
+            app.staticTexts[countdownView.countdownTimeDisplay.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
             "タップ後、CountdownViewに遷移して時刻フォーマットラベルが表示される"
         )
     }

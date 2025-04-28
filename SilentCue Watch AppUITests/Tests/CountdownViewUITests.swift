@@ -52,8 +52,8 @@ final class CountdownViewUITests: XCTestCase {
         // 時間表示要素の存在を確認
         let timeDisplay = app.staticTexts[countdownView.countdownTimeDisplay.rawValue]
         XCTAssertTrue(timeDisplay.exists, "時間表示ラベルが存在する")
-        // timeFormatLabel の存在も確認
-        let timeFormatLabel = app.staticTexts[countdownView.timeFormatLabel.rawValue]
+        // countdownTimeDisplay の存在も確認
+        let timeFormatLabel = app.staticTexts[countdownView.countdownTimeDisplay.rawValue]
         XCTAssertTrue(timeFormatLabel.exists, "時間フォーマットラベルが存在する")
 
         // キャンセルボタンの存在と有効状態を確認

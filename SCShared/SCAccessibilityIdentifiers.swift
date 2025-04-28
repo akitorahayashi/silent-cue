@@ -22,7 +22,6 @@ public enum SCAccessibilityIdentifiers {
     }
 
     public enum CountdownView: String {
-        case timeFormatLabel
         case countdownTimeDisplay
         case cancelTimerButton
     }
