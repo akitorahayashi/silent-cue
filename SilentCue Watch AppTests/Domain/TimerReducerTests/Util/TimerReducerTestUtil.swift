@@ -1,12 +1,10 @@
+import Foundation
 import ComposableArchitecture
-import SCMock
-@testable import SilentCue_Watch_App
-import XCTest
+@testable import SilentCue_Watch_App // Needed for TimerReducer.State and TimerMode
 
-@MainActor
-final class TimerReducerTests: XCTestCase {
-    // Create a calendar fixed to UTC for consistent testing
-    var utcCalendar: Calendar = {
+enum TimerReducerTestUtil {
+    // テストの一貫性を保つためにUTCに固定されたカレンダーを作成
+    static var utcCalendar: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         guard let timeZone = TimeZone(identifier: "UTC") else {
             fatalError("UTC time zone should always be available.")
@@ -15,8 +13,8 @@ final class TimerReducerTests: XCTestCase {
         return calendar
     }()
 
-    // .time モードの期待される目標終了日時を計算するヘルパー関数
-    func calculateExpectedTargetEndDateAtTime(
+    // .time モードの期待される目標終了日時を計算する
+    static func calculateExpectedTargetEndDateAtTime(
         selectedHour: Int,
         selectedMinute: Int,
         now: Date,
@@ -28,14 +26,10 @@ final class TimerReducerTests: XCTestCase {
         dateComponents.second = 0
 
         guard var targetDate = calendar.date(from: dateComponents) else {
-            // 日付が形成できない場合の潜在的なエラーを処理
             print("Error: Could not create target date from components in helper.")
-            // 要件に応じて、nil またはデフォルトの未来の日付をオプションで返す
             return calendar.date(byAdding: .day, value: 1, to: now)
         }
 
-        // 計算された目標時刻が 'now' に対して過去の場合、
-        // 目標は翌日であると仮定する。
         if targetDate <= now {
             guard let tomorrowTargetDate = calendar.date(byAdding: .day, value: 1, to: targetDate) else {
                 print("Error: Could not calculate tomorrow's target date in helper.")
@@ -46,7 +40,7 @@ final class TimerReducerTests: XCTestCase {
         return targetDate
     }
 
-    func createInitialState(
+    static func createInitialState(
         now: Date,
         selectedMinutes: Int = 1,
         timerMode: TimerMode = .minutes,
@@ -68,8 +62,6 @@ final class TimerReducerTests: XCTestCase {
             completionDate: completionDate
         )
 
-        // テスト用に特定の時/分が提供された場合、デフォルトを上書きする
-        // そして依存するプロパティを再計算する。
         var needsRecalculation = false
         if let hour = selectedHour {
             state.selectedHour = hour
@@ -80,9 +72,6 @@ final class TimerReducerTests: XCTestCase {
             needsRecalculation = true
         }
 
-        // 時/分が上書きされたか、timerMode が .time の場合にのみ秒を再計算する
-        // または timerMode が .minutes で selectedMinutes がデフォルトでない場合 (イニシャライザがこれを処理するが)
-        // テスト用に時/分が明示的に提供された場合、再計算する方が安全。
         if needsRecalculation || timerMode == .time {
             let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
                 mode: state.timerMode,
@@ -96,26 +85,7 @@ final class TimerReducerTests: XCTestCase {
             state.currentRemainingSeconds = recalculatedSeconds
             state.timerDurationMinutes = recalculatedSeconds / 60
         }
-        // モードが .minutes で selectedMinutes のみが提供された場合 (時/分ではなく)、
-        // イニシャライザは selectedMinutes に基づいて既に正しく計算済み。
 
         return state
     }
-
-    // Example of how a test function would use the fixed calendar:
-    func testTimerStartTimeMode() {
-        let now = Date() // Use a fixed date if necessary for reproducibility
-        let fixedCalendar = utcCalendar // Use the fixed UTC calendar
-        let selectedHour = 10
-        let selectedMinute = 30
-
-        // Pass the fixed calendar to the state initializer
-        let initialState = createInitialState(
-            now: now,
-            timerMode: .time,
-            selectedHour: selectedHour,
-            selectedMinute: selectedMinute,
-            calendar: fixedCalendar // Pass the fixed calendar
-        )
-    }
-}
+} 
