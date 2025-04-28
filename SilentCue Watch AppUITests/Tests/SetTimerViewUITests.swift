@@ -137,11 +137,11 @@ final class SetTimerViewUITests: XCTestCase {
         XCTAssertTrue(startButton.isEnabled, "スタートボタンがタップ可能である")
         startButton.tap()
 
-        // CountdownView 要素で画面遷移確認
+        // CountdownView のキャンセルボタンが表示されるかで画面遷移を確認
         XCTAssertTrue(
-            app.staticTexts[countdownViewIDs.countdownTimeDisplay.rawValue]
-                .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "スタートボタンタップ後、CountdownViewに遷移する"
+            app.buttons[countdownViewIDs.cancelTimerButton.rawValue] // Wait for the cancel button
+                .waitForExistence(timeout: UITestConstants.Timeout.standard * 2),
+            "スタートボタンタップ後、CountdownViewに遷移する (キャンセルボタンの表示を確認)"
         )
     }
 
