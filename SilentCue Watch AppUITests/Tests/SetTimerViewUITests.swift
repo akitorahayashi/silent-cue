@@ -129,7 +129,6 @@ final class SetTimerViewUITests: XCTestCase {
     func test_startButton_whenTapped_navigatesToCountdownView() throws {
         let startButton = app.buttons[setTimerViewIDs.startTimerButton.rawValue]
 
-        // スワイプ操作は不安定なため、waitForExistence で確認し、存在すれば操作する方針に変更
         if !startButton.waitForExistence(timeout: UITestConstants.Timeout.standard) {
             XCTFail("スタートボタンが見つかりませんでした")
             return

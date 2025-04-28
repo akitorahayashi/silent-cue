@@ -82,6 +82,22 @@ jobs:
       result: ${{ steps.unit_tests.outcome }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache Mint packages
+        uses: actions/cache@v4
+        id: cache-mint-packages
+        with:
+          path: ${{ github.workspace }}/.mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+  
+      - name: Install Mint
+        run: brew install mint
+
+      - name: Generate Xcode Project
+        run: mint run xcodegen generate
+
       - name: Create Unit Test Output Directory
         run: mkdir -p ci-outputs/test-results/unit
 
@@ -137,6 +153,22 @@ jobs:
       result: ${{ steps.ui_tests.outcome }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache Mint packages
+        uses: actions/cache@v4
+        id: cache-mint-packages
+        with:
+          path: ${{ github.workspace }}/.mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+  
+      - name: Install Mint
+        run: brew install mint
+
+      - name: Generate Xcode Project
+        run: mint run xcodegen generate
+
       - name: Create UI Test Output Directory
         run: mkdir -p ci-outputs/test-results/ui
 
