@@ -7,7 +7,7 @@ jobs:
   archive:
     runs-on: macos-latest
     env:
-      MINT_PATH: /opt/mint
+      MINT_PATH: ${{ github.workspace }}/.mint
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
