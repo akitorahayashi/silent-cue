@@ -159,13 +159,13 @@ final class SetTimerViewUITests: XCTestCase {
 
         // --- 時コンテナ操作（タップ＆Digital Crown回転） ---
         hourContainer.tap()
-        XCUIDevice.shared.rotateDigitalCrown(delta: 0.2)
-        XCUIDevice.shared.rotateDigitalCrown(delta: -0.1)
+        XCUIDevice.shared.rotateDigitalCrown(delta: 0.4)
+        XCUIDevice.shared.rotateDigitalCrown(delta: -0.2)
 
         // --- 分コンテナ操作（タップ＆Digital Crown回転） ---
         minuteContainer.tap()
-        XCUIDevice.shared.rotateDigitalCrown(delta: 0.2)
-        XCUIDevice.shared.rotateDigitalCrown(delta: -0.1)
+        XCUIDevice.shared.rotateDigitalCrown(delta: 0.4)
+        XCUIDevice.shared.rotateDigitalCrown(delta: -0.2)
 
         // 操作後の値を取得
         guard let finalHourValue = hourContainer.value,
@@ -191,12 +191,16 @@ final class SetTimerViewUITests: XCTestCase {
             return
         }
         let startButton = app.buttons[setTimerView.startTimerButton.rawValue]
-        XCTAssertTrue(startButton.exists)
-        XCTAssertTrue(startButton.isEnabled)
-        // タップと画面遷移確認
+        // Add explicit wait within the test for CI stability
+        XCTAssertTrue(startButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "スタートボタンが存在する")
+        XCTAssertTrue(startButton.isEnabled, "スタートボタンが有効である")
+        // タップと画面遷移
         startButton.tap()
         // CountdownView 要素で画面遷移確認
-        XCTAssertTrue(app.staticTexts[countdownView.timeFormatLabel.rawValue].waitForExistence(timeout: 2))
+        XCTAssertTrue(
+            app.staticTexts[countdownView.timeFormatLabel.rawValue].waitForExistence(timeout: 2),
+            "タップ後、CountdownViewに遷移して時刻フォーマットラベルが表示される"
+        )
     }
 
     func testSettingsButtonExistsAndTappable() throws {
