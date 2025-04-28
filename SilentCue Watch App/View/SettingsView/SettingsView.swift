@@ -3,6 +3,7 @@ import SCShared
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.dismiss) var dismiss
     let store: StoreOf<SettingsReducer>
     let hapticsStore: StoreOf<HapticsReducer>
 
@@ -23,6 +24,18 @@ struct SettingsView: View {
                 )
             }
             .navigationTitle(SCAccessibilityIdentifiers.SettingsView.navigationBarTitle.rawValue)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .aspectRatio(contentMode: .fit)
+                    }
+                    .accessibilityIdentifier(SCAccessibilityIdentifiers.SettingsView.backButton.rawValue)
+                }
+            }
             .onAppear {
                 if !viewStore.isSettingsLoaded {
                     viewStore.send(.loadSettings)

@@ -17,14 +17,19 @@ extension SCAppEnvironment {
     static func setupUITestEnv(
         for app: XCUIApplication,
         initialView: InitialViewOption? = nil,
-        otherArguments: [SCAppEnvironment.LaunchArguments] = []
+        notificationAuthorized: Bool? = nil
     ) {
         var arguments: [String] = [LaunchArguments.uiTesting.rawValue]
         if let initialViewRawValue = initialView?.rawValue {
             arguments.append(initialViewRawValue)
         }
-        arguments.append(contentsOf: otherArguments.map(\.rawValue))
 
         app.launchArguments = arguments
+
+        var environment: [String: String] = [:]
+        if let isAuthorized = notificationAuthorized {
+            environment[LaunchEnvironmentKeys.uiTestNotificationAuthorized.rawValue] = isAuthorized ? "TRUE" : "FALSE"
+        }
+        app.launchEnvironment = environment
     }
 }

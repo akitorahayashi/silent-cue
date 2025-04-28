@@ -13,7 +13,7 @@ struct MinutesPicker: View {
         }
         .pickerStyle(.wheel)
         .frame(height: 100)
-        .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.minutesPickerView.rawValue)
+        .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.minutesOnlyPicker.rawValue)
         .padding(.horizontal, 10)
     }
 }

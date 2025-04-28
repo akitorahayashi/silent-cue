@@ -4,24 +4,16 @@ import XCTest
 
 final class TimerCompletionViewUITests: XCTestCase {
     var app: XCUIApplication!
-    // Accessibility Identifiers
-    let timerCompletionView = SCAccessibilityIdentifiers.TimerCompletionView.self
-    let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
-    // countdownViewのAccessibility Identifierを追加する必要がある
-    let countdownView = SCAccessibilityIdentifiers.CountdownView.self
-
-    override func setUp() {
+    let timerCompletionViewIDs = SCAccessibilityIdentifiers.TimerCompletionView.self
+    
+    private func setup() {
         continueAfterFailure = false
-        let application = XCUIApplication()
-        // TimerCompletionView からテストを開始するように環境設定
-        SCAppEnvironment.setupUITestEnv(for: application, initialView: .timerCompletionView)
-        application.launch()
-        app = application
-
-        XCTAssertTrue(
-            app.staticTexts[timerCompletionView.completionMessage.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "TimerCompletionView should be displayed initially."
+        app = XCUIApplication()
+        SCAppEnvironment.setupUITestEnv(
+            for: app,
+            initialView: .timerCompletionView
         )
+        app.launch()
     }
 
     override func tearDown() {
@@ -30,35 +22,32 @@ final class TimerCompletionViewUITests: XCTestCase {
         super.tearDown()
     }
 
-    func testInitialUIElementsExist() throws {
-        let completionMessage = app.staticTexts[timerCompletionView.completionMessage.rawValue]
-        let finishButton = app.buttons[timerCompletionView.finishButton.rawValue]
-        let restartButton = app.buttons[timerCompletionView.restartButton.rawValue]
+    /// 主要なUI要素が正しく表示されること
+    /// - 終了時刻、タイマー概要、閉じるボタンは表示される
+    func testUIElementsExist() throws {
+        setup()
 
-        XCTAssertTrue(completionMessage.exists)
-        XCTAssertTrue(finishButton.exists)
-        XCTAssertTrue(restartButton.exists)
+        let notifyEndTimeView = app.otherElements[timerCompletionViewIDs.notifyEndTimeSection.rawValue]
+        let closeButton = app.buttons[timerCompletionViewIDs.closeTimeCompletionViewButton.rawValue]
+        let timerSummaryView = app.otherElements[timerCompletionViewIDs.timerSummarySection.rawValue]
+
+        XCTAssertTrue(notifyEndTimeView.exists, "終了時刻表示エリアが表示される")
+        XCTAssertTrue(closeButton.exists, "閉じるボタンが表示される")
+        XCTAssertTrue(timerSummaryView.exists, "タイマー概要エリアが表示される")
     }
 
-    func testFinishButtonAction() throws {
-        let finishButton = app.buttons[timerCompletionView.finishButton.rawValue]
-        XCTAssertTrue(finishButton.exists)
-        finishButton.tap()
+    /// 閉じるボタンをタップすると SetTimerView に戻ること
+    func testCloseButtonNavigatesBack() throws {
+        setup()
+
+        let closeButton = app.buttons[timerCompletionViewIDs.closeTimeCompletionViewButton.rawValue]
+        XCTAssertTrue(closeButton.exists, "閉じるボタンが表示される")
+
+        closeButton.tap()
 
         XCTAssertTrue(
-            app.buttons[setTimerView.startTimerButton.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "Should navigate back to SetTimerView after tapping Finish."
-        )
-    }
-
-    func testRestartButtonAction() throws {
-        let restartButton = app.buttons[timerCompletionView.restartButton.rawValue]
-        XCTAssertTrue(restartButton.exists)
-        restartButton.tap()
-
-        XCTAssertTrue(
-            app.staticTexts[countdownView.countdownTimeDisplay.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "Should navigate to CountdownView after tapping Restart."
+            app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "閉じるボタンをタップ後、SetTimerViewに遷移する"
         )
     }
 }

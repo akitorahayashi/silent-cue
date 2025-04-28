@@ -6,15 +6,15 @@ public enum SCAccessibilityIdentifiers {
         case navigationBarTitle = "Silent Cue"
         case minutesModeButton
         case timeModeButton
-        case minutesPickerView
-        case hourMinutePickerView
-        case hourPickerWheel
-        case minutePickerWheel
+        case minutesOnlyPicker
+        case hourPicker
+        case minutePicker
         case startTimerButton
     }
 
     public enum SettingsView: String {
         case navigationBarTitle = "Settings"
+        case backButton
         case vibrationTypeHeader
         case vibrationTypeOptionStandard
         case vibrationTypeOptionStrong
@@ -27,9 +27,8 @@ public enum SCAccessibilityIdentifiers {
     }
 
     public enum TimerCompletionView: String {
-        case timerCompletionView
+        case notifyEndTimeSection
         case closeTimeCompletionViewButton
-        case notifyEndTimeViewVStack
-        case timerSummaryViewVStack
+        case timerSummarySection
     }
 }

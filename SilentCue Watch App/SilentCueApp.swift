@@ -76,10 +76,6 @@ struct SilentCueWatchApp: App {
                                     store: store.scope(state: \.timer, action: \.timer)
                                 )
                                 .navigationBarBackButtonHidden(true)
-                                .accessibilityIdentifier(
-                                    SCAccessibilityIdentifiers.TimerCompletionView
-                                        .timerCompletionView.rawValue
-                                )
                             case .settings:
                                 SettingsView(
                                     store: store.scope(state: \.settings, action: \.settings),

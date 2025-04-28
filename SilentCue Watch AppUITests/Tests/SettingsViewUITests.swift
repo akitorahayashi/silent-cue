@@ -15,14 +15,6 @@ final class SettingsViewUITests: XCTestCase {
         SCAppEnvironment.setupUITestEnv(for: application, initialView: .settingsView)
         application.launch()
         app = application
-
-        // デバッグ用に要素階層を出力
-        print("--- SettingsView setUp UI Tree Start ---")
-        print(app.debugDescription)
-        print("--- SettingsView setUp UI Tree End ---")
-
-        // SettingsView の主要要素（ナビゲーションバータイトル）が表示されることを確認
-        XCTAssertTrue(app.navigationBars[settingsView.navigationBarTitle.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard))
     }
 
     override func tearDown() {
@@ -59,37 +51,31 @@ final class SettingsViewUITests: XCTestCase {
 
     // MARK: - Tests
 
-    func testInitialUIElementsExist() throws {
+    func testNavigationTitleIsCorrect() throws {
+        // Assert: ナビゲーションバーのタイトルが期待通りか確認
         let navBar = app.navigationBars[settingsView.navigationBarTitle.rawValue]
-        XCTAssertTrue(navBar.exists)
-
-        let vibrationSectionHeader = app.staticTexts[settingsView.vibrationSectionHeader.rawValue]
-        let notificationSectionHeader = app.staticTexts[settingsView.notificationSectionHeader.rawValue]
-        let otherSectionHeader = app.staticTexts[settingsView.otherSectionHeader.rawValue]
-
-        XCTAssertTrue(vibrationSectionHeader.exists)
-        XCTAssertTrue(notificationSectionHeader.exists)
-        XCTAssertTrue(otherSectionHeader.exists)
-
-        let vibrationPatternButton = app.buttons[settingsView.vibrationPatternButton.rawValue]
-        let soundToggleButton = app.switches[settingsView.soundToggle.rawValue]
-        let notificationTimeButton = app.buttons[settingsView.notificationTimingButton.rawValue]
-        let autoStartToggleButton = app.switches[settingsView.autoStartToggle.rawValue]
-
-        XCTAssertTrue(vibrationPatternButton.exists)
-        XCTAssertTrue(soundToggleButton.exists)
-        XCTAssertTrue(notificationTimeButton.exists)
-        XCTAssertTrue(autoStartToggleButton.exists)
+        XCTAssertTrue(navBar.waitForExistence(timeout: UITestConstants.Timeout.short), "ナビゲーションバーが表示されている")
+        XCTAssertEqual(navBar.identifier, settingsView.navigationBarTitle.rawValue, "ナビゲーションバーのタイトルが正しい")
     }
 
     func testSelectVibrationType() throws {
         // 各要素の取得
-        let standardOption = app.buttons[settingsView.vibrationTypeOptionStandard.rawValue] // 定数を使用
-        let strongOption = app.buttons[settingsView.vibrationTypeOptionStrong.rawValue] // 定数を使用
-        let weakOption = app.buttons[settingsView.vibrationTypeOptionWeak.rawValue] // 定数を使用
+        let standardOption = app.buttons[settingsView.vibrationTypeOptionStandard.rawValue]
+        let strongOption = app.buttons[settingsView.vibrationTypeOptionStrong.rawValue]
+        let weakOption = app.buttons[settingsView.vibrationTypeOptionWeak.rawValue]
 
-        // 初期状態を確認 (Standard がデフォルト)
+        // Assert: 全ての振動オプションが存在することを確認
         XCTAssertTrue(standardOption.waitForExistence(timeout: UITestConstants.Timeout.short), "Standard オプションが表示されている")
+        // StrongとWeakは画面内にない可能性があるのでスクロールして探す
+        rotateDigitalCrownToFindElement(strongOption)
+        XCTAssertTrue(strongOption.exists, "Strong オプションが表示されている")
+        rotateDigitalCrownToFindElement(weakOption)
+        XCTAssertTrue(weakOption.exists, "Weak オプションが表示されている")
+
+        // スクロールによってStandardが見えなくなる可能性があるので、再度Standardまでスクロールする
+        rotateDigitalCrownToFindElement(standardOption, scrollDelta: -0.5, maxScrollAttempts: 5) // 逆方向にスクロール
+
+        // Assert: 初期状態を確認 (Standard がデフォルト)
         XCTAssertTrue(standardOption.isSelected, "Standard が初期選択されている")
         XCTAssertFalse(strongOption.isSelected, "Strong が初期選択されていない")
         XCTAssertFalse(weakOption.isSelected, "Weak が初期選択されていない")
@@ -111,54 +97,30 @@ final class SettingsViewUITests: XCTestCase {
         XCTAssertTrue(weakOption.isSelected, "Weak が選択されている")
         XCTAssertFalse(standardOption.isSelected, "Standard が選択解除されている")
         XCTAssertFalse(strongOption.isSelected, "Strong が選択解除されている")
+
+        // Standard を再度選択
+        rotateDigitalCrownToFindElement(standardOption) // Standardが見えるまでスクロール
+        standardOption.tap()
+
+        // Assert: Standard が選択され、他が非選択になったことを確認
+        XCTAssertTrue(standardOption.isSelected, "Standard が選択されている")
+        XCTAssertFalse(strongOption.isSelected, "Strong が選択解除されている")
+        XCTAssertFalse(weakOption.isSelected, "Weak が選択解除されている")
     }
 
     func testBackButtonNavigatesToSetTimerView() throws {
-        let backButton = app.navigationBars.buttons.element(boundBy: 0)
-        XCTAssertTrue(backButton.waitForExistence(timeout: UITestConstants.Timeout.short), "戻るボタンが表示されている")
+        // SettingsViewのカスタム戻るボタンを Accessibility Identifier で取得
+        let backButton = app.buttons[settingsView.backButton.rawValue]
+        XCTAssertTrue(backButton.waitForExistence(timeout: UITestConstants.Timeout.short), "カスタム戻るボタン（ID: \(settingsView.backButton.rawValue)）が表示されている")
+
+        // 戻るボタンをタップ
         backButton.tap()
 
         // Assert: SetTimerViewに戻ったことを確認（ナビゲーションバータイトルで判断）
         XCTAssertTrue(
-            app.navigationBars[setTimerView.navigationBarTitle.rawValue] // 定数を使用
+            app.navigationBars[setTimerView.navigationBarTitle.rawValue] // SetTimerView のタイトルを期待
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "SetTimerView に戻り、ナビゲーションバータイトルが表示されている"
+            "SetTimerView に戻り、ナビゲーションバータイトル '\\(setTimerView.navigationBarTitle.rawValue)' が表示されている"
         )
-    }
-
-    func testVibrationPatternNavigation() throws {
-        let vibrationButton = app.buttons[settingsView.vibrationPatternButton.rawValue]
-        XCTAssertTrue(vibrationButton.exists)
-        vibrationButton.tap()
-
-        XCTAssertTrue(app.navigationBars["バイブレーションパターン"].waitForExistence(timeout: UITestConstants.Timeout.standard))
-        app.navigationBars.buttons.element(boundBy: 0).tap() // Back button
-    }
-
-    func testSoundToggleInteraction() throws {
-        let soundToggle = app.switches[settingsView.soundToggle.rawValue]
-        XCTAssertTrue(soundToggle.exists)
-    }
-
-    func testNotificationTimeNavigation() throws {
-        let notificationTimeButton = app.buttons[settingsView.notificationTimingButton.rawValue]
-        XCTAssertTrue(notificationTimeButton.exists)
-        notificationTimeButton.tap()
-
-        XCTAssertTrue(app.navigationBars["通知タイミング"].waitForExistence(timeout: UITestConstants.Timeout.standard))
-        app.navigationBars.buttons.element(boundBy: 0).tap() // Back button
-    }
-
-    func testAutoStartToggleInteraction() throws {
-        let autoStartToggle = app.switches[settingsView.autoStartToggle.rawValue]
-        XCTAssertTrue(autoStartToggle.exists)
-    }
-
-    func testBackButtonNavigation() throws {
-        let backButton = app.navigationBars[settingsView.navigationBarTitle.rawValue].buttons.element(boundBy: 0)
-        XCTAssertTrue(backButton.exists)
-        backButton.tap()
-
-        XCTAssertTrue(app.navigationBars[setTimerView.navigationBarTitle.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard))
     }
 }

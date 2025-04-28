@@ -6,6 +6,13 @@ public enum SCAppEnvironment {
     public enum LaunchArguments: String {
         /// UIテストモードでアプリを起動することを示す
         case uiTesting
+        /// UIテスト時に通知許可状態をシミュレートする ("TRUE" or "FALSE")
+        case uiTestNotificationAuthorized
+    }
+
+    /// UIテスト環境変数キー
+    public enum LaunchEnvironmentKeys: String {
+        case uiTestNotificationAuthorized
     }
 
     /// UIテストで初期表示する画面を指定する
