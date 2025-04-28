@@ -10,7 +10,9 @@ struct CountdownView: View {
             VStack {
                 Spacer()
 
-                TimeDisplayView(displayTime: viewStore.displayTime, remainingSeconds: viewStore.currentRemainingSeconds
+                TimeDisplayView(
+                    displayTime: viewStore.displayTime,
+                    remainingSeconds: viewStore.currentRemainingSeconds
                 ).accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.countdownTimeDisplay.rawValue)
 
                 Spacer()
