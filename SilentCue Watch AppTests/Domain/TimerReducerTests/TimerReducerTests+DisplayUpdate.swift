@@ -8,7 +8,7 @@ extension TimerReducerTests {
     func testDismissCompletionView() async {
         let fixedNow = Date(timeIntervalSince1970: 0) // Use fixed date
         let completionDate = fixedNow.addingTimeInterval(60)
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // タイマーが既に完了した状態で開始
         let initialState = createInitialState(
@@ -42,7 +42,7 @@ extension TimerReducerTests {
         let fixedStartDate = Date(timeIntervalSince1970: 0) // Use fixed date
         let selectedMinutes = 5
         let expectedInitialSeconds = 300
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // タイマー実行中の状態を作成
         let runningState = createInitialState(
@@ -79,7 +79,7 @@ extension TimerReducerTests {
     // テスト: タイマー停止中の表示更新は何もしない
     func testUpdateTimerDisplay_WhenNotRunning() async {
         let fixedNow = Date(timeIntervalSince1970: 0) // Use fixed date
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
         let initialState = createInitialState(
             now: fixedNow,
             isRunning: false,
@@ -106,7 +106,7 @@ extension TimerReducerTests {
         let selectedMinutes = 1
         let expectedInitialSeconds = 60
         let finishDate = fixedStartDate.addingTimeInterval(TimeInterval(expectedInitialSeconds))
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // タイマー実行中の状態を作成
         let runningState = createInitialState(

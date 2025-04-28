@@ -8,7 +8,7 @@ extension TimerReducerTests {
     func testTimerFinishes_Background() async {
         let fixedNow = Date(timeIntervalSince1970: 0) // Use fixed date
         let selectedMinutes = 1 // 60 秒
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // Pass fixed calendar to initializer
         let initialState = createInitialState(
@@ -78,7 +78,7 @@ extension TimerReducerTests {
 
     // テスト: .time モードでのバックグラウンド完了
     func testTimerFinishes_AtTime_Background() async throws {
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // Define fixed start date using UTC
         let startComponents = DateComponents(year: 2023, month: 10, day: 26, hour: 12, minute: 30, second: 0)
@@ -147,7 +147,10 @@ extension TimerReducerTests {
                 now: fixedStartDate,
                 calendar: fixedCalendar // Use fixed calendar
             )
-            let unwrappedTargetEndDate = try XCTUnwrap(calculatedTargetEndDate, "Target end date should not be nil on start")
+            let unwrappedTargetEndDate = try XCTUnwrap(
+                calculatedTargetEndDate,
+                "Target end date should not be nil on start"
+            )
             XCTAssertEqual(unwrappedTargetEndDate, finishDate)
             $0.targetEndDate = calculatedTargetEndDate
 

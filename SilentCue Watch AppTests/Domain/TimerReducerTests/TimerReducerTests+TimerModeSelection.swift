@@ -8,7 +8,7 @@ extension TimerReducerTests {
     func testTimerModeSelection() async {
         let fixedInitialDate = Date(timeIntervalSince1970: 1000) // Use fixed date
         let fixedActionDate = Date(timeIntervalSince1970: 2000) // Use fixed date
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // Create initial state with fixed date and calendar
         let initialState = createInitialState(
@@ -93,7 +93,7 @@ extension TimerReducerTests {
         let fixedActionDate = Date(timeIntervalSince1970: 100) // Use fixed date
         let initialMinutes = 1
         let newMinutes = 5
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // Create initial state with fixed date and calendar
         let initialState = createInitialState(
@@ -160,7 +160,7 @@ extension TimerReducerTests {
 
     // テスト: 時刻選択時の状態変化と秒数再計算 (.time モード)
     func testHourMinuteSelected() async {
-        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use fixed UTC calendar
 
         // Define fixed initial date using UTC
         var components = DateComponents(year: 2023, month: 10, day: 27, hour: 9, minute: 0, second: 0)

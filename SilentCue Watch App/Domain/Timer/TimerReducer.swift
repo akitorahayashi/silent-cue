@@ -113,14 +113,26 @@ struct TimerReducer: Reducer {
             dateComponents.second = 0
 
             guard var calculatedTargetDate = calendar.date(from: dateComponents) else {
-                print("Error: Could not create target date from components in handleStartTimer using calendar: \(calendar). Components: \(dateComponents)")
+                print(
+                    """
+                    Error: Could not create target date from components in handleStartTimer
+                    using calendar: \(calendar).
+                    Components: \(dateComponents)
+                    """
+                )
                 state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
                 return .none
             }
 
             if calculatedTargetDate <= now {
                 guard let tomorrowTargetDate = calendar.date(byAdding: .day, value: 1, to: calculatedTargetDate) else {
-                    print("Error: Could not calculate tomorrow's target date in handleStartTimer using calendar: \(calendar). Base date: \(calculatedTargetDate)")
+                    print(
+                        """
+                        Error: Could not calculate tomorrow's target date in handleStartTimer
+                        using calendar: \(calendar).
+                        Base date: \(calculatedTargetDate)
+                        """
+                    )
                     state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
                     return .none
                 }

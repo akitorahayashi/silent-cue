@@ -105,7 +105,7 @@ final class TimerReducerTests: XCTestCase {
     // Example of how a test function would use the fixed calendar:
     func testTimerStartTimeMode() {
         let now = Date() // Use a fixed date if necessary for reproducibility
-        let fixedCalendar = self.utcCalendar // Use the fixed UTC calendar
+        let fixedCalendar = utcCalendar // Use the fixed UTC calendar
         let selectedHour = 10
         let selectedMinute = 30
 
