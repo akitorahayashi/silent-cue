@@ -27,6 +27,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spm-
 
+      - name: Cache Mint packages
+        uses: actions/cache@v4
+        id: cache-mint-packages
+        with:
+          path: ${{ github.workspace }}/.mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+
+      - name: Install Mint
+        run: brew install mint
+
+      - name: Generate Xcode Project
+        run: mint run xcodegen generate
+
       - name: Build Release Version (Unsigned)
         run: |
           set -euo pipefail

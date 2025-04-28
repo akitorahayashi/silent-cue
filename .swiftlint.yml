@@ -10,6 +10,7 @@ included:
   - SilentCue Watch App
   - SilentCue Watch AppTests
   - SilentCue Watch AppUITests
+  - Infrastructure
 
 excluded:
   - .git
