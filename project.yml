@@ -78,6 +78,7 @@ targets:
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_BITCODE: NO
+        SKIP_INSTALL: NO
       configs:
         Debug:
           PRODUCT_BUNDLE_IDENTIFIER: com.akitorahayashi.SilentCue.watchkitapp
@@ -180,6 +181,7 @@ targets:
     platform: watchOS
     sources:
       - path: Infrastructure/SCPreview
+        excludes: ["**/Preview Assets.xcassets"]
     dependencies:
       - target: SCProtocol
       - package: ComposableArchitecture
@@ -195,8 +197,11 @@ targets:
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
       configs:
-        Debug: {}
-        Release: {}
+        Debug:
+          sources: # Only include assets for Debug
+            - path: Infrastructure/SCPreview/Preview Assets.xcassets
+        Release:
+          sources: [] # Keep Release sources empty
 
   SCMock:
     type: library.static
@@ -274,7 +279,7 @@ schemes:
   "SilentCue Watch App":
     build:
       targets:
-        "SilentCue Watch App": all
+        "SilentCue Watch App": [running, testing, analyzing, archiving]
     run:
       config: Debug
     test:
@@ -283,7 +288,7 @@ schemes:
         - "SilentCue Watch AppTests"
         - "SilentCue Watch AppUITests"
     archive:
-      config: Release
+      buildConfiguration: Release
 
   "SilentCue Watch AppTests":
     build:
