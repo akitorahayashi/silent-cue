@@ -5,6 +5,16 @@ import XCTest
 
 @MainActor
 final class TimerReducerTests: XCTestCase {
+    // Create a calendar fixed to UTC for consistent testing
+    var utcCalendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        guard let timeZone = TimeZone(identifier: "UTC") else {
+            fatalError("UTC time zone should always be available.")
+        }
+        calendar.timeZone = timeZone
+        return calendar
+    }()
+
     // .time モードの期待される目標終了日時を計算するヘルパー関数
     func calculateExpectedTargetEndDateAtTime(
         selectedHour: Int,
@@ -29,7 +39,6 @@ final class TimerReducerTests: XCTestCase {
         if targetDate <= now {
             guard let tomorrowTargetDate = calendar.date(byAdding: .day, value: 1, to: targetDate) else {
                 print("Error: Could not calculate tomorrow's target date in helper.")
-                // 要件に応じて、nil またはデフォルトの未来の日付をオプションで返す
                 return calendar.date(byAdding: .day, value: 1, to: now)
             }
             targetDate = tomorrowTargetDate
@@ -46,7 +55,8 @@ final class TimerReducerTests: XCTestCase {
         isRunning: Bool = false,
         startDate: Date? = nil,
         targetEndDate: Date? = nil,
-        completionDate: Date? = nil
+        completionDate: Date? = nil,
+        calendar: Calendar
     ) -> TimerReducer.State {
         var state = TimerReducer.State(
             timerMode: timerMode,
@@ -80,7 +90,7 @@ final class TimerReducerTests: XCTestCase {
                 selectedHour: state.selectedHour,
                 selectedMinute: state.selectedMinute,
                 now: now,
-                calendar: .current
+                calendar: calendar
             )
             state.totalSeconds = recalculatedSeconds
             state.currentRemainingSeconds = recalculatedSeconds
@@ -90,5 +100,22 @@ final class TimerReducerTests: XCTestCase {
         // イニシャライザは selectedMinutes に基づいて既に正しく計算済み。
 
         return state
+    }
+
+    // Example of how a test function would use the fixed calendar:
+    func testTimerStartTimeMode() {
+        let now = Date() // Use a fixed date if necessary for reproducibility
+        let fixedCalendar = self.utcCalendar // Use the fixed UTC calendar
+        let selectedHour = 10
+        let selectedMinute = 30
+
+        // Pass the fixed calendar to the state initializer
+        let initialState = createInitialState(
+            now: now,
+            timerMode: .time,
+            selectedHour: selectedHour,
+            selectedMinute: selectedMinute,
+            calendar: fixedCalendar // Pass the fixed calendar
+        )
     }
 }

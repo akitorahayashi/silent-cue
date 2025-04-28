@@ -6,29 +6,34 @@ import XCTest
 extension TimerReducerTests {
     // テスト: タイマーモード選択時の状態変化と秒数再計算
     func testTimerModeSelection() async {
-        let initialDate = Date(timeIntervalSince1970: 1000)
-        let actionDate = Date(timeIntervalSince1970: 2000)
-        let calendar = Calendar.current // 一貫性のために Calendar.current を使用
+        let fixedInitialDate = Date(timeIntervalSince1970: 1000) // Use fixed date
+        let fixedActionDate = Date(timeIntervalSince1970: 2000) // Use fixed date
+        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
 
-        // 初期状態を作成
-        let initialState = createInitialState(now: initialDate)
+        // Create initial state with fixed date and calendar
+        let initialState = createInitialState(
+            now: fixedInitialDate,
+            calendar: fixedCalendar // Pass fixed calendar
+        )
 
-        // 期待される初期合計秒数をユーティリティ関数で計算
+        // Calculate initial seconds using fixed date and calendar
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
             mode: initialState.timerMode,
             selectedMinutes: initialState.selectedMinutes,
             selectedHour: initialState.selectedHour,
             selectedMinute: initialState.selectedMinute,
-            now: initialDate,
-            calendar: calendar // 一貫性のあるカレンダーを渡す
+            now: fixedInitialDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
 
         let store = TestStore(initialState: initialState) {
             TimerReducer()
         } withDependencies: {
-            $0.date = DateGenerator.constant(actionDate)
+            $0.date = DateGenerator.constant(fixedActionDate) // Use fixed action date
             $0.notificationService = MockNotificationService()
             $0.extendedRuntimeService = MockExtendedRuntimeService()
+            $0.continuousClock = TestClock() // Needed for timer effects, even if not advanced
+            $0.calendar = fixedCalendar
         }
 
         // 初期状態のアサーション
@@ -36,16 +41,17 @@ extension TimerReducerTests {
         XCTAssertEqual(expectedInitialSeconds, 60)
 
         // .time を選択
-        let expectedHour = calendar.component(.hour, from: actionDate)
-        let expectedMinute = calendar.component(.minute, from: actionDate)
-        // 期待される合計秒数をユーティリティ関数で計算
+        // Calculate expected hour/minute based on fixed action date and UTC calendar
+        let expectedHour = fixedCalendar.component(.hour, from: fixedActionDate)
+        let expectedMinute = fixedCalendar.component(.minute, from: fixedActionDate)
+        // Calculate expected seconds using fixed date and calendar
         let expectedAtTimeSeconds = TimeCalculation.calculateTotalSeconds(
             mode: .time,
-            selectedMinutes: initialState.selectedMinutes, // この値は .time では影響しない
+            selectedMinutes: initialState.selectedMinutes,
             selectedHour: expectedHour,
             selectedMinute: expectedMinute,
-            now: actionDate,
-            calendar: calendar
+            now: fixedActionDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
 
         await store.send(TimerReducer.Action.timerModeSelected(.time)) { /* 状態変更 */
@@ -55,26 +61,26 @@ extension TimerReducerTests {
             // totalSeconds/currentRemainingSeconds/duration は Reducer が TimeCalculation を呼び出して計算
             $0.totalSeconds = expectedAtTimeSeconds
             $0.currentRemainingSeconds = expectedAtTimeSeconds
-            $0.timerDurationMinutes = expectedAtTimeSeconds / 60
+            $0.timerDurationMinutes = max(1, (expectedAtTimeSeconds + 59) / 60)
         }
 
         // 再度 .minutes を選択
-        // ユーティリティ関数で期待される秒数を計算
-        let currentState = store.state // .time に切り替えた後の状態を取得
+        // Calculate expected seconds using fixed date and calendar
+        let currentState = store.state
         let expectedAfterMinutesSeconds = TimeCalculation.calculateTotalSeconds(
             mode: .minutes,
-            selectedMinutes: currentState.selectedMinutes, // 1 であるはず
+            selectedMinutes: currentState.selectedMinutes,
             selectedHour: currentState.selectedHour,
             selectedMinute: currentState.selectedMinute,
-            now: actionDate,
-            calendar: calendar
+            now: fixedActionDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
 
         await store.send(TimerReducer.Action.timerModeSelected(.minutes)) { /* 状態変更 */
             $0.timerMode = .minutes
             $0.totalSeconds = expectedAfterMinutesSeconds
             $0.currentRemainingSeconds = expectedAfterMinutesSeconds
-            $0.timerDurationMinutes = expectedAfterMinutesSeconds / 60
+            $0.timerDurationMinutes = max(1, (expectedAfterMinutesSeconds + 59) / 60)
             XCTAssertEqual(expectedAfterMinutesSeconds, 60)
         }
         // モード選択アクションはエフェクトを返さないはずだが、念のため完了を確認
@@ -83,31 +89,37 @@ extension TimerReducerTests {
 
     // テスト: 分数選択時の状態変化と秒数再計算
     func testMinutesSelected() async {
-        let initialDate = Date(timeIntervalSince1970: 0)
-        let actionDate = Date(timeIntervalSince1970: 100)
+        let fixedInitialDate = Date(timeIntervalSince1970: 0) // Use fixed date
+        let fixedActionDate = Date(timeIntervalSince1970: 100) // Use fixed date
         let initialMinutes = 1
         let newMinutes = 5
-        let calendar = Calendar.current // Add calendar instance
+        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
 
-        // 初期状態を作成 (.minutes)
-        let initialState = createInitialState(now: initialDate, selectedMinutes: initialMinutes, timerMode: .minutes)
-        // Pass all required args
+        // Create initial state with fixed date and calendar
+        let initialState = createInitialState(
+            now: fixedInitialDate,
+            selectedMinutes: initialMinutes,
+            timerMode: .minutes,
+            calendar: fixedCalendar // Pass fixed calendar
+        )
+        // Calculate initial seconds using fixed date and calendar
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
             mode: .minutes,
             selectedMinutes: initialMinutes,
-            selectedHour: initialState.selectedHour, // Pass required arg
-            selectedMinute: initialState.selectedMinute, // Pass required arg
-            now: initialDate,
-            calendar: calendar // Pass calendar
+            selectedHour: initialState.selectedHour,
+            selectedMinute: initialState.selectedMinute,
+            now: fixedInitialDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
 
         let store = TestStore(initialState: initialState) {
             TimerReducer()
         } withDependencies: {
-            $0.date = DateGenerator.constant(actionDate)
+            $0.date = DateGenerator.constant(fixedActionDate) // Use fixed action date
             $0.notificationService = MockNotificationService()
             $0.extendedRuntimeService = MockExtendedRuntimeService()
-            $0.continuousClock = TestClock() // 依存性として必要
+            $0.continuousClock = TestClock()
+            $0.calendar = fixedCalendar
         }
 
         // 初期状態確認
@@ -116,31 +128,31 @@ extension TimerReducerTests {
         XCTAssertEqual(expectedInitialSeconds, 60)
 
         // 新しい分数を選択
-        // Pass all required args
+        // Calculate new seconds using fixed date and calendar
         let expectedNewSeconds = TimeCalculation.calculateTotalSeconds(
             mode: .minutes,
             selectedMinutes: newMinutes,
-            selectedHour: initialState.selectedHour, // Pass required arg
-            selectedMinute: initialState.selectedMinute, // Pass required arg
-            now: actionDate,
-            calendar: calendar // Pass calendar
+            selectedHour: initialState.selectedHour,
+            selectedMinute: initialState.selectedMinute,
+            now: fixedActionDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
         XCTAssertEqual(expectedNewSeconds, 300)
 
         await store.send(.minutesSelected(newMinutes)) { state in
             state.selectedMinutes = newMinutes
-            // Pass all required args for recalculation check
+            // Recalculate seconds using fixed date and calendar
             let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
                 mode: .minutes,
                 selectedMinutes: newMinutes,
                 selectedHour: state.selectedHour,
                 selectedMinute: state.selectedMinute,
-                now: actionDate,
-                calendar: calendar // Pass calendar
+                now: fixedActionDate,
+                calendar: fixedCalendar // Use fixed calendar
             )
             state.totalSeconds = recalculatedSeconds
             state.currentRemainingSeconds = recalculatedSeconds
-            state.timerDurationMinutes = recalculatedSeconds / 60
+            state.timerDurationMinutes = max(1, (recalculatedSeconds + 59) / 60)
             XCTAssertEqual(recalculatedSeconds, expectedNewSeconds)
         }
         await store.finish()
@@ -148,50 +160,48 @@ extension TimerReducerTests {
 
     // テスト: 時刻選択時の状態変化と秒数再計算 (.time モード)
     func testHourMinuteSelected() async {
-        let initialDate = Date(timeIntervalSince1970: 0) // 例: 09:00 JST
-        let actionDate = Date(timeIntervalSince1970: 100)
-        let calendar = Calendar.current
-        guard let timeZone = TimeZone(identifier: "Asia/Tokyo") else {
-            XCTFail("Failed to get TimeZone")
+        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+
+        // Define fixed initial date using UTC
+        var components = DateComponents(year: 2023, month: 10, day: 27, hour: 9, minute: 0, second: 0)
+        guard let fixedInitialDate = fixedCalendar.date(from: components) else {
+            XCTFail("Failed to create fixed initial date using UTC calendar")
             return
-        }
-        var components = calendar.dateComponents(in: timeZone, from: initialDate)
-        components.hour = 9
-        components.minute = 0
-        guard let initialTime = calendar.date(from: components) else { // Use guard let
-            XCTFail("Failed to create initial time")
-            return
-        }
+        } // 2023-10-27 09:00:00 UTC
+
+        let fixedActionDate = fixedInitialDate.addingTimeInterval(100) // Use fixed date for action
 
         let initialHour = 9
         let initialMinute = 0
         let newHour = 10
         let newMinute = 30
 
-        // 初期状態を作成 (.time)
+        // Create initial state using fixed date and calendar
         let initialState = createInitialState(
-            now: initialTime,
+            now: fixedInitialDate,
             timerMode: .time,
             selectedHour: initialHour,
-            selectedMinute: initialMinute
+            selectedMinute: initialMinute,
+            calendar: fixedCalendar // Pass fixed calendar
         )
-        // Pass all required args
+        // Calculate initial seconds using fixed date and calendar
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
             mode: .time,
-            selectedMinutes: initialState.selectedMinutes, // Pass required arg
+            selectedMinutes: initialState.selectedMinutes,
             selectedHour: initialHour,
             selectedMinute: initialMinute,
-            now: initialTime,
-            calendar: calendar // Pass calendar
+            now: fixedInitialDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
 
         let store = TestStore(initialState: initialState) {
             TimerReducer()
         } withDependencies: {
-            $0.date = DateGenerator.constant(actionDate) // アクション時の時刻
+            $0.date = DateGenerator.constant(fixedActionDate) // Use fixed action date
             $0.notificationService = MockNotificationService()
             $0.extendedRuntimeService = MockExtendedRuntimeService()
             $0.continuousClock = TestClock()
+            $0.calendar = fixedCalendar
         }
 
         // 初期状態確認
@@ -201,56 +211,56 @@ extension TimerReducerTests {
         XCTAssertEqual(store.state.totalSeconds, expectedInitialSeconds)
 
         // 新しい時を選択
-        // Pass all required args
+        // Calculate expected seconds using fixed date and calendar
         let expectedSecondsAfterHour = TimeCalculation.calculateTotalSeconds(
             mode: .time,
-            selectedMinutes: initialState.selectedMinutes, // Pass required arg
+            selectedMinutes: initialState.selectedMinutes,
             selectedHour: newHour,
-            selectedMinute: initialMinute,
-            now: actionDate,
-            calendar: calendar // Pass calendar
+            selectedMinute: initialMinute, // Minute hasn't changed yet
+            now: fixedActionDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
         await store.send(.hourSelected(newHour)) { state in
             state.selectedHour = newHour
-            // Pass all required args for recalculation check
+            // Recalculate seconds using fixed date and calendar
             let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
                 mode: .time,
-                selectedMinutes: state.selectedMinutes, // Pass required arg
+                selectedMinutes: state.selectedMinutes,
                 selectedHour: newHour,
-                selectedMinute: initialMinute,
-                now: actionDate,
-                calendar: calendar // Pass calendar
+                selectedMinute: initialMinute, // Minute hasn't changed yet
+                now: fixedActionDate,
+                calendar: fixedCalendar // Use fixed calendar
             )
             state.totalSeconds = recalculatedSeconds
             state.currentRemainingSeconds = recalculatedSeconds
-            state.timerDurationMinutes = recalculatedSeconds / 60
+            state.timerDurationMinutes = max(1, (recalculatedSeconds + 59) / 60)
             XCTAssertEqual(recalculatedSeconds, expectedSecondsAfterHour)
         }
 
         // 新しい分を選択
-        // Pass all required args
+        // Calculate expected seconds using fixed date and calendar
         let expectedSecondsAfterMinute = TimeCalculation.calculateTotalSeconds(
             mode: .time,
-            selectedMinutes: initialState.selectedMinutes, // Pass required arg
-            selectedHour: newHour,
+            selectedMinutes: initialState.selectedMinutes,
+            selectedHour: newHour, // Hour has changed
             selectedMinute: newMinute,
-            now: actionDate,
-            calendar: calendar // Pass calendar
+            now: fixedActionDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
         await store.send(.minuteSelected(newMinute)) { state in
             state.selectedMinute = newMinute
-            // Pass all required args for recalculation check
+            // Recalculate seconds using fixed date and calendar
             let recalculatedSeconds = TimeCalculation.calculateTotalSeconds(
                 mode: .time,
-                selectedMinutes: state.selectedMinutes, // Pass required arg
+                selectedMinutes: state.selectedMinutes,
                 selectedHour: newHour,
                 selectedMinute: newMinute,
-                now: actionDate,
-                calendar: calendar // Pass calendar
+                now: fixedActionDate,
+                calendar: fixedCalendar // Use fixed calendar
             )
             state.totalSeconds = recalculatedSeconds
             state.currentRemainingSeconds = recalculatedSeconds
-            state.timerDurationMinutes = recalculatedSeconds / 60
+            state.timerDurationMinutes = max(1, (recalculatedSeconds + 59) / 60)
             XCTAssertEqual(recalculatedSeconds, expectedSecondsAfterMinute)
         }
         await store.finish()

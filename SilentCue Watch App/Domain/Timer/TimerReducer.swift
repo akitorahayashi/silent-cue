@@ -18,6 +18,7 @@ struct TimerReducer: Reducer {
     @Dependency(\.notificationService) var notificationService
     @Dependency(\.extendedRuntimeService) var extendedRuntimeService
     @Dependency(\.date) var date
+    @Dependency(\.calendar) var calendar
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -67,9 +68,9 @@ struct TimerReducer: Reducer {
         state.timerMode = mode
         if mode == .time {
             let now = date()
-            let calendar = Calendar.current
-            state.selectedHour = calendar.component(.hour, from: now)
-            state.selectedMinute = calendar.component(.minute, from: now)
+            let currentComponents = calendar.dateComponents([.hour, .minute], from: now)
+            state.selectedHour = currentComponents.hour ?? 12
+            state.selectedMinute = currentComponents.minute ?? 0
         }
         recalculateTimerProperties(&state)
         return .none
@@ -106,35 +107,37 @@ struct TimerReducer: Reducer {
         if state.timerMode == .minutes {
             targetEndDate = now.addingTimeInterval(Double(state.totalSeconds))
         } else {
-            let calendar = Calendar.current
             var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
             dateComponents.hour = state.selectedHour
             dateComponents.minute = state.selectedMinute
             dateComponents.second = 0
 
             guard var calculatedTargetDate = calendar.date(from: dateComponents) else {
-                print("Error: Could not create target date from components in handleStartTimer.")
-                // Fallback or error handling: perhaps set targetEndDate to nil or a default future date
-                state.targetEndDate = now.addingTimeInterval(86400) // Default to 24 hours later as a fallback
-                return .none // Exit if date creation fails
+                print("Error: Could not create target date from components in handleStartTimer using calendar: \(calendar). Components: \(dateComponents)")
+                state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
+                return .none
             }
 
             if calculatedTargetDate <= now {
                 guard let tomorrowTargetDate = calendar.date(byAdding: .day, value: 1, to: calculatedTargetDate) else {
-                    print("Error: Could not calculate tomorrow's target date in handleStartTimer.")
-                    // Fallback or error handling
-                    state.targetEndDate = now.addingTimeInterval(86400) // Default fallback
-                    return .none // Exit if tomorrow calculation fails
+                    print("Error: Could not calculate tomorrow's target date in handleStartTimer using calendar: \(calendar). Base date: \(calculatedTargetDate)")
+                    state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
+                    return .none
                 }
                 calculatedTargetDate = tomorrowTargetDate
             }
             targetEndDate = calculatedTargetDate
         }
 
-        state.targetEndDate = targetEndDate
+        guard let unwrappedTargetEndDate = targetEndDate else {
+            print("Error: Target end date is nil after calculation in handleStartTimer.")
+            state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
+            return .none
+        }
+        state.targetEndDate = unwrappedTargetEndDate
 
         let totalSeconds = state.totalSeconds
-        let unwrappedTargetEndDateForEffect = targetEndDate ?? now.addingTimeInterval(Double(totalSeconds))
+        let timerDurationMinutes = state.timerDurationMinutes
 
         let tickerEffect = Effect<Action>.run { send in
             for await _ in clock.timer(interval: .seconds(1)) {
@@ -144,22 +147,22 @@ struct TimerReducer: Reducer {
         .cancellable(id: CancelID.timer)
 
         let backgroundEffect = Effect<Action>.run { [
-            unwrappedTargetEndDateForEffect,
+            unwrappedTargetEndDate,
             totalSeconds,
             timerDurationMinutes = state.timerDurationMinutes
         ] send in
             extendedRuntimeService.startSession(
                 duration: TimeInterval(totalSeconds + 10),
-                targetEndTime: unwrappedTargetEndDateForEffect
+                targetEndTime: unwrappedTargetEndDate
             )
             let content = UNMutableNotificationContent()
             content.title = "タイマー完了"
             content.body = "\(timerDurationMinutes)分のタイマーが完了しました"
             content.sound = .default
 
-            let triggerComponents = Calendar.current.dateComponents(
+            let triggerComponents = calendar.dateComponents(
                 [.year, .month, .day, .hour, .minute, .second],
-                from: unwrappedTargetEndDateForEffect
+                from: unwrappedTargetEndDate
             )
             let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
             let identifier = "TIMER_COMPLETED_NOTIFICATION"
@@ -168,7 +171,7 @@ struct TimerReducer: Reducer {
                 do {
                     try await notificationService.add(identifier: identifier, content: content, trigger: trigger)
                 } catch {
-                    print("通知スケジュールエラー: \(error)")
+                    print("Failed to schedule timer completion notification: \(error)")
                 }
             }.value
             for await _ in extendedRuntimeService.completionEvents {
@@ -249,7 +252,7 @@ struct TimerReducer: Reducer {
         state.isRunning = false
         state.completionDate = completionDate
 
-        extendedRuntimeService.stopSession() // Keep explicit stop for safety
+        extendedRuntimeService.stopSession()
         return .merge(
             .cancel(id: CancelID.timer),
             .cancel(id: CancelID.background)
@@ -265,17 +268,17 @@ struct TimerReducer: Reducer {
     }
 
     private func recalculateTimerProperties(_ state: inout State) {
-        let now = date()
         state.totalSeconds = TimeCalculation.calculateTotalSeconds(
             mode: state.timerMode,
             selectedMinutes: state.selectedMinutes,
             selectedHour: state.selectedHour,
             selectedMinute: state.selectedMinute,
-            now: now
+            now: date(),
+            calendar: calendar
         )
         if !state.isRunning {
             state.currentRemainingSeconds = state.totalSeconds
         }
-        state.timerDurationMinutes = state.totalSeconds / 60
+        state.timerDurationMinutes = max(1, (state.totalSeconds + 59) / 60)
     }
 }

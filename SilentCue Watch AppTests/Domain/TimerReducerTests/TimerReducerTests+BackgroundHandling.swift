@@ -4,40 +4,49 @@ import SCMock
 import XCTest
 
 extension TimerReducerTests {
-    // テスト: バックグラウンドでのタイマー完了シーケンス
+    // テスト: バックグラウンドでのタイマー完了シーケンス (.minutes モード)
     func testTimerFinishes_Background() async {
-        let startDate = Date(timeIntervalSince1970: 0)
+        let fixedNow = Date(timeIntervalSince1970: 0) // Use fixed date
         let selectedMinutes = 1 // 60 秒
+        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
 
-        let initialState = createInitialState(now: startDate, selectedMinutes: selectedMinutes)
+        // Pass fixed calendar to initializer
+        let initialState = createInitialState(
+            now: fixedNow,
+            selectedMinutes: selectedMinutes,
+            calendar: fixedCalendar // Pass fixed calendar
+        )
+        // Calculate initial seconds using fixed calendar
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
             mode: initialState.timerMode,
             selectedMinutes: initialState.selectedMinutes,
             selectedHour: initialState.selectedHour,
             selectedMinute: initialState.selectedMinute,
-            now: startDate
+            now: fixedNow,
+            calendar: fixedCalendar // Use fixed calendar
         )
 
         let clock = TestClock()
         // バックグラウンド完了を通知するモックが必要
         let extendedRuntimeService = MockExtendedRuntimeService() // 引数なしで初期化
         let notificationService = MockNotificationService()
-        let finishDate = startDate.addingTimeInterval(TimeInterval(expectedInitialSeconds))
+        let finishDate = fixedNow.addingTimeInterval(TimeInterval(expectedInitialSeconds))
 
         let store = TestStore(initialState: initialState) {
             TimerReducer()
         } withDependencies: {
-            $0.date = DateGenerator.constant(startDate)
+            $0.date = DateGenerator.constant(fixedNow) // Use fixed date
             $0.continuousClock = clock
             $0.notificationService = notificationService
             $0.extendedRuntimeService = extendedRuntimeService
+            $0.calendar = fixedCalendar // Inject the fixed UTC calendar
         }
 
         // 1. タイマーを開始
         await store.send(TimerReducer.Action.startTimer) {
             $0.isRunning = true
-            $0.startDate = startDate
-            $0.targetEndDate = startDate.addingTimeInterval(TimeInterval(expectedInitialSeconds))
+            $0.startDate = fixedNow // Use fixed date
+            $0.targetEndDate = fixedNow.addingTimeInterval(TimeInterval(expectedInitialSeconds))
             $0.totalSeconds = expectedInitialSeconds
             $0.timerDurationMinutes = expectedInitialSeconds / 60
             $0.currentRemainingSeconds = expectedInitialSeconds
@@ -69,93 +78,87 @@ extension TimerReducerTests {
 
     // テスト: .time モードでのバックグラウンド完了
     func testTimerFinishes_AtTime_Background() async throws {
-        let calendar = Calendar.current
-        let now = Date()
-        // 午後11時59分
-        let components = DateComponents(
-            year: calendar.component(.year, from: now),
-            month: calendar.component(.month, from: now),
-            day: calendar.component(.day, from: now),
-            hour: 12,
-            minute: 30,
-            second: 0
-        )
-        guard let startDate = calendar.date(from: components) else {
-            XCTFail("Failed to create start date")
+        let fixedCalendar = self.utcCalendar // Use fixed UTC calendar
+
+        // Define fixed start date using UTC
+        let startComponents = DateComponents(year: 2023, month: 10, day: 26, hour: 12, minute: 30, second: 0)
+        guard let fixedStartDate = fixedCalendar.date(from: startComponents) else {
+            XCTFail("Failed to create fixed start date using UTC calendar")
             return
-        } // 12:30:00 JST
+        } // 2023-10-26 12:30:00 UTC
 
         let targetHour = 12
-        let targetMinute = 31 // Target: 12:31:00 JST (60 seconds duration)
+        let targetMinute = 31 // Target: 12:31:00 UTC (60 seconds duration)
 
-        // 初期状態を作成 (.time)
+        // Create initial state using fixed date and calendar
         let initialState = createInitialState(
-            now: startDate,
+            now: fixedStartDate,
             timerMode: .time,
             selectedHour: targetHour,
-            selectedMinute: targetMinute
+            selectedMinute: targetMinute,
+            calendar: fixedCalendar // Pass fixed calendar
         )
 
-        // 期待される初期秒数を計算
+        // Calculate initial seconds using fixed calendar
         let expectedInitialSeconds = TimeCalculation.calculateTotalSeconds(
             mode: .time,
             selectedMinutes: initialState.selectedMinutes,
             selectedHour: targetHour,
             selectedMinute: targetMinute,
-            now: startDate,
-            calendar: calendar
+            now: fixedStartDate,
+            calendar: fixedCalendar // Use fixed calendar
         )
         XCTAssertEqual(expectedInitialSeconds, 60)
 
-        // 期待される完了時刻を計算
+        // Calculate expected finish date using fixed calendar
         guard let finishDate = calculateExpectedTargetEndDateAtTime(
             selectedHour: targetHour,
             selectedMinute: targetMinute,
-            now: startDate,
-            calendar: calendar
+            now: fixedStartDate,
+            calendar: fixedCalendar // Use fixed calendar
         ) else {
             XCTFail("Failed to calculate expected finish date")
             return
         }
 
-        let clock = TestClock() // クロック自体は進めないが、依存性として必要
+        let clock = TestClock()
         let notificationService = MockNotificationService()
         let extendedRuntimeService = MockExtendedRuntimeService()
 
         let store = TestStore(initialState: initialState) {
             TimerReducer()
         } withDependencies: {
-            $0.date = DateGenerator.constant(startDate)
+            $0.date = DateGenerator.constant(fixedStartDate) // Use fixed date
             $0.continuousClock = clock
             $0.notificationService = notificationService
             $0.extendedRuntimeService = extendedRuntimeService
+            $0.calendar = fixedCalendar // Inject the fixed UTC calendar
         }
 
         // 1. タイマーを開始
         await store.send(.startTimer) {
             $0.isRunning = true
-            $0.startDate = startDate
+            $0.startDate = fixedStartDate // Use fixed date
 
+            // Check target end date calculated by helper
             let calculatedTargetEndDate = self.calculateExpectedTargetEndDateAtTime(
                 selectedHour: targetHour,
                 selectedMinute: targetMinute,
-                now: startDate,
-                calendar: calendar
+                now: fixedStartDate,
+                calendar: fixedCalendar // Use fixed calendar
             )
-            let unwrappedTargetEndDate = try XCTUnwrap(
-                calculatedTargetEndDate,
-                "Target end date should not be nil on start"
-            )
+            let unwrappedTargetEndDate = try XCTUnwrap(calculatedTargetEndDate, "Target end date should not be nil on start")
             XCTAssertEqual(unwrappedTargetEndDate, finishDate)
             $0.targetEndDate = calculatedTargetEndDate
 
+            // Recalculate seconds on start
             let secondsOnStart = TimeCalculation.calculateTotalSeconds(
                 mode: .time,
                 selectedMinutes: $0.selectedMinutes,
                 selectedHour: targetHour,
                 selectedMinute: targetMinute,
-                now: startDate,
-                calendar: calendar
+                now: fixedStartDate,
+                calendar: fixedCalendar // Use fixed calendar
             )
             XCTAssertEqual(secondsOnStart, 60)
             $0.totalSeconds = secondsOnStart

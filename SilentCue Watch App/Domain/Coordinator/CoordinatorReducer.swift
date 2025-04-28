@@ -30,7 +30,13 @@ struct CoordinatorReducer: Reducer {
 
             switch action {
                 case .onAppear:
-                    return .send(.checkFirstLaunch)
+                    // アプリ起動時に通知許可をリクエスト
+                    // Result is intentionally ignored as it runs on appear.
+                    Task { _ = await notificationService.requestAuthorization() }
+                    return .run { send in
+                        // 設定読み込みを SettingsReducer に依頼
+                        await send(.settings(.loadSettings))
+                    }
 
                 case let .scenePhaseChanged(newPhase):
                     print("Scene Phase Changed: \(newPhase)")
@@ -109,7 +115,7 @@ struct CoordinatorReducer: Reducer {
                     state.shouldShowNotificationAlert = false
                     return .merge(
                         .run { _ in
-                            _ = try? await notificationService.requestAuthorization()
+                            _ = await notificationService.requestAuthorization()
                         },
                         .send(.markAsLaunched)
                     )
