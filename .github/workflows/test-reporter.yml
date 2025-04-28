@@ -17,15 +17,17 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code # jq を使うためにリポジトリをチェックアウト
+      - name: Checkout code # jq や actions/github-script のためにリポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: Download test results artifact
+      - name: Download JUnit test results artifact
+        id: download-test-results
         uses: actions/download-artifact@v4
+        continue-on-error: true # アーティファクトがなくてもステップを継続
         with:
           name: test-results # run-tests.yml でアップロードされたテスト結果のアーティファクト名
           path: ./ci-outputs/test-results
-          
+
       - name: Publish Test Report as Check
         uses: mikepenz/action-junit-report@v4
         # JUnitファイルが存在する場合のみ実行
@@ -37,42 +39,93 @@ jobs:
           require_tests: false # テストがなくてもエラーにしない
           check_name: 'Test Suite Results' # Checksタブに表示される名前
 
+      # XCResultsを含むアーティファクトをリンク生成用にアップロード
+      - name: Upload XCResults Bundle for Link
+        id: upload-xcresults-for-link
+        # test-results アーティファクトが正常にダウンロードされ、かつ XCResults ファイルが存在する場合のみ実行
+        if: steps.download-test-results.outcome == 'success' && ( hashFiles('./ci-outputs/test-results/unit/TestResults.xcresult') != '' || hashFiles('./ci-outputs/test-results/ui/TestResults.xcresult') != '' )
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresults-bundle # ダウンロード用アーティファクト名
+          path: |
+            ./ci-outputs/test-results/unit/TestResults.xcresult
+            ./ci-outputs/test-results/ui/TestResults.xcresult
+          # 指定されたファイルが見つからない場合、アップロードをスキップする
+          if-no-files-found: ignore
+          retention-days: 7 # オプション: 保存期間
+
       - name: Create or Update PR Comment
-        # Run if test results or any coverage report was found
-        if: ${{ hashFiles('./ci-outputs/test-results/**/*.xml') != '' }}
+        # JUnitレポートまたはtest-resultsアーティファクトが見つかった場合に実行 (downloadステップの成功を確認)
+        if: steps.download-test-results.outcome == 'success'
         uses: actions/github-script@v7
+        id: pr-commenter
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const prNumber = ${{ inputs.pull_request_number }};
             if (!prNumber) {
               console.error('Could not extract pull request number.');
-              return;
+              process.exit(1); // エラーで終了
             }
 
             const { owner, repo } = context.repo;
-
             const commentMarker = '<!-- test-and-coverage-report -->';
-            let commentBody = `${commentMarker}\n\n## Test Summary\n\n`;
+            let commentBody = `${commentMarker}\\n\\n## Test & Artifact Summary\\n\\n`; // タイトルを更新
             const fs = require('fs');
+            const path = require('path');
+            const core = require('@actions/core');
 
-            // Test Results Summary
-            const unitTestFile = './ci-outputs/test-results/unit/junit.xml';
-            const uiTestFile = './ci-outputs/test-results/ui/junit.xml';
-            if (fs.existsSync(unitTestFile) || fs.existsSync(uiTestFile)) {
-               commentBody += `✅ Test Results: Available in Checks tab.\n`;
-            } else {
-               commentBody += `ℹ️ Test Results: No JUnit reports found.\n`;
+            // --- Test Results Summary ---
+            const unitTestDir = './ci-outputs/test-results/unit';
+            const uiTestDir = './ci-outputs/test-results/ui';
+            let junitFound = false;
+            try {
+              // ディレクトリが存在し、XMLファイルが含まれているかを確認
+              if (fs.existsSync(unitTestDir) && fs.readdirSync(unitTestDir).some(f => f.endsWith('.xml'))) junitFound = true;
+              if (fs.existsSync(uiTestDir) && fs.readdirSync(uiTestDir).some(f => f.endsWith('.xml'))) junitFound = true;
+            } catch (e) {
+              console.warn("Error checking JUnit directories:", e);
             }
 
-            // 既存コメントの検索・更新 or 新規作成
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber });
-            const existingComment = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes(commentMarker));
-
-            if (existingComment) {
-              console.log(`Updating comment ${existingComment.id} on PR #${prNumber}`);
-              await github.rest.issues.updateComment({ owner, repo, comment_id: existingComment.id, body: commentBody });
+            if (junitFound) {
+               commentBody += `✅ **Test Results**: Available in the 'Checks' tab.\\n`;
             } else {
-              console.log(`Creating new comment on PR #${prNumber}`);
-              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: commentBody });
+               commentBody += `ℹ️ **Test Results**: No JUnit reports found or processed.\\n`;
+            }
+
+            // --- XCResults Download Link ---
+            // test-results アーティファクトのダウンロード成功と、XCResultsファイルの存在を確認
+            const testResultsDownloadSuccess = '${{ steps.download-test-results.outcome }}' === 'success';
+            const unitXcresultPath = path.join(unitTestDir, 'TestResults.xcresult');
+            const uiXcresultPath = path.join(uiTestDir, 'TestResults.xcresult');
+            const unitXcresultExists = testResultsDownloadSuccess && fs.existsSync(unitXcresultPath);
+            const uiXcresultExists = testResultsDownloadSuccess && fs.existsSync(uiXcresultPath);
+            const xcresultsUploadSuccess = '${{ steps.upload-xcresults-for-link.outcome }}' === 'success';
+            const xcresultsUrl = '${{ steps.upload-xcresults-for-link.outputs.artifact-url }}'; // アップロードステップの出力からURLを取得
+
+            if ((unitXcresultExists || uiXcresultExists) && xcresultsUploadSuccess && xcresultsUrl) {
+              commentBody += `📦 **XCResults Bundle**: [Download XCResults](${xcresultsUrl})\\n`;
+            } else if (unitXcresultExists || uiXcresultExists) {
+              // ダウンロードは成功したが、アップロード失敗またはURL欠落
+              commentBody += `⚠️ **XCResults Bundle**: Found, but failed to create a direct download link. Check the workflow run artifacts.\\n`;
+              core.warning('XCResults found but upload step failed or URL is missing.');
+            } else {
+              commentBody += `ℹ️ **XCResults Bundle**: Not found or artifact expired.\\n`;
+            }
+
+            // --- 既存コメントの検索・更新 or 新規作成 ---
+            try {
+              const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber, per_page: 100 });
+              const existingComment = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes(commentMarker));
+
+              if (existingComment) {
+                console.log(`Updating comment ${existingComment.id} on PR #${prNumber}`);
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existingComment.id, body: commentBody });
+              } else {
+                console.log(`Creating new comment on PR #${prNumber}`);
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: commentBody });
+              }
+            } catch (error) {
+               console.error(`Failed to list/create/update comment on PR #${prNumber}:`, error);
+               // コメント操作に失敗しても、ワークフローを失敗させない (必要なら process.exit(1) を追加)
             }
