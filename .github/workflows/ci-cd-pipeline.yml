@@ -11,20 +11,23 @@ jobs:
   setup:
     name: Setup Mint
     uses: ./.github/workflows/setup-mint.yml
+    permissions:
+      contents: read
 
-  # コード品質チェック
   code-quality:
     name: Code Quality Check
     needs: setup
     uses: ./.github/workflows/code-quality.yml
-    
-  # ビルドとテスト
+    permissions:
+      contents: read
+
   build-and-test:
     name: Run Tests
     needs: setup
     uses: ./.github/workflows/run-tests.yml
-    
-  # テスト結果レポート生成
+    permissions:
+      contents: read
+
   test-report:
     name: Test Report
     needs: build-and-test
@@ -34,41 +37,38 @@ jobs:
       pull_request_number: ${{ github.event.pull_request.number }}
     permissions:
       checks: write
-      actions: read 
+      actions: read
       pull-requests: write
-    
-  # コードレビュー - PRの場合のみ実行
+
   code-review:
     name: Code Review
     needs: build-and-test
     if: github.event_name == 'pull_request' && needs.build-and-test.result == 'success'
-    permissions:
-      pull-requests: write
-      contents: read
-      issues: write
     uses: ./.github/workflows/copilot-review.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
     secrets: inherit
-    
-  # アーカイブビルド検証
+    permissions:
+      pull-requests: write
+      contents: read
+      issues: write
+
   verify-archive-build:
     name: Verify Archive Build
     needs: [build-and-test, code-quality]
-    if: |
-      needs.build-and-test.result == 'success' && 
-      needs.code-quality.result == 'success'
+    if: needs.build-and-test.result == 'success' && needs.code-quality.result == 'success'
     uses: ./.github/workflows/build-unsigned-archive.yml
-    
-  # ビルド完了通知
+    permissions:
+      contents: read
+
   notify-completion:
     name: Notify Completion
     runs-on: ubuntu-latest
     needs: [code-quality, build-and-test, test-report, code-review, verify-archive-build]
     if: always()
     permissions:
-      issues: write
       pull-requests: write
+      issues: write
     steps:
       - name: Determine Status
         id: status
@@ -82,7 +82,7 @@ jobs:
             echo "icon=❌" >> $GITHUB_OUTPUT
             echo "message=ビルドまたはテストに失敗しました" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Add Comment on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -103,4 +103,4 @@ jobs:
               - コードレビュー: ${{ needs.code-review.result == 'success' && '✅' || (needs.code-review.result == 'skipped' && '⏭️' || '❌') }}
               - アーカイブビルド検証: ${{ needs.verify-archive-build.result == 'success' && '✅' || '❌' }}
               `
-            }); 
+            });
