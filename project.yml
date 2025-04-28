@@ -2,7 +2,6 @@
 
 name: SilentCue
 options:
-  bundleIdPrefix: com.akitorahayashi
   deploymentTarget:
     watchOS: 10.0
 
@@ -16,6 +15,12 @@ settings:
     MARKETING_VERSION: 1.0
     CURRENT_PROJECT_VERSION: 1
     ENABLE_BITCODE: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    # DEVELOPMENT_TEAM: YOUR_TEAM_ID
+
+# signing:
+#   automaticSigning:
+#     teamID: YOUR_TEAM_ID
 
 packages:
   ComposableArchitecture:
@@ -35,6 +40,16 @@ packages:
     from: "1.0.0"
 
 targets:
+  SilentCueStub:
+    type: application
+    platform: iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.akitorahayashi.SilentCue
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
+    sources: []
+
   "SilentCue Watch App":
     type: application
     platform: watchOS
@@ -60,13 +75,14 @@ targets:
         condition: { config: Debug }
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_BITCODE: NO
       configs:
-        Debug: {}
-        Release: {}
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.akitorahayashi.SilentCue.watchkitapp
+        Release:
+          PRODUCT_BUNDLE_IDENTIFIER: com.akitorahayashi.SilentCue.watchkitapp
     info:
       path: SilentCue Watch App/Info.plist
       properties:
@@ -82,8 +98,9 @@ targets:
           - background-fetch
           - background-processing
         WKBackgroundRefresh: true
-        WKCompanionAppBundleIdentifier: ""
+        WKCompanionAppBundleIdentifier: com.akitorahayashi.SilentCue
         WKApplication: true
+        WKRunsIndependentlyOfCompanionApp: true
 
   SCProtocol:
     type: library.static
@@ -104,7 +121,7 @@ targets:
         product: Clocks
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCProtocol
+        DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
       configs:
         Debug: {}
@@ -128,7 +145,7 @@ targets:
         product: Clocks
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCShared
+        DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
       configs:
         Debug: {}
@@ -152,7 +169,7 @@ targets:
         product: Clocks
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCLiveService
+        DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
       configs:
         Debug: {}
@@ -175,7 +192,7 @@ targets:
         product: Clocks
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCPreview
+        DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
       configs:
         Debug: {}
@@ -199,7 +216,7 @@ targets:
         product: Clocks
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchApp.SCMock
+        DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: NO
       configs:
         Debug: {}
@@ -229,7 +246,6 @@ targets:
         product: Clocks
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchAppTests
         GENERATE_INFOPLIST_FILE: YES
         ENABLE_BITCODE: NO
       configs:
@@ -246,7 +262,6 @@ targets:
       - target: SCShared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).SilentCueWatchAppUITests
         DEVELOPMENT_TARGET: $(TARGET_DEVICE_IDENTIFIER)
         TEST_TARGET_NAME: "SilentCue Watch App"
         GENERATE_INFOPLIST_FILE: YES

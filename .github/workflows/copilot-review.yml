@@ -27,7 +27,7 @@ jobs:
               const res = await github.rest.pulls.requestReviewers({
                 ...context.repo,
                 pull_number: pr,
-                reviewers: ['github-copilot']
+                reviewers: ['github-copilot']   // ★ここが重要
               });
               core.notice(`Copilot reviewer request status: ${res.status}`);
             } catch (error) {

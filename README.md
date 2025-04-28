@@ -39,7 +39,6 @@ SilentCue/
 ├── SilentCue Watch AppUITests/
 │   ├── Constant/
 │   ├── Extension/
-│   ├── Util/
 │   └── Tests/
 ├── .gitignore
 ├── .swiftformat

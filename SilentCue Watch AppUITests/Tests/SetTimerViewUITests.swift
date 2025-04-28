@@ -3,7 +3,7 @@ import SCShared
 import XCTest
 
 final class SetTimerViewUITests: XCTestCase {
-    var app: XCUIApplication?
+    var app: XCUIApplication!
     // Accessibility Identifiers
     let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
     let countdownView = SCAccessibilityIdentifiers.CountdownView.self
@@ -17,40 +17,26 @@ final class SetTimerViewUITests: XCTestCase {
         application.launch()
         app = application
 
-        guard let unwrappedApp = app else {
-            XCTFail("XCUIApplication instance failed to initialize in setUp.")
-            return
-        }
-        XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されていること")
-
-        // 初回起動時に対して通知を許可 (要素チェックの前に実行)
-        NotificationPermissionHelper.ensureNotificationPermission(for: unwrappedApp)
-
         // デバッグ用に要素階層を出力
         print("--- SetTimerView setUp UI Tree Start ---")
-        print(unwrappedApp.debugDescription)
+        print(app.debugDescription)
         print("--- SetTimerView setUp UI Tree End ---")
 
         // SetTimerView の主要要素（スタートボタン）が表示されることを確認
         XCTAssertTrue(
-            unwrappedApp.buttons[setTimerView.startTimerButton.rawValue]
+            app.buttons[setTimerView.startTimerButton.rawValue]
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "SetTimerView のスタートボタンが表示されること"
         )
     }
 
     override func tearDown() {
-        app?.terminate()
+        app.terminate()
         app = nil
         super.tearDown()
     }
 
     func testInitialViewState() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
-
         let minutesModeButtonExists = app
             .buttons[setTimerView.minutesModeButton.rawValue]
             .waitForExistence(timeout: UITestConstants.Timeout.standard)
@@ -79,10 +65,6 @@ final class SetTimerViewUITests: XCTestCase {
     }
 
     func testTimerModeSwitching() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
         let timeModeButton = app.buttons[setTimerView.timeModeButton.rawValue]
         let minutesModeButton = app.buttons[setTimerView.minutesModeButton.rawValue]
         let minutesPicker = app.otherElements[setTimerView.minutesPickerView.rawValue]
@@ -100,11 +82,6 @@ final class SetTimerViewUITests: XCTestCase {
     }
 
     func testMinutesPickerInteraction() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
-
         let minutesPicker = app.otherElements[setTimerView.minutesPickerView.rawValue]
         // 初期値の取得
         let initialValueLabel = minutesPicker.staticTexts.firstMatch.label
@@ -124,11 +101,6 @@ final class SetTimerViewUITests: XCTestCase {
     }
 
     func testHourMinutePickerInteraction() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
-
         // 時刻モードへ切り替え
         let timeModeButton = app.buttons[setTimerView.timeModeButton.rawValue]
         XCTAssertTrue(timeModeButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "時刻指定モードボタンが存在すること")
@@ -190,10 +162,6 @@ final class SetTimerViewUITests: XCTestCase {
     }
 
     func testStartButtonExistsAndTappable() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
         let startButton = app.buttons[setTimerView.startTimerButton.rawValue]
 
         // ボタンが表示されるように少し上にスワイプ (ピッカーを避けるため上部で)
@@ -207,11 +175,6 @@ final class SetTimerViewUITests: XCTestCase {
         // タップと画面遷移
         startButton.tap()
 
-        // UI階層をデバッグ出力 (遷移確認前)
-        print("--- UI Tree Before CountdownView Check ---")
-        print(app.debugDescription)
-        print("--- End UI Tree ---")
-
         // CountdownView 要素で画面遷移確認 (タイムアウト延長)
         XCTAssertTrue(
             app.staticTexts[countdownView.countdownTimeDisplay.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
@@ -220,10 +183,6 @@ final class SetTimerViewUITests: XCTestCase {
     }
 
     func testSettingsButtonExistsAndTappable() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
         // ナビゲーションバーの設定ボタン取得
         let settingsButton = app.navigationBars[setTimerView.navigationBarTitle.rawValue]
             .buttons[setTimerView.openSettingsButton.rawValue].firstMatch

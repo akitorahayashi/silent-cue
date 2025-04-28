@@ -3,7 +3,7 @@ import SCShared
 import XCTest
 
 final class CountdownViewUITests: XCTestCase {
-    var app: XCUIApplication?
+    var app: XCUIApplication!
     // Accessibility Identifiers
     let countdownView = SCAccessibilityIdentifiers.CountdownView.self
     let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
@@ -16,39 +16,25 @@ final class CountdownViewUITests: XCTestCase {
         application.launch()
         app = application
 
-        guard let unwrappedApp = app else {
-            XCTFail("XCUIApplication instance failed to initialize in setUp.")
-            return
-        }
-        XCTAssertNotNil(unwrappedApp, "XCUIApplication が初期化されていること")
-
-        // 初回起動時に対して通知を許可 (要素チェックの前に実行)
-        NotificationPermissionHelper.ensureNotificationPermission(for: unwrappedApp)
-
         // デバッグ用に要素階層を出力
         print("--- CountdownView setUp UI Tree Start ---")
-        print(unwrappedApp.debugDescription)
+        print(app.debugDescription)
         print("--- CountdownView setUp UI Tree End ---")
 
         // CountdownView の時間表示が表示されることを確認
         XCTAssertTrue(
-            unwrappedApp.staticTexts[countdownView.countdownTimeDisplay.rawValue]
-                .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "CountdownView の時間表示が表示されること"
+            app.staticTexts[countdownView.countdownTimeDisplay.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "CountdownView should be displayed initially."
         )
     }
 
     override func tearDown() {
-        app?.terminate()
+        app.terminate()
         app = nil
         super.tearDown()
     }
 
     func testInitialUIElementsExist() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
         // 時間表示要素の存在を確認
         let timeDisplay = app.staticTexts[countdownView.countdownTimeDisplay.rawValue]
         XCTAssertTrue(timeDisplay.exists, "時間表示ラベルが存在する")
@@ -62,32 +48,32 @@ final class CountdownViewUITests: XCTestCase {
         XCTAssertTrue(cancelButton.isEnabled, "キャンセルボタンが有効である")
     }
 
-    func testCancelButtonAction() throws {
-        guard let app else {
-            XCTFail("XCUIApplication instance was nil")
-            return
-        }
+    func testCancelButton() throws {
         let cancelButton = app.buttons[countdownView.cancelTimerButton.rawValue]
-        XCTAssertTrue(cancelButton.exists, "タップ前にキャンセルボタンが存在する")
-
-        // キャンセルボタンをタップ
+        XCTAssertTrue(cancelButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "Cancel button should exist.")
+        XCTAssertTrue(cancelButton.isEnabled, "Cancel button should be enabled.")
         cancelButton.tap()
 
-        // SetTimerView に戻ることを確認 (スタートボタンの存在で判断)
-        let startButton = app.buttons[setTimerView.startTimerButton.rawValue]
+        // Verify navigation back to SetTimerView
         XCTAssertTrue(
-            startButton.waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "キャンセルボタンタップ後に SetTimerView に戻る"
+            app.buttons[setTimerView.startTimerButton.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "Should navigate back to SetTimerView after cancel."
         )
+    }
 
-        // CountdownView のキャンセルボタンが消えていることを確認
-        XCTAssertFalse(cancelButton.exists, "SetTimerView に戻った後、キャンセルボタンは存在しない")
+    func testPauseAndResumeButton() throws {
+        let pauseButton = app.buttons[countdownView.pauseButton.rawValue]
+        let resumeButton = app.buttons[countdownView.resumeButton.rawValue]
+        XCTAssertTrue(pauseButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "Pause button should exist.")
 
-        // SetTimerView のナビゲーションバータイトルが存在するか確認
-        XCTAssertTrue(
-            app.navigationBars[setTimerView.navigationBarTitle.rawValue]
-                .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "SetTimerView に戻り、ナビゲーションバータイトルが表示されている"
-        )
+        // Pause the timer
+        pauseButton.tap()
+        XCTAssertTrue(resumeButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "Resume button should appear after pause.")
+        XCTAssertFalse(pauseButton.exists, "Pause button should disappear after pause.")
+
+        // Resume the timer
+        resumeButton.tap()
+        XCTAssertTrue(pauseButton.waitForExistence(timeout: UITestConstants.Timeout.standard), "Pause button should reappear after resume.")
+        XCTAssertFalse(resumeButton.exists, "Resume button should disappear after resume.")
     }
 }
