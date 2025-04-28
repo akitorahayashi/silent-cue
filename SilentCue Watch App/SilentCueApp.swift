@@ -32,7 +32,6 @@ struct SilentCueWatchApp: App {
                     dependencies.notificationService = PreviewNotificationService()
                     dependencies.extendedRuntimeService = PreviewExtendedRuntimeService()
                     dependencies.hapticsService = PreviewHapticsService()
-                    dependencies.continuousClock = ImmediateClock()
                 }
             } else {
                 // --- 通常のデバッグビルド: デフォルトの依存関係でストアを初期化 ---

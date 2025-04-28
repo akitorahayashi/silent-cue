@@ -202,7 +202,7 @@ final class TimerLifecycleTests: XCTestCase {
     func testTimerFinishes_AtTime_Foreground() async throws {
         let fixedCalendar = calendar! // Use instance variable
 
-        var components = DateComponents(year: 2023, month: 10, day: 26, hour: 10, minute: 0, second: 0)
+        let components = DateComponents(year: 2023, month: 10, day: 26, hour: 10, minute: 0, second: 0)
         guard let fixedStartDate = fixedCalendar.date(from: components) else {
             XCTFail("Failed to create fixed start date using UTC calendar")
             return
@@ -298,7 +298,7 @@ final class TimerLifecycleTests: XCTestCase {
     func testStartAndCancelTimer_AtTime() async {
         let fixedCalendar = calendar! // Use instance variable
 
-        var components = DateComponents(year: 2023, month: 1, day: 1, hour: 14, minute: 0, second: 0)
+        let components = DateComponents(year: 2023, month: 1, day: 1, hour: 14, minute: 0, second: 0)
         guard let fixedStartDate = fixedCalendar.date(from: components) else {
             XCTFail("Failed to create fixed start date using UTC calendar")
             return

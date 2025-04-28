@@ -139,9 +139,9 @@ final class SetTimerViewUITests: XCTestCase {
 
         // CountdownView のキャンセルボタンが表示されるかで画面遷移を確認
         XCTAssertTrue(
-            app.buttons[countdownViewIDs.cancelTimerButton.rawValue] // Wait for the cancel button
-                .waitForExistence(timeout: UITestConstants.Timeout.standard * 2),
-            "スタートボタンタップ後、CountdownViewに遷移する (キャンセルボタンの表示を確認)"
+            app.buttons[countdownViewIDs.cancelTimerButton.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
+            "スタートボタンタップ後、CountdownViewに遷移する"
         )
     }
 
