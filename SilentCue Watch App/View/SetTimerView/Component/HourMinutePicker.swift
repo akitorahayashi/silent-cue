@@ -1,3 +1,4 @@
+import SCShared
 import SwiftUI
 
 struct HourMinutePicker: View {
@@ -13,7 +14,7 @@ struct HourMinutePicker: View {
                 }
             }
             .pickerStyle(.wheel)
-            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.hourPickerWheel.rawValue)
+            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.hourPicker.rawValue)
 
             Picker("分", selection: selectedMinute) {
                 ForEach(0 ..< 60) { minute in
@@ -22,12 +23,8 @@ struct HourMinutePicker: View {
                 }
             }
             .pickerStyle(.wheel)
-            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.minutePickerWheel.rawValue)
+            .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.minutePicker.rawValue)
         }
-        .accessibilityIdentifier(
-            SCAccessibilityIdentifiers.SetTimerView.hourMinutePickerView
-                .rawValue
-        )
         .frame(height: 100)
         .padding(.horizontal, 6)
     }

@@ -1,3 +1,4 @@
+import SCShared
 import SwiftUI
 
 struct CancelButtonView: View {
@@ -9,8 +10,6 @@ struct CancelButtonView: View {
                 .foregroundStyle(.primary)
                 .font(.system(size: 16))
         }
-        .accessibilityLabel("CancelTimerButton")
-        .accessibilityIdentifier(SCAccessibilityIdentifiers.CountdownView.cancelTimerButton.rawValue)
         .buttonStyle(.plain)
         .padding(.horizontal)
     }

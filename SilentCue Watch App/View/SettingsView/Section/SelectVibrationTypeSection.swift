@@ -1,3 +1,4 @@
+import SCShared
 import SwiftUI
 
 struct SelectVibrationTypeSection: View {
@@ -26,7 +27,6 @@ struct SelectVibrationTypeSection: View {
                         }
                     }
                 })
-                .accessibilityLabel("VibrationTypeOption\(hapticType.rawValue.capitalized)")
                 .accessibilityIdentifier(accessibilityIdentifier(for: hapticType))
                 .accessibilityAddTraits(hapticType == selectedHapticType ? .isSelected : [])
             }

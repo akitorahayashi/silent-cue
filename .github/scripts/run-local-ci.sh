@@ -19,7 +19,7 @@ run_unit_tests=false
 run_ui_tests=false
 run_archive=false
 skip_build_for_testing=false
-run_all=true # Default to running all steps if no specific args are given
+run_all=true # 引数指定がない場合は全ステップを実行
 
 # === Argument Parsing ===
 specific_action_requested=false
@@ -29,24 +29,24 @@ while [[ $# -gt 0 ]]; do
     --all-tests)
       run_unit_tests=true
       run_ui_tests=true
-      run_archive=false # Only run tests if this flag is specified
+      run_archive=false # このフラグ指定時はテストのみ実行
       run_all=false
       specific_action_requested=true
-      shift # past argument
+      shift
       ;;
     --unit-test)
       run_unit_tests=true
-      run_archive=false # Only run tests if this flag is specified
+      run_archive=false # このフラグ指定時はテストのみ実行
       run_all=false
       specific_action_requested=true
-      shift # past argument
+      shift
       ;;
     --ui-test)
       run_ui_tests=true
-      run_archive=false # Only run tests if this flag is specified
+      run_archive=false # このフラグ指定時はテストのみ実行
       run_all=false
       specific_action_requested=true
-      shift # past argument
+      shift
       ;;
     --archive-only)
       run_unit_tests=false
@@ -54,23 +54,23 @@ while [[ $# -gt 0 ]]; do
       run_archive=true
       run_all=false
       specific_action_requested=true
-      shift # past argument
+      shift
       ;;
     --test-without-building)
       skip_build_for_testing=true
-      run_archive=false # Cannot archive without building
+      run_archive=false # ビルドなしではアーカイブ不可
       run_all=false
-      # Keep specific_action_requested status from other flags
-      shift # past argument
+      # 他のフラグによる specific_action_requested の状態を維持
+      shift
       ;;
-    *)    # unknown option
+    *)    # 不明なオプション
       echo "Unknown option: $1"
       exit 1
       ;;
   esac
 done
 
-# If no specific action was requested, run everything
+# 特定のアクションが要求されなかった場合、全て実行
 if [ "$specific_action_requested" = false ]; then
   run_unit_tests=true
   run_ui_tests=true
@@ -94,26 +94,32 @@ fail() {
   exit 1
 }
 
-check_command() {
-  if ! command -v $1 &> /dev/null; then
-    echo "⚠️ Warning: '$1' command not found. Attempting to install..."
-    if [ "$1" == "xcpretty" ]; then
-      gem install xcpretty || fail "Failed to install xcpretty. Please install it manually (gem install xcpretty)."
-      success "xcpretty installed successfully."
-    else
-      fail "Required command '$1' is not installed. Please install it."
-    fi
+
+# === XcodeGen ===
+# プロジェクト生成 (アーカイブ時 or ビルドを伴うテスト実行時)
+if [[ "$skip_build_for_testing" = false && ( "$run_archive" = true || "$run_unit_tests" = true || "$run_ui_tests" = true ) ]]; then
+  step "Generating Xcode project using XcodeGen"
+  # mint の存在確認
+  if ! command -v mint &> /dev/null; then
+      fail "Mint がインストールされていません。先に mint をインストールしてください。(brew install mint)"
   fi
-}
+  # xcodegen の存在確認 (なければ bootstrap)
+  if ! mint list | grep -q 'XcodeGen'; then
+      echo "mint で XcodeGen が見つかりません。'mint bootstrap' を実行します..."
+      mint bootstrap || fail "mint パッケージの bootstrap に失敗しました。"
+  fi
+  echo "Running xcodegen..."
+  mint run xcodegen || fail "XcodeGen によるプロジェクト生成に失敗しました。"
+  # プロジェクトファイルの存在確認
+  if [ ! -d "$PROJECT_FILE" ]; then
+    fail "XcodeGen 実行後、プロジェクトファイル '$PROJECT_FILE' が見つかりません。"
+  fi
+  success "Xcode project generated successfully."
+fi
 
 # === Main Script ===
 
-# Check prerequisites
-step "Checking prerequisites"
-check_command xcpretty
-success "Prerequisites met."
-
-# Clean previous outputs and create directories (only if not skipping build)
+# 前回の出力削除とディレクトリ作成 (ビルドスキップ時以外)
 if [ "$skip_build_for_testing" = false ] || [ "$run_archive" = true ]; then
   step "Cleaning previous outputs and creating directories"
   echo "Removing old $OUTPUT_DIR directory if it exists..."
@@ -124,7 +130,7 @@ if [ "$skip_build_for_testing" = false ] || [ "$run_archive" = true ]; then
   success "Directories created under $OUTPUT_DIR."
 else
   step "Skipping cleanup and directory creation (reusing existing build outputs)"
-  # Ensure required directories for tests exist if running tests without building
+  # ビルドなしでテストを実行する場合、必要なディレクトリが存在するか確認
   if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
       if [ ! -d "$TEST_DERIVED_DATA_DIR" ]; then
           fail "Cannot run tests without building: DerivedData directory not found at $TEST_DERIVED_DATA_DIR. Run a full build first."
@@ -138,7 +144,6 @@ fi
 if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
   step "Running Tests"
 
-  # Find simulator
   echo "Finding simulator..."
   SIMULATOR_ID=$(./.github/scripts/find-simulator.sh)
   if [ -z "$SIMULATOR_ID" ]; then
@@ -147,7 +152,7 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
   echo "Using Simulator ID: $SIMULATOR_ID"
   success "Simulator selected."
 
-  # Build for Testing (unless skipped)
+  # Build for Testing (スキップされていない場合)
   if [ "$skip_build_for_testing" = false ]; then
     echo "Building for testing..."
     set -o pipefail && xcodebuild build-for-testing \
@@ -158,7 +163,7 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
       -configuration Debug \
       -skipMacroValidation \
       CODE_SIGNING_ALLOWED=NO \
-    | xcpretty -c || fail "Build for testing failed."
+    | xcpretty -c
     success "Build for testing completed."
   else
       echo "Skipping build for testing as requested (--test-without-building)."
@@ -171,6 +176,8 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
   # Run Unit Tests
   if [ "$run_unit_tests" = true ]; then
     echo "Running unit tests..."
+    # Remove existing result bundle if it exists
+    rm -rf "$TEST_RESULTS_DIR/unit/TestResults.xcresult"
     set -o pipefail && xcodebuild test-without-building \
       -project "$PROJECT_FILE" \
       -scheme "$UNIT_TEST_SCHEME" \
@@ -178,9 +185,8 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
       -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
       -enableCodeCoverage NO \
       -resultBundlePath "$TEST_RESULTS_DIR/unit/TestResults.xcresult" \
-    | xcpretty -c || echo "Unit test execution finished with non-zero exit code (ignoring for local check)."
+    | xcbeautify --report junit --report-path "$TEST_RESULTS_DIR/unit/junit.xml"
 
-    # Check Unit Test Results Bundle Existence
     echo "Verifying unit test results bundle..."
     if [ ! -d "$TEST_RESULTS_DIR/unit/TestResults.xcresult" ]; then
       fail "Unit test result bundle not found at $TEST_RESULTS_DIR/unit/TestResults.xcresult"
@@ -191,6 +197,8 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
   # Run UI Tests
   if [ "$run_ui_tests" = true ]; then
     echo "Running UI tests..."
+    # Remove existing result bundle if it exists
+    rm -rf "$TEST_RESULTS_DIR/ui/TestResults.xcresult"
     set -o pipefail && xcodebuild test-without-building \
       -project "$PROJECT_FILE" \
       -scheme "$UI_TEST_SCHEME" \
@@ -198,9 +206,8 @@ if [ "$run_unit_tests" = true ] || [ "$run_ui_tests" = true ]; then
       -derivedDataPath "$TEST_DERIVED_DATA_DIR" \
       -enableCodeCoverage NO \
       -resultBundlePath "$TEST_RESULTS_DIR/ui/TestResults.xcresult" \
-    | xcpretty -c || echo "UI test execution finished with non-zero exit code (ignoring for local check)."
+    | xcbeautify --report junit --report-path "$TEST_RESULTS_DIR/ui/junit.xml"
 
-    # Check UI Test Results Bundle Existence
     echo "Verifying UI test results bundle..."
     if [ ! -d "$TEST_RESULTS_DIR/ui/TestResults.xcresult" ]; then
       fail "UI test result bundle not found at $TEST_RESULTS_DIR/ui/TestResults.xcresult"
@@ -216,7 +223,6 @@ if [ "$run_archive" = true ]; then
   ARCHIVE_PATH="$ARCHIVE_DIR/SilentCue.xcarchive"
   ARCHIVE_APP_PATH="$ARCHIVE_PATH/Products/Applications/$WATCH_APP_SCHEME.app"
 
-  # Archive Build
   echo "Building archive..."
   set -o pipefail && xcodebuild \
     -project "$PROJECT_FILE" \
@@ -228,10 +234,9 @@ if [ "$run_archive" = true ]; then
     -skipMacroValidation \
     CODE_SIGNING_ALLOWED=NO \
     archive \
-  | xcpretty -c || fail "Archive build failed."
+  | xcpretty -c
   success "Archive build completed."
 
-  # Verify Archive Contents
   echo "Verifying archive contents..."
   if [ ! -d "$ARCHIVE_APP_PATH" ]; then
     echo "Error: '$WATCH_APP_SCHEME.app' not found in expected archive location ($ARCHIVE_APP_PATH)."

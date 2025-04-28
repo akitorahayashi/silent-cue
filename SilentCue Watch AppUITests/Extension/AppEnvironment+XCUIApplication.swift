@@ -1,3 +1,4 @@
+import SCShared
 @testable import SilentCue_Watch_App
 import XCTest
 
@@ -15,15 +16,19 @@ extension SCAppEnvironment {
     /// 指定された初期画面と追加引数でUIテスト環境をセットアップする
     static func setupUITestEnv(
         for app: XCUIApplication,
-        initialView: InitialViewOption? = nil,
-        otherArguments: [SCAppEnvironment.LaunchArguments] = []
+        initialView: InitialViewOption?
+        // notificationAuthorized: Bool
     ) {
         var arguments: [String] = [LaunchArguments.uiTesting.rawValue]
         if let initialViewRawValue = initialView?.rawValue {
             arguments.append(initialViewRawValue)
         }
-        arguments.append(contentsOf: otherArguments.map(\.rawValue))
 
         app.launchArguments = arguments
+
+        var environment: [String: String] = [:]
+        environment[LaunchEnvironmentKeys.uiTestNotificationAuthorized.rawValue] = "FALSE"
+        // notificationAuthorized ? "TRUE" :
+        app.launchEnvironment = environment
     }
 }

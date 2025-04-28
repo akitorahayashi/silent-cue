@@ -1,3 +1,4 @@
+import SCShared
 import SwiftUI
 
 struct StartButton: View {
@@ -20,7 +21,6 @@ struct StartButton: View {
                 .foregroundStyle(.primary)
         })
         .buttonStyle(.plain)
-        .accessibilityLabel("開始")
         .accessibilityIdentifier(SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue)
         .padding(.horizontal)
         .padding(.top, 12)

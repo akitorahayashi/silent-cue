@@ -6,6 +6,7 @@ DerivedData/
 *.moved-aside
 *.pbxuser
 !default.pbxuser
+build/
 
 ## Objective-C/Swift固有のファイル
 *.hmap
@@ -29,6 +30,14 @@ DerivedData/
 *.p12
 *.cer
 *.mobileprovision
+/.cursor/
 
 # CI/CD output directory
-ci-outputs/ 
+ci-outputs/
+
+*.xcodeproj
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+*.xcuserdatad/
+*.xcuserdata/

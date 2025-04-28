@@ -1,3 +1,4 @@
+import SCShared
 import SwiftUI
 
 struct NotifyEndTimeView: View {
@@ -28,8 +29,6 @@ struct NotifyEndTimeView: View {
                     .foregroundStyle(.primary)
             }
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.notifyEndTimeViewVStack.rawValue)
         .opacity(appearAnimation ? 1.0 : 0.0)
         .offset(y: appearAnimation ? 0 : 20)
         .animation(.easeInOut(duration: 0.5).delay(0.2), value: appearAnimation)

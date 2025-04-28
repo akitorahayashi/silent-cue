@@ -1,5 +1,5 @@
 import ComposableArchitecture
-import Foundation
+import SCShared
 
 /// 設定画面に関連するアクション
 enum SettingsAction: Equatable {
@@ -15,7 +15,7 @@ enum SettingsAction: Equatable {
     // 設定の変更関連
     case selectHapticType(HapticType)
     @available(*, deprecated, message: "Use selectHapticType, saving is now an effect.")
-    case saveSettings // Keep for now if legacy tests depend on it, otherwise remove
+    case saveSettings
 
     // --- New Haptic Feedback Actions ---
     case startHapticPreview(HapticType) // プレビュー開始 & 初期再生 & タイマー起動
@@ -27,8 +27,6 @@ enum SettingsAction: Equatable {
     case previewHapticFeedback(HapticType)
     @available(*, deprecated, message: "Use stopHapticPreview")
     case previewHapticCompleted
-    // previewingHapticChanged is no longer needed as state is updated directly
-    // case previewingHapticChanged(Bool)
 
     // ナビゲーション関連
     case backButtonTapped

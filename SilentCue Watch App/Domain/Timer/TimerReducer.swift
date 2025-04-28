@@ -1,37 +1,28 @@
 import ComposableArchitecture
 import Foundation
+import UserNotifications
 
 /// タイマー関連のすべての機能を管理するReducer
 struct TimerReducer: Reducer {
     typealias State = TimerState
-    // Action は TimerAction.swift で定義
     typealias Action = TimerAction
 
-    // Internal Actions Enum (これはここにネストしても良い、あるいは TimerAction 内でも良い)
-    // 外部から直接参照されないため、Reducer 内にある方がカプセル化される場合もある
     enum InternalAction {
         case backgroundTimerDidComplete
         case finalizeTimerCompletion(completionDate: Date)
     }
 
-    // キャンセル用ID
     private enum CancelID { case timer, background }
-
-    // MARK: - 依存関係
 
     @Dependency(\.continuousClock) var clock
     @Dependency(\.notificationService) var notificationService
     @Dependency(\.extendedRuntimeService) var extendedRuntimeService
     @Dependency(\.date) var date
-
-    // MARK: - Reducer 本体
+    @Dependency(\.calendar) var calendar
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
-            // 依存関係はプロパティになったため、Reduceブロックでキャプチャする必要はない
-
             switch action {
-                // タイマー設定のアクション
                 case let .timerModeSelected(mode):
                     return handleTimerModeSelected(&state, mode: mode)
 
@@ -44,30 +35,27 @@ struct TimerReducer: Reducer {
                 case let .minuteSelected(minute):
                     return handleMinuteSelected(&state, minute: minute)
 
-                // タイマー操作
                 case .startTimer:
                     return handleStartTimer(&state)
 
                 case .cancelTimer:
                     return handleCancelTimer(&state)
 
-                case .tick: // clockエフェクトから受信
+                case .tick:
                     return handleTick(&state)
 
-                case .timerFinished: // tickがゼロになったときに内部的に送信
+                case .timerFinished:
                     return handleTimerFinished(&state)
 
                 case .dismissCompletionView:
                     return handleDismissCompletionView(&state)
 
-                // バックグラウンド対応
                 case .updateTimerDisplay:
                     return handleUpdateTimerDisplay(&state)
 
-                // --- 内部アクション ---
                 case let .internal(internalAction):
                     switch internalAction {
-                        case .backgroundTimerDidComplete: // backgroundエフェクトから受信
+                        case .backgroundTimerDidComplete:
                             return handleBackgroundTimerDidComplete(&state)
                         case let .finalizeTimerCompletion(completionDate):
                             return handleFinalizeTimerCompletion(&state, completionDate: completionDate)
@@ -76,15 +64,13 @@ struct TimerReducer: Reducer {
         }
     }
 
-    // MARK: - アクション処理メソッド - タイマー設定
-
     private func handleTimerModeSelected(_ state: inout State, mode: TimerMode) -> Effect<Action> {
         state.timerMode = mode
         if mode == .time {
             let now = date()
-            let calendar = Calendar.current
-            state.selectedHour = calendar.component(.hour, from: now)
-            state.selectedMinute = calendar.component(.minute, from: now)
+            let currentComponents = calendar.dateComponents([.hour, .minute], from: now)
+            state.selectedHour = currentComponents.hour ?? 12
+            state.selectedMinute = currentComponents.minute ?? 0
         }
         recalculateTimerProperties(&state)
         return .none
@@ -108,25 +94,63 @@ struct TimerReducer: Reducer {
         return .none
     }
 
-    // MARK: - アクション処理メソッド - タイマー操作
-
-    // キャンセルIDを使用するマージされたエフェクトに戻す
     private func handleStartTimer(_ state: inout State) -> Effect<Action> {
         guard !state.isRunning else { return .none }
         recalculateTimerProperties(&state)
 
         let now = date()
         state.startDate = now
-        state.targetEndDate = now.addingTimeInterval(TimeInterval(state.totalSeconds))
         state.isRunning = true
         state.completionDate = nil
 
-        // エフェクトに必要な値をキャプチャ
-        let totalSeconds = state.totalSeconds
-        let targetEndDate = state.targetEndDate
-        let durationMinutes = state.timerDurationMinutes
+        let targetEndDate: Date?
+        if state.timerMode == .minutes {
+            targetEndDate = now.addingTimeInterval(Double(state.totalSeconds))
+        } else {
+            var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
+            dateComponents.hour = state.selectedHour
+            dateComponents.minute = state.selectedMinute
+            dateComponents.second = 0
 
-        // エフェクト1: ティッカー
+            guard var calculatedTargetDate = calendar.date(from: dateComponents) else {
+                print(
+                    """
+                    Error: Could not create target date from components in handleStartTimer
+                    using calendar: \(calendar).
+                    Components: \(dateComponents)
+                    """
+                )
+                state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
+                return .none
+            }
+
+            if calculatedTargetDate <= now {
+                guard let tomorrowTargetDate = calendar.date(byAdding: .day, value: 1, to: calculatedTargetDate) else {
+                    print(
+                        """
+                        Error: Could not calculate tomorrow's target date in handleStartTimer
+                        using calendar: \(calendar).
+                        Base date: \(calculatedTargetDate)
+                        """
+                    )
+                    state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
+                    return .none
+                }
+                calculatedTargetDate = tomorrowTargetDate
+            }
+            targetEndDate = calculatedTargetDate
+        }
+
+        guard let unwrappedTargetEndDate = targetEndDate else {
+            print("Error: Target end date is nil after calculation in handleStartTimer.")
+            state.targetEndDate = calendar.date(byAdding: .day, value: 1, to: now)
+            return .none
+        }
+        state.targetEndDate = unwrappedTargetEndDate
+
+        let totalSeconds = state.totalSeconds
+        let timerDurationMinutes = state.timerDurationMinutes
+
         let tickerEffect = Effect<Action>.run { send in
             for await _ in clock.timer(interval: .seconds(1)) {
                 await send(.tick)
@@ -134,21 +158,34 @@ struct TimerReducer: Reducer {
         }
         .cancellable(id: CancelID.timer)
 
-        // エフェクト2: バックグラウンドセッション / 通知 / 完了監視
-        let backgroundEffect = Effect<Action>.run { send in
-            // セッション開始
+        let backgroundEffect = Effect<Action>.run { [
+            unwrappedTargetEndDate,
+            totalSeconds,
+            timerDurationMinutes = state.timerDurationMinutes
+        ] send in
             extendedRuntimeService.startSession(
                 duration: TimeInterval(totalSeconds + 10),
-                targetEndTime: targetEndDate
+                targetEndTime: unwrappedTargetEndDate
             )
-            // 通知をスケジュール
-            if let targetDate = targetEndDate {
-                notificationService.scheduleTimerCompletionNotification(
-                    at: targetDate,
-                    minutes: durationMinutes
-                )
-            }
-            // 完了イベントを監視
+            let content = UNMutableNotificationContent()
+            content.title = "タイマー完了"
+            content.body = "\(timerDurationMinutes)分のタイマーが完了しました"
+            content.sound = .default
+
+            let triggerComponents = calendar.dateComponents(
+                [.year, .month, .day, .hour, .minute, .second],
+                from: unwrappedTargetEndDate
+            )
+            let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+            let identifier = "TIMER_COMPLETED_NOTIFICATION"
+
+            await Task {
+                do {
+                    try await notificationService.add(identifier: identifier, content: content, trigger: trigger)
+                } catch {
+                    print("Failed to schedule timer completion notification: \(error)")
+                }
+            }.value
             for await _ in extendedRuntimeService.completionEvents {
                 await send(.internal(.backgroundTimerDidComplete))
             }
@@ -158,7 +195,6 @@ struct TimerReducer: Reducer {
         return .merge(tickerEffect, backgroundEffect)
     }
 
-    // キャンセルIDと直接的なサービス呼び出しを使用するように戻す
     private func handleCancelTimer(_ state: inout State) -> Effect<Action> {
         let wasRunning = state.isRunning
         state.isRunning = false
@@ -169,124 +205,92 @@ struct TimerReducer: Reducer {
 
         guard wasRunning else { return .none }
 
-        // 明示的にセッションを停止し、通知をキャンセル
         extendedRuntimeService.stopSession()
-        notificationService.cancelTimerCompletionNotification()
+        let identifier = "TIMER_COMPLETED_NOTIFICATION"
+        notificationService.removePendingNotificationRequests(withIdentifiers: [identifier])
 
-        // 実行中のエフェクトをIDでキャンセル
         return .merge(
             .cancel(id: CancelID.timer),
             .cancel(id: CancelID.background)
         )
     }
 
-    // --- 状態を直接デクリメントするように変更 ---
     private func handleTick(_ state: inout State) -> Effect<Action> {
         guard state.isRunning else {
-            // タイマーが予期せず停止した場合、エフェクトをキャンセル
             return .merge(.cancel(id: CancelID.timer), .cancel(id: CancelID.background))
         }
-        // 残り秒数を直接デクリメント
         state.currentRemainingSeconds = max(0, state.currentRemainingSeconds - 1)
         if state.currentRemainingSeconds <= 0 {
-            return .send(.timerFinished) // タイマーがゼロになったときに内部アクションを送信
+            return .send(.timerFinished)
         }
         return .none
     }
 
-    // --- 変更終了 ---
-
-    // フォアグラウンド完了ロジックに戻す
     private func handleTimerFinished(_: inout State) -> Effect<Action> {
-        // バックグラウンドエフェクト（セッション/通知/監視）をキャンセル
-        // 通知も明示的にキャンセル
-        notificationService.cancelTimerCompletionNotification()
-        // 注意: extendedRuntimeService.stopSession() は finalize で呼び出される
+        let identifier = "TIMER_COMPLETED_NOTIFICATION"
+        notificationService.removePendingNotificationRequests(withIdentifiers: [identifier])
 
         return .concatenate(
             .cancel(id: CancelID.background),
             .send(.internal(.finalizeTimerCompletion(completionDate: date())))
-            // タイマーエフェクトは tick が停止するか finalize 経由で自身をキャンセルする
         )
     }
-
-    // MARK: - アクション処理メソッド - バックグラウンド
 
     private func handleUpdateTimerDisplay(_ state: inout State) -> Effect<Action> {
         if !state.isRunning { return .none }
 
         if let targetEnd = state.targetEndDate {
-            let now = date() // 注入されたdateを使用
+            let now = date()
             state.currentRemainingSeconds = max(0, Int(ceil(targetEnd.timeIntervalSince(now))))
         } else {
             state.currentRemainingSeconds = 0
         }
 
         if state.currentRemainingSeconds <= 0 {
-            // ここで検出された場合（例：アプリがフォアグラウンドになった時）、完了フローをトリガー
             return .send(.timerFinished)
         }
         return .none
     }
 
-    // MARK: - アクション処理メソッド - Internal
-
-    // バックグラウンド完了ロジックに戻す
     private func handleBackgroundTimerDidComplete(_: inout State) -> Effect<Action> {
-        // バックグラウンドエフェクトが完了を通知。
-        // tick タイマーエフェクトをキャンセル。
         .concatenate(
             .cancel(id: CancelID.timer),
             .send(.internal(.finalizeTimerCompletion(completionDate: date())))
-            // バックグラウンドエフェクトは完了時または finalize 経由で自身をキャンセルする
         )
     }
 
-    // finalize ロジックに戻す
     private func handleFinalizeTimerCompletion(_ state: inout State, completionDate: Date) -> Effect<Action> {
         guard state.isRunning else { return .none }
         state.isRunning = false
         state.completionDate = completionDate
 
-        // 明示的にセッションを停止（既に停止している場合は冪等）
         extendedRuntimeService.stopSession()
-        // 残っているエフェクトがあればIDでキャンセル
         return .merge(
             .cancel(id: CancelID.timer),
             .cancel(id: CancelID.background)
         )
     }
 
-    // MARK: - アクション処理メソッド - その他
-
-    // dismiss ロジックに戻す
     private func handleDismissCompletionView(_ state: inout State) -> Effect<Action> {
         state.completionDate = nil
-        // 残っている可能性のあるエフェクトをキャンセル
         return .merge(
             .cancel(id: CancelID.timer),
             .cancel(id: CancelID.background)
         )
     }
 
-    // MARK: - プライベートヘルパーメソッド
-
-    /// Recalculates timer properties (totalSeconds, currentRemainingSeconds, timerDurationMinutes)
-    /// based on the current state and injected dependencies.
-    /// Should be called whenever timer settings (mode, minutes, hour, minute) change,
-    /// or when resetting the timer (e.g., on cancel).
     private func recalculateTimerProperties(_ state: inout State) {
-        let now = date()
         state.totalSeconds = TimeCalculation.calculateTotalSeconds(
             mode: state.timerMode,
             selectedMinutes: state.selectedMinutes,
             selectedHour: state.selectedHour,
             selectedMinute: state.selectedMinute,
-            now: now
+            now: date(),
+            calendar: calendar
         )
         if !state.isRunning {
             state.currentRemainingSeconds = state.totalSeconds
         }
-        state.timerDurationMinutes = state.totalSeconds / 60
+        state.timerDurationMinutes = max(1, (state.totalSeconds + 59) / 60)
     }
 }

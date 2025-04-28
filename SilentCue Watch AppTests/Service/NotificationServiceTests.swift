@@ -1,3 +1,4 @@
+import SCMock
 @testable import SilentCue_Watch_App
 import UserNotifications
 import XCTest
@@ -5,6 +6,7 @@ import XCTest
 final class NotificationServiceTests: XCTestCase {
     var service: MockNotificationService!
 
+    @MainActor // Add MainActor since setup involves UI-related mock setup potentially
     override func setUp() {
         super.setUp()
         service = MockNotificationService()
@@ -15,80 +17,155 @@ final class NotificationServiceTests: XCTestCase {
         super.tearDown()
     }
 
-    // 同期的な認証リクエストと結果のコールバックを検証
-    func testRequestAuthorization_SyncCompletion() {
-        let expectation = expectation(description: "requestAuthorization 完了")
-        var receivedGranted: Bool?
+    // Test requesting authorization successfully
+    func testRequestAuthorization_Success() async {
+        service.requestAuthorizationShouldSucceed = true
 
-        service.requestAuthorizationGrantedResult = true
-        service.completeRequestAuthorizationAsynchronously = false
+        let granted = await service.requestAuthorization()
 
-        service.requestAuthorization { granted in
-            receivedGranted = granted
-            expectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 0.1)
         XCTAssertEqual(service.requestAuthorizationCallCount, 1)
-        XCTAssertEqual(receivedGranted, true)
+        XCTAssertTrue(granted)
+        XCTAssertEqual(service.mockAuthorizationStatus, .authorized) // Check if status updated
     }
 
-    // 認証ステータスの確認と結果のコールバックを検証
-    func testCheckAuthorizationStatus() {
-        let expectation = expectation(description: "checkAuthorizationStatus 完了")
-        var receivedStatus: Bool?
+    // Test requesting authorization failure
+    func testRequestAuthorization_Failure() async {
+        service.requestAuthorizationShouldSucceed = false
 
-        service.checkAuthorizationStatusResult = false
+        let granted = await service.requestAuthorization()
 
-        service.checkAuthorizationStatus { isAuthorized in
-            receivedStatus = isAuthorized
-            expectation.fulfill()
+        XCTAssertEqual(service.requestAuthorizationCallCount, 1)
+        XCTAssertFalse(granted)
+        // Status should remain as it was or become denied, depending on exact mock logic
+        // Let's assume it stays notDetermined if it fails before prompting
+        XCTAssertEqual(service.mockAuthorizationStatus, .notDetermined)
+    }
+
+    // Test checking authorization status when authorized
+    func testGetAuthorizationStatus_Authorized() async {
+        service.mockAuthorizationStatus = .authorized
+
+        let status = await service.getAuthorizationStatus()
+
+        XCTAssertEqual(service.getAuthorizationStatusCallCount, 1)
+        XCTAssertEqual(status, .authorized)
+    }
+
+    // Test checking authorization status when denied
+    func testGetAuthorizationStatus_Denied() async {
+        service.mockAuthorizationStatus = .denied
+
+        let status = await service.getAuthorizationStatus()
+
+        XCTAssertEqual(service.getAuthorizationStatusCallCount, 1)
+        XCTAssertEqual(status, .denied)
+    }
+
+    // Test scheduling a notification (using the add method)
+    func testScheduleNotification_AddsRequest() async throws {
+        let identifier = "testTimer"
+        let content = UNMutableNotificationContent()
+        content.title = "Test"
+        content.body = "Test Body"
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 60, repeats: false)
+
+        try await service.add(identifier: identifier, content: content, trigger: trigger)
+
+        XCTAssertEqual(service.addRequestCallCount, 1)
+        XCTAssertEqual(service.addedRequests.count, 1)
+        XCTAssertEqual(service.addedRequests.first?.identifier, identifier)
+        XCTAssertEqual(service.addedRequests.first?.content.title, "Test")
+        XCTAssertNotNil(service.addedRequests.first?.trigger as? UNTimeIntervalNotificationTrigger)
+    }
+
+    // Test scheduling a notification when adding should throw an error
+    func testScheduleNotification_ThrowsError() async {
+        let identifier = "testErrorTimer"
+        let content = UNMutableNotificationContent()
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 60, repeats: false)
+        let expectedError = NSError(domain: "TestError", code: 123, userInfo: nil)
+        service.addRequestShouldThrowError = expectedError
+
+        do {
+            try await service.add(identifier: identifier, content: content, trigger: trigger)
+            XCTFail("Expected add method to throw an error, but it did not.")
+        } catch {
+            XCTAssertEqual(service.addRequestCallCount, 1)
+            XCTAssertEqual(error as NSError, expectedError)
+            XCTAssertTrue(service.addedRequests.isEmpty)
         }
-
-        waitForExpectations(timeout: 0.1)
-        XCTAssertEqual(service.checkAuthorizationStatusCallCount, 1)
-        XCTAssertEqual(receivedStatus, false)
     }
 
-    // タイマー完了通知のスケジュール時にパラメータが記録されるか
-    func testScheduleTimerCompletionNotification_RecordsParameters() {
-        let testDate = Date()
-        let testMinutes = 15
+    // Test cancelling a specific notification
+    func testCancelSpecificNotification_RemovesRequest() async throws {
+        // Add a request first
+        let identifier1 = "timer1"
+        let identifier2 = "timer2"
+        let content = UNMutableNotificationContent()
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 60, repeats: false)
+        try await service.add(identifier: identifier1, content: content, trigger: trigger)
+        try await service.add(identifier: identifier2, content: content, trigger: trigger)
+        XCTAssertEqual(service.addedRequests.count, 2)
 
-        service.scheduleTimerCompletionNotification(at: testDate, minutes: testMinutes)
+        service.removePendingNotificationRequests(withIdentifiers: [identifier1])
 
-        XCTAssertEqual(service.scheduleTimerCompletionNotificationCallCount, 1)
-        XCTAssertEqual(service.lastScheduledNotificationParams?.targetDate, testDate)
-        XCTAssertEqual(service.lastScheduledNotificationParams?.minutes, testMinutes)
+        XCTAssertEqual(service.removePendingRequestsCallCount, 1)
+        XCTAssertEqual(service.removedRequestIdentifiers, [identifier1])
+        XCTAssertEqual(service.addedRequests.count, 1)
+        XCTAssertEqual(service.addedRequests.first?.identifier, identifier2)
     }
 
-    // タイマー完了通知のキャンセルが記録されるか
-    func testCancelTimerCompletionNotification_IncrementsCallCount() {
-        service.cancelTimerCompletionNotification()
-        XCTAssertEqual(service.cancelTimerCompletionNotificationCallCount, 1)
+    // Test cancelling all notifications
+    func testCancelAllNotifications_RemovesAllRequests() async throws {
+        // Add some requests first
+        let identifier1 = "timer1"
+        let identifier2 = "timer2"
+        let content = UNMutableNotificationContent()
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 60, repeats: false)
+        try await service.add(identifier: identifier1, content: content, trigger: trigger)
+        try await service.add(identifier: identifier2, content: content, trigger: trigger)
+        XCTAssertEqual(service.addedRequests.count, 2)
+
+        service.removeAllPendingNotificationRequests()
+
+        XCTAssertEqual(service.removeAllPendingRequestsCallCount, 1)
+        // Check if removed identifiers contains the ones added (order might vary)
+        XCTAssertTrue(service.removedRequestIdentifiers.contains(identifier1))
+        XCTAssertTrue(service.removedRequestIdentifiers.contains(identifier2))
+        XCTAssertTrue(service.addedRequests.isEmpty)
     }
 
-    // モックの状態がリセットされるか
-    func testReset() {
-        service.requestAuthorizationGrantedResult = false
-        service.checkAuthorizationStatusResult = false
-        service.completeRequestAuthorizationAsynchronously = true
-        service.requestAuthorization { _ in }
-        service.checkAuthorizationStatus { _ in }
-        service.scheduleTimerCompletionNotification(at: Date(), minutes: 5)
-        service.cancelTimerCompletionNotification()
+    // Test if the mock state resets correctly
+    @MainActor // Ensure reset happens on main actor if it interacts with properties potentially accessed from main
+    func testReset() async throws {
+        // Setup some state
+        service.mockAuthorizationStatus = .denied
+        service.requestAuthorizationShouldSucceed = false
+        service.addRequestShouldThrowError = NSError(domain: "Test", code: 1)
+        _ = await service.requestAuthorization()
+        _ = await service.getAuthorizationStatus()
+        try? await service.add(
+            identifier: "t1",
+            content: .init(),
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        )
+        service.removePendingNotificationRequests(withIdentifiers: ["t1"])
+        service.removeAllPendingNotificationRequests() // Call remove all as well
 
+        // Reset
         service.reset()
 
+        // Verify initial state
         XCTAssertEqual(service.requestAuthorizationCallCount, 0)
-        XCTAssertEqual(service.checkAuthorizationStatusCallCount, 0)
-        XCTAssertEqual(service.scheduleTimerCompletionNotificationCallCount, 0)
-        XCTAssertNil(service.lastScheduledNotificationParams)
-        XCTAssertEqual(service.cancelTimerCompletionNotificationCallCount, 0)
-        XCTAssertTrue(service.requestAuthorizationGrantedResult)
-        XCTAssertFalse(service.completeRequestAuthorizationAsynchronously)
-        XCTAssertTrue(service.checkAuthorizationStatusResult)
-        XCTAssertFalse(service.completeCheckAuthorizationStatusAsynchronously)
+        XCTAssertEqual(service.getAuthorizationStatusCallCount, 0)
+        XCTAssertEqual(service.addRequestCallCount, 0)
+        XCTAssertEqual(service.removePendingRequestsCallCount, 0)
+        XCTAssertEqual(service.removeAllPendingRequestsCallCount, 0)
+        XCTAssertTrue(service.addedRequests.isEmpty)
+        XCTAssertTrue(service.removedRequestIdentifiers.isEmpty)
+        XCTAssertEqual(service.mockAuthorizationStatus, .notDetermined)
+        XCTAssertTrue(service.requestAuthorizationShouldSucceed)
+        XCTAssertNil(service.addRequestShouldThrowError)
     }
 }
 

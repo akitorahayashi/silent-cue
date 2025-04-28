@@ -1,3 +1,4 @@
+import ComposableArchitecture
 import Foundation
 
 /// タイマーのモード（分後か時刻指定か）
@@ -32,12 +33,10 @@ struct TimerState: Equatable {
     var completionDate: Date?
     var timerDurationMinutes: Int
 
-    // Reverted initializer: Removed calendar and timerCalculator parameters
-    // Uses Date() and Calendar.current implicitly for defaults
     init(
         timerMode: TimerMode = .minutes,
         selectedMinutes: Int = 1,
-        now: Date = Date(), // Keep explicit now for testability
+        now: Date = Date(),
         isRunning: Bool = false,
         startDate: Date? = nil,
         targetEndDate: Date? = nil,
@@ -55,7 +54,6 @@ struct TimerState: Equatable {
         let currentMinute = calendar.component(.minute, from: now)
         selectedMinute = currentMinute
 
-        // Call the utility function for calculation
         totalSeconds = TimeCalculation.calculateTotalSeconds(
             mode: timerMode,
             selectedMinutes: selectedMinutes,

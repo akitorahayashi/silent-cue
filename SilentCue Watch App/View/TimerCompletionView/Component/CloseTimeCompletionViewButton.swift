@@ -1,3 +1,4 @@
+import SCShared
 import SwiftUI
 
 struct CloseTimeCompletionViewButton: View {
@@ -21,7 +22,6 @@ struct CloseTimeCompletionViewButton: View {
                 .foregroundStyle(.primary)
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier(SCAccessibilityIdentifiers.TimerCompletionView.closeTimeCompletionViewButton.rawValue)
         .padding(.horizontal)
         .opacity(appearAnimation ? 1.0 : 0.0)
         .animation(.easeInOut(duration: 0.4), value: appearAnimation)

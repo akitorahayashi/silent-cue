@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SCShared
 import SwiftUI
 
 // MARK: - メインビュー

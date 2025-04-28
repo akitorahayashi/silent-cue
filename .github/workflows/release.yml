@@ -60,9 +60,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spm-
 
-      - name: Install xcpretty
-        run: gem install xcpretty
-
       - name: Build Release Archive (Unsigned)
         id: archive
         run: |
@@ -82,7 +79,7 @@ jobs:
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             archive \
-          | xcpretty -c
+          | xcbeautify
           echo "archive_path=$ARCHIVE_PATH" >> $GITHUB_OUTPUT
 
       - name: Verify Archive Contents

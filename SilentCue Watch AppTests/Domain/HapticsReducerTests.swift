@@ -1,60 +1,59 @@
 import ComposableArchitecture
+import SCMock
+import SCProtocol
+import SCShared
 @testable import SilentCue_Watch_App
 import WatchKit
 import XCTest
 
 @MainActor
 final class HapticsReducerTests: XCTestCase {
-    func testUpdateSettings() async {
-        let store = TestStore(
-            initialState: AppState(),
-            reducer: { AppReducer() }
-        )
+    var store: TestStore<CoordinatorState, CoordinatorAction>!
+    var clock: TestClock<Duration>!
 
-        await store.send(AppAction.haptics(.updateHapticSettings(
+    override func setUp() {
+        super.setUp()
+        clock = TestClock<Duration>()
+        store = TestStore(
+            initialState: CoordinatorState(),
+            reducer: { CoordinatorReducer() },
+            withDependencies: {
+                $0.hapticsService = MockHapticsService()
+                $0.continuousClock = self.clock
+                $0.date = .constant(Date(timeIntervalSince1970: 0))
+            }
+        )
+    }
+
+    override func tearDown() {
+        store = nil
+        clock = nil
+        super.tearDown()
+    }
+
+    func testUpdateSettings() async {
+        await store.send(CoordinatorAction.haptics(.updateHapticSettings(
             type: HapticType.strong
         ))) { state in
             state.haptics.hapticType = HapticType.strong
         }
-        await store.finish() // Add finish for potential effects
+        await store.finish()
     }
 
     func testStartAndStopHaptic() async {
-        // HapticsのEffect.runの中身（実際の振動）はテスト困難なため、
-        // 状態変化とキャンセルIDの管理を中心にテストする
-        let clock = TestClock() // Add TestClock
-
-        struct MockHapticsService: HapticsServiceProtocol {
-            func play(_: WKHapticType) async {}
-        }
-
-        let store = TestStore(
-            initialState: AppState(),
-            reducer: { AppReducer() },
-            withDependencies: { dependencies in
-                dependencies.hapticsService = MockHapticsService()
-                dependencies.continuousClock = clock
-                dependencies.date = .constant(Date(timeIntervalSince1970: 0))
-            }
-        )
-
         // Hapticを開始
-        await store.send(AppAction.haptics(.startHaptic(HapticType.weak))) { state in
+        await store.send(CoordinatorAction.haptics(.startHaptic(HapticType.weak))) { state in
             state.haptics.isActive = true
             state.haptics.hapticType = HapticType.weak
         }
-        // Effect.run は実行されるが、Task {} の中身は通常実行されない（TestClockなどが必要）
-        // TestClockを使って時間依存の処理をテストする
-        await clock.advance(by: .seconds(1)) // Advance time if needed for effects
+
+        await clock.advance(by: .seconds(1))
 
         // Hapticを停止
-        await store.send(AppAction.haptics(.stopHaptic)) { state in
+        await store.send(CoordinatorAction.haptics(.stopHaptic)) { state in
             state.haptics.isActive = false
         }
-        // .stopHapticで .cancel(id: .haptic) が発行されることを確認
-        // TestStoreが自動でキャンセルをハンドルしてくれる
 
-        // エフェクト完了待ち (startHapticとstopHaptic)
         await store.finish()
     }
 }
