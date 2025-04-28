@@ -58,7 +58,7 @@ jobs:
           -project "SilentCue.xcodeproj" \
           -scheme "SilentCue Watch App" \
           -destination "platform=watchOS Simulator,id=${{ steps.select_simulator.outputs.simulator_id }}" \
-          -derivedDataPath ./ci-outputs/test-results/derived-data \
+          -derivedDataPath ./ci-outputs/test-results/DerivedData \
           -configuration Debug \
           -skipMacroValidation \
           CODE_SIGNING_ALLOWED=NO \

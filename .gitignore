@@ -6,6 +6,7 @@ DerivedData/
 *.moved-aside
 *.pbxuser
 !default.pbxuser
+build/
 
 ## Objective-C/Swift固有のファイル
 *.hmap
