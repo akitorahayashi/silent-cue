@@ -16,8 +16,8 @@ extension SCAppEnvironment {
     /// 指定された初期画面と追加引数でUIテスト環境をセットアップする
     static func setupUITestEnv(
         for app: XCUIApplication,
-        initialView: InitialViewOption? = nil,
-        notificationAuthorized: Bool? = nil
+        initialView: InitialViewOption?
+        // notificationAuthorized: Bool
     ) {
         var arguments: [String] = [LaunchArguments.uiTesting.rawValue]
         if let initialViewRawValue = initialView?.rawValue {
@@ -27,9 +27,8 @@ extension SCAppEnvironment {
         app.launchArguments = arguments
 
         var environment: [String: String] = [:]
-        if let isAuthorized = notificationAuthorized {
-            environment[LaunchEnvironmentKeys.uiTestNotificationAuthorized.rawValue] = isAuthorized ? "TRUE" : "FALSE"
-        }
+        environment[LaunchEnvironmentKeys.uiTestNotificationAuthorized.rawValue] = "FALSE"
+        // notificationAuthorized ? "TRUE" :
         app.launchEnvironment = environment
     }
 }

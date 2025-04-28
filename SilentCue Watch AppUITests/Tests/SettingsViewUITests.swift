@@ -4,7 +4,6 @@ import XCTest
 
 final class SettingsViewUITests: XCTestCase {
     var app: XCUIApplication!
-    // Accessibility Identifiers
     let settingsView = SCAccessibilityIdentifiers.SettingsView.self
     let setTimerView = SCAccessibilityIdentifiers.SetTimerView.self
 
@@ -36,7 +35,7 @@ final class SettingsViewUITests: XCTestCase {
         let startTime = Date()
         var scrollAttempts = 0
 
-        // element の存在チェックはそのまま
+        // element の存在チェック
         while !element.exists, Date().timeIntervalSince(startTime) < timeout, scrollAttempts < maxScrollAttempts {
             XCUIDevice.shared.rotateDigitalCrown(delta: scrollDelta)
             scrollAttempts += 1
@@ -109,9 +108,18 @@ final class SettingsViewUITests: XCTestCase {
     }
 
     func testBackButtonNavigatesToSetTimerView() throws {
-        // SettingsViewのカスタム戻るボタンを Accessibility Identifier で取得
-        let backButton = app.buttons[settingsView.backButton.rawValue]
-        XCTAssertTrue(backButton.waitForExistence(timeout: UITestConstants.Timeout.short), "カスタム戻るボタン（ID: \(settingsView.backButton.rawValue)）が表示されている")
+        let navBar = app.navigationBars[settingsView.navigationBarTitle.rawValue]
+        XCTAssertTrue(
+            navBar.waitForExistence(timeout: UITestConstants.Timeout.short),
+            "ナビゲーションバー「\(settingsView.navigationBarTitle.rawValue)」が存在するはずです"
+        )
+
+        let backButton = navBar.buttons[settingsView.backButton.rawValue].firstMatch
+        XCTAssertTrue(
+            backButton.waitForExistence(timeout: UITestConstants.Timeout.short),
+            "カスタム戻るボタン（ID: \(settingsView.backButton.rawValue)）が" +
+                "ナビゲーションバーの子孫内に存在するはずです"
+        )
 
         // 戻るボタンをタップ
         backButton.tap()
@@ -120,7 +128,7 @@ final class SettingsViewUITests: XCTestCase {
         XCTAssertTrue(
             app.navigationBars[setTimerView.navigationBarTitle.rawValue] // SetTimerView のタイトルを期待
                 .waitForExistence(timeout: UITestConstants.Timeout.standard),
-            "SetTimerView に戻り、ナビゲーションバータイトル '\\(setTimerView.navigationBarTitle.rawValue)' が表示されている"
+            "SetTimerView に戻り、ナビゲーションバータイトル '\(setTimerView.navigationBarTitle.rawValue)' が表示されている"
         )
     }
 }

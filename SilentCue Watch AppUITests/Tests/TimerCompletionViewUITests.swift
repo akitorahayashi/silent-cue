@@ -5,7 +5,7 @@ import XCTest
 final class TimerCompletionViewUITests: XCTestCase {
     var app: XCUIApplication!
     let timerCompletionViewIDs = SCAccessibilityIdentifiers.TimerCompletionView.self
-    
+
     private func setup() {
         continueAfterFailure = false
         app = XCUIApplication()
@@ -46,7 +46,8 @@ final class TimerCompletionViewUITests: XCTestCase {
         closeButton.tap()
 
         XCTAssertTrue(
-            app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app.buttons[SCAccessibilityIdentifiers.SetTimerView.startTimerButton.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "閉じるボタンをタップ後、SetTimerViewに遷移する"
         )
     }

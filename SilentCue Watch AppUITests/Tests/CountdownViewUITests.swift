@@ -45,7 +45,8 @@ final class CountdownViewUITests: XCTestCase {
 
         // SetTimerView に戻ることを確認
         XCTAssertTrue(
-            app.buttons[setTimerView.startTimerButton.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app.buttons[setTimerView.startTimerButton.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "キャンセル後、SetTimerViewに戻る"
         )
     }

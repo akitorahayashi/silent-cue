@@ -1,6 +1,6 @@
 import ComposableArchitecture
-import SwiftUI
 import SCShared
+import SwiftUI
 
 struct CountdownView: View {
     let store: StoreOf<TimerReducer>

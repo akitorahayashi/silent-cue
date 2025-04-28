@@ -6,7 +6,7 @@ enum UITestConstants {
 
     /// タイムアウト関連の定数
     enum Timeout {
-        static let standard: TimeInterval = 5
-        static let short: TimeInterval = 3
+        static let standard: TimeInterval = 3
+        static let short: TimeInterval = 1
     }
 }

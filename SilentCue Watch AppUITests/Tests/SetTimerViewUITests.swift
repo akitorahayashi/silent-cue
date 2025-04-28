@@ -13,7 +13,6 @@ final class SetTimerViewUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
         app = XCUIApplication()
-        
         SCAppEnvironment.setupUITestEnv(for: app, initialView: .setTimerView)
         app.launch()
     }
@@ -117,7 +116,10 @@ final class SetTimerViewUITests: XCTestCase {
         // 値変更の確認
         XCTAssertTrue(
             finalHourLabel != initialHourLabel || finalMinuteLabel != initialMinuteLabel,
-            "Digital Crown 操作後に時または分の値が変わること (Initial: H=\(initialHourLabel), M=\(initialMinuteLabel), Final: H=\(finalHourLabel), M=\(finalMinuteLabel))"
+            """
+            Digital Crown 操作後に時または分の値が変わる
+            (Initial: H=\(initialHourLabel), M=\(initialMinuteLabel), Final: H=\(finalHourLabel), M=\(finalMinuteLabel))
+            """
         )
     }
 
@@ -129,16 +131,17 @@ final class SetTimerViewUITests: XCTestCase {
 
         // スワイプ操作は不安定なため、waitForExistence で確認し、存在すれば操作する方針に変更
         if !startButton.waitForExistence(timeout: UITestConstants.Timeout.standard) {
-             XCTFail("スタートボタンが見つかりませんでした")
-             return
-         }
+            XCTFail("スタートボタンが見つかりませんでした")
+            return
+        }
 
         XCTAssertTrue(startButton.isEnabled, "スタートボタンがタップ可能である")
         startButton.tap()
 
         // CountdownView 要素で画面遷移確認
         XCTAssertTrue(
-            app.staticTexts[countdownViewIDs.countdownTimeDisplay.rawValue].waitForExistence(timeout: UITestConstants.Timeout.standard),
+            app.staticTexts[countdownViewIDs.countdownTimeDisplay.rawValue]
+                .waitForExistence(timeout: UITestConstants.Timeout.standard),
             "スタートボタンタップ後、CountdownViewに遷移する"
         )
     }
