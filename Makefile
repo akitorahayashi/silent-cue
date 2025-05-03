@@ -146,9 +146,11 @@ archive: $(ARCHIVE_OUTPUT_DIR) ## 署名なしのリリースアーカイブを�
 
 verify-archive: ## 署名なしアーカイブの内容を検証
 	@echo ">>> Verifying Archive Contents"
-	@ARCHIVE_APP_PATH="$(ARCHIVE_PATH)/Products/Applications/$(SCHEME_WATCH_APP).app"; \
-	if [ ! -d "$$ARCHIVE_APP_PATH" ]; then \
-		echo "❌ Error: '$(SCHEME_WATCH_APP).app' not found in expected archive location ($$ARCHIVE_APP_PATH)."; \
+	@EXPECTED_APP_NAME="$(SCHEME_WATCH_APP).app"; \
+	EXPECTED_APP_PATH="$(ARCHIVE_PATH)/Products/Applications/$$EXPECTED_APP_NAME"; \
+	echo "Checking path: '$$EXPECTED_APP_PATH'"; \
+	if [ ! -d "$$EXPECTED_APP_PATH" ]; then \
+		echo "❌ Error: '$$EXPECTED_APP_NAME' not found in expected archive location ('$$EXPECTED_APP_PATH')."; \
 		echo "--- Archive Contents (on error) ---"; \
 		ls -lR "$(ARCHIVE_PATH)" || echo "Archive directory not found or empty."; \
 		exit 1; \
@@ -194,7 +196,6 @@ RELEASE_ARCHIVE_PATH := $(RELEASE_ARCHIVE_DIR)/SilentCue.xcarchive
 RELEASE_DERIVED_DATA_PATH := $(RELEASE_ARCHIVE_DIR)/DerivedData
 EXPORT_DIR := ./ipa_export
 EXPORT_OPTIONS_PLIST := ./ExportOptions.plist
-RELEASE_IPA_PATH := $(shell find $(EXPORT_DIR) -name "*.ipa" -print -quit)
 
 $(RELEASE_ARCHIVE_DIR):
 	mkdir -p $(RELEASE_ARCHIVE_DIR) $(RELEASE_DERIVED_DATA_PATH)
@@ -212,9 +213,11 @@ release-archive: $(RELEASE_ARCHIVE_DIR) ## リリース用の署名なしアー�
 		CODE_SIGNING_ALLOWED=NO \
 	| $(XCBEAUTIFY)
 	@echo ">>> Verifying Release Archive Contents"
-	@ARCHIVE_APP_PATH="$(RELEASE_ARCHIVE_PATH)/Products/Applications/$(SCHEME_WATCH_APP).app"; \
-	if [ ! -d "$$ARCHIVE_APP_PATH" ]; then \
-		echo "❌ Error: '$(SCHEME_WATCH_APP).app' not found in expected release archive location ($$ARCHIVE_APP_PATH)."; \
+	@EXPECTED_APP_NAME="$(SCHEME_WATCH_APP).app"; \
+	EXPECTED_APP_PATH="$(RELEASE_ARCHIVE_PATH)/Products/Applications/$$EXPECTED_APP_NAME"; \
+	echo "Checking path: '$$EXPECTED_APP_PATH'"; \
+	if [ ! -d "$$EXPECTED_APP_PATH" ]; then \
+		echo "❌ Error: '$$EXPECTED_APP_NAME' not found in expected release archive location ('$$EXPECTED_APP_PATH')."; \
 		ls -lR "$(RELEASE_ARCHIVE_PATH)" || echo "Release archive directory not found or empty."; \
 		exit 1; \
 	fi
@@ -234,11 +237,6 @@ export-ipa: release-archive $(EXPORT_DIR)
 		-exportPath "$(EXPORT_DIR)" \
 		-exportOptionsPlist "$(EXPORT_OPTIONS_PLIST)" \
 		-allowProvisioningUpdates
-	@RELEASE_IPA_PATH=$$(find $(EXPORT_DIR) -name "*.ipa" -print -quit); \
-	if [ -z "$$RELEASE_IPA_PATH" ]; then \
-		echo "❌ Error: Could not find exported IPA file in $(EXPORT_DIR)."; \
-		exit 1; \
-	fi
 	@echo "✅ IPA exported successfully to $$RELEASE_IPA_PATH"
 
 validate-ipa: export-ipa

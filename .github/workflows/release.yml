@@ -56,7 +56,7 @@ jobs:
           mint bootstrap
           mint run xcodegen generate
 
-      # --- Signing Setup (Remains in Workflow) ---
+      # --- Signing Setup ---
       - name: Create temporary keychain
         id: keychain
         run: |
