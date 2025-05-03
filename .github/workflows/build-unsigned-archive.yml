@@ -10,6 +10,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Restore Mint Cache
+        uses: actions/cache@v4
+        id: cache-mint-packages-archive
+        with:
+          path: ~/.mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+
       - name: Install Mint
         run: brew install mint
 

@@ -46,20 +46,19 @@ FIND_SIM_CMD := \
 # Variable to cache the found Simulator ID (initially empty)
 _SIMULATOR_ID :=
 
-# Target to find and cache the simulator ID if not already found
+# Function to find simulator ID (only run once per make invocation if needed)
+define find_simulator_id_once
+  $(if $(_SIMULATOR_ID),, \
+    $(eval _SIMULATOR_ID := $(shell $(FIND_SIM_CMD))))
+endef
+
+# Target to ensure the simulator ID is found. Calls the function.
 .PHONY: ensure-simulator-id
 ensure-simulator-id:
-ifndef _SIMULATOR_ID
-	@echo "Finding simulator ID..."
-	@export FOUND_SIM_ID=$(shell $(FIND_SIM_CMD)); \
-	if [ -z "$$FOUND_SIM_ID" ]; then \
-		echo "Error: Could not find simulator ID. FIND_SIM_CMD output: $(shell $(FIND_SIM_CMD) 2>&1)" >&2; \
-		exit 1; \
-	else \
-		echo "Using Simulator ID: $$FOUND_SIM_ID"; \
-		$(eval _SIMULATOR_ID := $$FOUND_SIM_ID); \
-	fi
-endif
+	$(call find_simulator_id_once)
+	$(if $(_SIMULATOR_ID), \
+	    @echo "Using Simulator ID: $(_SIMULATOR_ID)", \
+	    $(error Could not find simulator ID. FIND_SIM_CMD output: $(shell $(FIND_SIM_CMD) 2>&1)))
 
 # Define destination using the potentially cached simulator ID
 # Use recursive assignment (=) here so it gets the value of _SIMULATOR_ID *when used*

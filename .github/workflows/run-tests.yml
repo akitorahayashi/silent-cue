@@ -8,16 +8,20 @@ on:
         value: ${{ jobs.report-status.outputs.test_result }}
 
 jobs:
-  # Combined setup, build, and test job using Makefile
   test:
     runs-on: macos-latest
-    # Add outputs if needed to report individual test step success/failure
-    # outputs:
-    #   unit_test_outcome: ${{ steps.unit_tests.outcome }}
-    #   ui_test_outcome: ${{ steps.ui_tests.outcome }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Restore Mint Cache
+        uses: actions/cache@v4
+        id: cache-mint-packages-tests
+        with:
+          path: ~/.mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
 
       - name: Install Mint
         run: brew install mint
@@ -28,10 +32,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.2' # Keep explicit Xcode version
-
-      # --- Build & Test Steps ---
-      # Makefile handles build-for-testing dependency internally
+          xcode-version: '16.2'
 
       - name: Run Unit Tests
         id: unit_tests
@@ -41,27 +42,24 @@ jobs:
         id: ui_tests
         run: make ui-test
 
-      # --- Artifact Upload ---
-      # Makefile creates output in predefined locations
-
       - name: Upload Unit Test Results
-        if: always() # Always upload even if tests fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-results-${{ github.run_id }}
-          path: ci-outputs/test-results/unit # Path defined in Makefile
+          path: ci-outputs/test-results/unit
           retention-days: 7
 
       - name: Upload UI Test Results
-        if: always() # Always upload even if tests fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ui-test-results-${{ github.run_id }}
-          path: ci-outputs/test-results/ui # Path defined in Makefile
+          path: ci-outputs/test-results/ui
           retention-days: 7
 
   report-status:
-    needs: [test] # Depends on the combined test job
+    needs: [test]
     runs-on: ubuntu-latest
     if: always()
     outputs:
@@ -70,8 +68,6 @@ jobs:
       - name: Check test job outcomes and set final status
         id: set_status
         run: |
-          # Access step outcomes if defined in the 'test' job outputs:
-          # Check the overall job outcome for simplicity:
           echo "Test job outcome: ${{ needs.test.result }}"
           if [[ "${{ needs.test.result }}" == "success" ]]; then
             echo "Test job succeeded."
