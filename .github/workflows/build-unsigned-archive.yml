@@ -10,6 +10,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Mint
+        run: brew install mint
+
       - name: Generate Project
         run: make codegen
 

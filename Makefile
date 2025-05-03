@@ -23,31 +23,42 @@ XCODEBUILD := xcrun xcodebuild
 XCBEAUTIFY := xcrun xcbeautify
 MINT := mint
 
-# xcodebuild -showdestinations を使用し、最初に有効な 'Apple Watch' シミュレータのIDを抽出。
-# UIテストスキームで有効か検証する。
+# Simulator ID Finding Command (doesn't execute immediately)
 FIND_SIM_CMD := \
-	DESTINATIONS=$$($(XCODEBUILD) -showdestinations -project "$(PROJECT)" -scheme $(SCHEME_WATCH_APP) 2>/dev/null); \
-	SIM_INFO=$$(echo "$$DESTINATIONS" | grep 'platform:watchOS Simulator' | grep 'name:Apple Watch' | head -n 1); \
+	DESTINATIONS=$$($$(XCODEBUILD) -showdestinations -project "$(PROJECT)" -scheme $(SCHEME_WATCH_APP) 2>/dev/null); \
+	SIM_INFO=$$($$(echo "$$DESTINATIONS" | grep 'platform:watchOS Simulator' | grep 'name:Apple Watch' | head -n 1)); \
 	if [ -z "$$SIM_INFO" ]; then \
 		echo "Error: Could not find a suitable 'Apple Watch' simulator." >&2; \
 		exit 1; \
 	fi; \
-	SIM_ID=$$(echo "$$SIM_INFO" | sed -nE 's/.*id:([0-9A-F-]+).*/\1/p'); \
+	SIM_ID=$$($$(echo "$$SIM_INFO" | sed -nE 's/.*id:([0-9A-F-]+).*/\1/p')); \
 	if [ -z "$$SIM_ID" ]; then \
 		echo "Error: Could not extract simulator ID from: $$SIM_INFO" >&2; \
 		exit 1; \
 	fi; \
-	UI_DEST_CHECK=$$($(XCODEBUILD) -showdestinations -project "$(PROJECT)" -scheme $(SCHEME_UI_TESTS) 2>/dev/null | grep "id:$$SIM_ID" || echo "not found"); \
+	UI_DEST_CHECK=$$($$(XCODEBUILD) -showdestinations -project "$(PROJECT)" -scheme $(SCHEME_UI_TESTS) 2>/dev/null | grep "id:$$SIM_ID" || echo "not found"); \
 	if [[ "$$UI_DEST_CHECK" == "not found" ]]; then \
 		echo "Error: Simulator ID $$SIM_ID not valid for UI test scheme $(SCHEME_UI_TESTS)." >&2; \
 		exit 1; \
 	fi; \
 	echo $$SIM_ID
 
-SIMULATOR_ID ?= $(shell $(FIND_SIM_CMD))
-DESTINATION_SIMULATOR := "platform=watchOS Simulator,id=$(SIMULATOR_ID)"
+# Variable to cache the found Simulator ID (initially empty)
+_SIMULATOR_ID :=
 
-.PHONY: all setup-mint codegen build-for-testing unit-test ui-test test archive verify-archive lint format-check quality clean clean-derived-data help release-archive setup-signing export-ipa validate-ipa upload-ipa github-release release clean-release
+# Target to find and cache the simulator ID if not already found
+.PHONY: ensure-simulator-id
+ensure-simulator-id:
+	$(if $(_SIMULATOR_ID),,\
+		@echo "Finding simulator ID..."; \
+		export _SIMULATOR_ID := $(shell $(FIND_SIM_CMD)); \
+		$(if $(_SIMULATOR_ID),@echo "Using Simulator ID: $(_SIMULATOR_ID)",$(error Could not find simulator ID. FIND_SIM_CMD output: $(shell $(FIND_SIM_CMD) 2>&1)))
+	)
+
+# Define destination using the potentially cached simulator ID
+DESTINATION_SIMULATOR := "platform=watchOS Simulator,id=$(_SIMULATOR_ID)"
+
+.PHONY: all setup-mint codegen build-for-testing unit-test ui-test run-tests build-unsigned-archive verify-archive lint format-check code-quality-check clean clean-derived-data help release-archive setup-signing export-ipa validate-ipa upload-ipa github-release release clean-release
 
 help: ## ヘルプメッセージを表示
 	@echo "Usage: make [target]"
@@ -70,8 +81,8 @@ codegen:
 $(DERIVED_DATA_PATH):
 	mkdir -p $(DERIVED_DATA_PATH)
 
-build-for-testing: $(DERIVED_DATA_PATH) ## シミュレータでのテスト用にアプリをビルド
-	@echo ">>> Building for Testing (Simulator ID: $(SIMULATOR_ID))"
+build-for-testing: $(DERIVED_DATA_PATH) ensure-simulator-id ## シミュレータでのテスト用にアプリをビルド
+	@echo ">>> Building for Testing (Simulator ID: $(_SIMULATOR_ID))"
 	set -o pipefail && $(XCODEBUILD) build-for-testing \
 		-project "$(PROJECT)" \
 		-scheme $(SCHEME_WATCH_APP) \
@@ -85,8 +96,8 @@ build-for-testing: $(DERIVED_DATA_PATH) ## シミュレータでのテスト用�
 $(UNIT_TEST_RESULTS_DIR):
 	mkdir -p $(UNIT_TEST_RESULTS_DIR)
 
-unit-test: build-for-testing $(UNIT_TEST_RESULTS_DIR) ## Unitテストを実行
-	@echo ">>> Running Unit Tests (Simulator ID: $(SIMULATOR_ID))"
+unit-test: build-for-testing ensure-simulator-id ## Unitテストを実行
+	@echo ">>> Running Unit Tests (Simulator ID: $(_SIMULATOR_ID))"
 	set -o pipefail && $(XCODEBUILD) test-without-building \
 		-project "$(PROJECT)" \
 		-scheme $(SCHEME_UNIT_TESTS) \
@@ -105,8 +116,8 @@ unit-test: build-for-testing $(UNIT_TEST_RESULTS_DIR) ## Unitテストを実行
 $(UI_TEST_RESULTS_DIR):
 	mkdir -p $(UI_TEST_RESULTS_DIR)
 
-ui-test: build-for-testing $(UI_TEST_RESULTS_DIR) ## UIテストを実行
-	@echo ">>> Running UI Tests (Simulator ID: $(SIMULATOR_ID))"
+ui-test: build-for-testing ensure-simulator-id ## UIテストを実行
+	@echo ">>> Running UI Tests (Simulator ID: $(_SIMULATOR_ID))"
 	set -o pipefail && $(XCODEBUILD) test-without-building \
 		-project "$(PROJECT)" \
 		-scheme $(SCHEME_UI_TESTS) \

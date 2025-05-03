@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Install Mint
+        run: brew install mint
       - name: Run Code Quality Checks
         run: make code-quality-check
 
