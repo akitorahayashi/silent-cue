@@ -133,7 +133,7 @@ identifier_name:
     - x
     - y
     - i
-    - j # ループカウンタ用
+    - j
     - to
     - at
     - of

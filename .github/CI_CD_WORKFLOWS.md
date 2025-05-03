@@ -2,10 +2,10 @@
 
 ## ファイル構成
 
-- **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインですPull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します
-- **`run-tests.yml`**: アプリのビルドとテスト（ユニット・UI）を実行する再利用可能ワークフロー`.github/scripts/` 配下の関数定義ファイルを `source` し、必要な関数（シミュレータ選択、ビルド、テスト実行、結果検証など）を直接呼び出します
+- **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインで、Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します
+- **`run-tests.yml`**: アプリのビルドとテスト（ユニット・UI）を実行する再利用可能ワークフローです
 - **`setup-mint.yml`**: Mint（Swiftパッケージマネージャ）をセットアップし、依存ライブラリ（SwiftFormat, SwiftLintなど）をインストール・キャッシュする再利用可能ワークフローです
-- **`build-unsigned-archive.yml`**: 署名なしのアーカイブ（.xcarchive）を作成する再利用可能ワークフロー`.github/scripts/` 配下の関数定義ファイルを `source` し、必要な関数（アーカイブビルド、結果検証など）を直接呼び出します
+- **`build-unsigned-archive.yml`**: 署名なしのアーカイブ（.xcarchive）を作成する再利用可能ワークフローです
 - **`code-quality.yml`**: コード品質チェック（SwiftFormat, SwiftLint）を実行します
 - **`test-reporter.yml`**: テスト結果のレポートを作成し、PRにコメントします
 - **`copilot-review.yml`**: GitHub CopilotによるPRレビューを自動化します
@@ -15,7 +15,7 @@
 
 ### ワークフローの分割
 メインの`ci-cd-pipeline.yml`が、テスト、コード品質チェック、アーカイブビルドなどの個別の再利用可能ワークフローを呼び出す構造になっています
-コアなビルド・テスト・アーカイブ処理は、`.github/scripts/build-steps/` および `.github/scripts/common/` 配下のシェルスクリプトに関数として定義され、各ワークフローが必要に応じてこれらを呼び出します
+コアなビルド・テスト・アーカイブ処理は、各ワークフロー (`run-tests.yml`, `build-unsigned-archive.yml` など) の `run` ステップ内に `xcodebuild` コマンドとして直接記述されています (一部ヘルパースクリプト `.github/scripts/find-simulator.sh` を除く)
 
 ### 包括的なビルドプロセスの検証
 Pull Requestや`main`ブランチへのプッシュ時に、以下の自動チェックを実行します
@@ -30,14 +30,14 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 - 成果物管理: ビルドやテストの成果物はGitHub Artifactsとしてアップロード・管理されます
 - 出力先を統一: 全てのビルド・テスト関連の成果物は、一貫して `ci-outputs/` ディレクトリ以下に出力されます
 
-### 自動リリース機能
+### リリース機能
 `vX.Y.Z`形式のタグがプッシュされると、`release.yml`ワークフローが自動的にトリガーされ、以下の処理を実行します
 - アプリケーションのビルドと署名
 - App Store ConnectへのIPAファイルアップロード
 - GitHub Releaseの作成とIPAファイルの添付
 
 ### ローカルでの検証
-主要なCIステップ（テスト、アーカイブ）のコアロジックを呼び出すローカル検証用スクリプト (`.github/scripts/run-local-ci.sh`) を提供しており、ローカル環境でCIの主要な処理フローを再現・検証できますこのスクリプトは、CIワークフローが使用する関数定義ファイルを `source` して利用します
+主要なCIステップ（テスト、アーカイブ）のコアロジックはワークフローファイルに直接記述されていますが、一部共通処理 (`find-simulator.sh`) やローカルでの検証を容易にするためのスクリプト (`.github/scripts/run-local-ci.sh`) も提供されています。ただし、`run-local-ci.sh` はCIで実行されるロジックとは**独立しており**、ローカルでの再現・検証を目的としています。CIのワークフロー自体は、このスクリプトを**利用しません**。
 
 ## 機能詳細
 
@@ -70,21 +70,23 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
     1.  Mintキャッシュを復元し、Mintをインストール
     2.  Xcodeセットアップ
     3.  Xcodeプロジェクト生成 (`mint run xcodegen generate`)
-    4.  watchOSシミュレータを選択
-    5.  テスト用ビルド (`build_for_testing`)
-    6.  Unitテスト実行と結果検証 (`run_unit_tests`, `verify_unit_test_results`)
-    7.  UIテスト実行と結果検証 (`run_ui_tests`, `verify_ui_test_results`)
-    8.  JUnit XMLレポート生成
+    4.  watchOSシミュレータを選択 (`.github/scripts/find-simulator.sh` を実行)
+    5.  テスト用ビルド (`xcodebuild build-for-testing` を実行)
+    6.  Unitテスト実行と結果検証 (`xcodebuild test-without-building` を実行、結果ファイルの存在確認)
+    7.  UIテスト実行と結果検証 (`xcodebuild test-without-building` を実行、結果ファイルの存在確認)
+    8.  JUnit XMLレポート生成 (`xcbeautify` を利用)
     9.  テスト結果 (`.xcresult`, `.xml`) をアーティファクト (`test-results`) としてアップロード
 
 ### `build-unsigned-archive.yml` (署名なしアーカイブ作成)
 
 - **トリガー**: `ci-cd-pipeline.yml` から `workflow_call` で呼び出し
 - **処理**:
-    1.  共通・ビルドステップ関数 (`build-archive.sh`) を `source`
-    2.  アーカイブビルド (`build_archive_step`)
-    3.  アーカイブ内容検証 (`verify_archive_step`)
-    4.  `.xcarchive` をアーティファクト (`unsigned-archive`) としてアップロード
+    1.  Mintキャッシュを復元し、Mintをインストール
+    2.  Xcodeセットアップ
+    3.  Xcodeプロジェクト生成 (`mint run xcodegen generate`)
+    4.  アーカイブビルド (`xcodebuild archive` を実行)
+    5.  アーカイブ内容検証 (シェルスクリプトでファイル存在確認)
+    6.  `.xcarchive` をアーティファクト (`unsigned-archive`) としてアップロード
 
 ### `code-quality.yml` (コード品質チェック)
 
@@ -133,58 +135,7 @@ Pull Requestに対して、テスト結果のレポート、GitHub Copilotによ
 
 ## ローカルでのCIプロセスの検証
 
-GitHub Actions で実行される主要なCIステップ（テスト、アーカイブ）のコアロジックをローカルで検証するためのスクリプト (`.github/scripts/run-local-ci.sh`) を用意していますこのスクリプトは、`.github/scripts/` 配下の関数定義ファイルを `source` し、コマンドライン引数に基づいて適切な関数を呼び出すことで、CIの主要な処理フローを再現します
+**注意:** ローカル検証用スクリプト (`.github/scripts/run-local-ci.sh`) は、CIワークフローが実際に実行するステップとは独立したものです。このスクリプトはローカル環境でのビルド・テストプロセスをシミュレート・検証するために提供されていますが、CIパイプライン自体はこのスクリプトを使用しません。CIの実際の動作はワークフローファイル (`.yml`) に定義されています。
 
 初回実行前に、以下のコマンドでスクリプトに実行権限を付与してください
-```shell
-$ chmod +x .github/scripts/find-simulator.sh
-$ chmod +x .github/scripts/run-local-ci.sh
 ```
-
-### ビルドを含む検証
-
-ローカル環境でビルドからテストやアーカイブを実行し、CIワークフローで実行されるコアな処理が期待通りかを確認します
-
-```shell
-# 全てのステップ (ビルド、Unitテスト実行・検証、UIテスト実行・検証、アーカイブビルド・検証) を実行
-$ ./.github/scripts/run-local-ci.sh
-
-# テスト用ビルド + UnitテストとUIテストの両方を実行・検証
-$ ./.github/scripts/run-local-ci.sh --all-tests
-
-# テスト用ビルド + Unitテストのみを実行・検証
-$ ./.github/scripts/run-local-ci.sh --unit-test
-
-# テスト用ビルド + UIテストのみを実行・検証
-$ ./.github/scripts/run-local-ci.sh --ui-test
-
-# ビルド + アーカイブのみを実行・検証
-$ ./.github/scripts/run-local-ci.sh --archive-only
-```
-
-### テストのみ実行 (ビルド成果物を再利用)
-
-テストコードのみを修正した後、既存のビルド成果物 (`ci-outputs/test-results/DerivedData`) を再利用して、テストのみを高速に再実行・検証します
-事前に上記のコマンドで `--all-tests` や `--unit-test` などを実行してビルド成果物を作成しておく必要があります
-
-```shell
-# UnitテストとUIテストの両方を再実行・検証
-$ ./.github/scripts/run-local-ci.sh --test-without-building
-
-# Unitテストのみを再実行・検証
-$ ./.github/scripts/run-local-ci.sh --test-without-building --unit-test
-
-# UIテストのみを再実行・検証
-$ ./.github/scripts/run-local-ci.sh --test-without-building --ui-test
-```
-
-## 技術仕様
-
-- Xcodeバージョン: 16.2
-- テスト環境: watchOS シミュレータ
-- 依存ツール管理: Mint (SwiftFormat, SwiftLint), Homebrew (xcbeautify), RubyGems (xcpretty)
-- アーティファクト保持期間: ビルド関連 = 1日、テスト結果/アーカイブビルド = 7日
-- 出力先ディレクトリ: `ci-outputs/`
-  - `test-results/`: テストの結果 (`.xcresult`, `.xml`)
-  - `production/`: リリース用（署名なし）のアーカイブの結果
-
