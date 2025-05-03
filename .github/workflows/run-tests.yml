@@ -34,6 +34,38 @@ jobs:
         with:
           xcode-version: '16.2'
 
+      - name: Find Simulator ID
+        id: find_sim
+        run: |
+          set -o pipefail
+          echo "利用可能なApple Watchシミュレータを検索中..."
+          PROJECT="SilentCue.xcodeproj"
+          SCHEME_WATCH_APP="SilentCue Watch App"
+          SCHEME_UI_TESTS="SilentCue Watch AppUITests"
+
+          SIM_INFO=$(xcrun xcodebuild -showdestinations -project "$PROJECT" -scheme "$SCHEME_WATCH_APP" | grep 'platform:watchOS Simulator' | grep 'name:Apple Watch' | head -n 1)
+          if [[ -z "$SIM_INFO" ]]; then
+            echo "::error::エラー: スキーム '$SCHEME_WATCH_APP' に適した 'Apple Watch' シミュレータが見つかりません。"
+            exit 1
+          fi
+          echo "発見したシミュレータ情報: $SIM_INFO"
+
+          SIM_ID=$(echo "$SIM_INFO" | sed -nE 's/.*id:([0-9A-F-]+).*/\1/p')
+          if [[ -z "$SIM_ID" ]]; then
+            echo "::error::エラー: シミュレータIDを抽出できませんでした: $SIM_INFO"
+            exit 1
+          fi
+          echo "抽出したシミュレータID: $SIM_ID"
+
+          echo "UIテストスキームでシミュレータIDを検証中..."
+          if ! xcrun xcodebuild -showdestinations -project "$PROJECT" -scheme "$SCHEME_UI_TESTS" | grep -q "id:$SIM_ID"; then
+            echo "::error::エラー: シミュレータID $SIM_ID はUIテストスキーム '$SCHEME_UI_TESTS' で有効ではありません。"
+            exit 1
+          fi
+          echo "シミュレータID $SIM_ID が検証されました。"
+
+          echo "SIMULATOR_ID=$SIM_ID" >> $GITHUB_ENV
+
       - name: Run Unit Tests
         id: unit_tests
         run: make unit-test

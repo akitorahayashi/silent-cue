@@ -23,42 +23,6 @@ XCODEBUILD := xcrun xcodebuild
 XCBEAUTIFY := xcrun xcbeautify
 MINT := mint
 
-# シミュレータID検索コマンド
-FIND_SIM_CMD := \
-	set -o pipefail; \
-	SIM_INFO=$$($$(XCODEBUILD) -showdestinations -project "$(PROJECT)" -scheme $(SCHEME_WATCH_APP) 2>/dev/null | grep 'platform:watchOS Simulator' | grep 'name:Apple Watch' | head -n 1); \
-	if [ -z "$$SIM_INFO" ]; then \
-		echo "エラー: スキーム $(SCHEME_WATCH_APP) に適した 'Apple Watch' シミュレータが見つかりません。" >&2; \
-		exit 1; \
-	fi; \
-	SIM_ID=$$($$(echo "$$SIM_INFO" | sed -nE 's/.*id:([0-9A-F-]+).*/\1/p')); \
-	if [ -z "$$SIM_ID" ]; then \
-		echo "エラー: シミュレータIDを抽出できませんでした: $$SIM_INFO" >&2; \
-		exit 1; \
-	fi; \
-	# UIテストスキームでの有効性を検証
-	if ! $$(XCODEBUILD) -showdestinations -project "$(PROJECT)" -scheme $(SCHEME_UI_TESTS) 2>/dev/null | grep -q "id:$$SIM_ID"; then \
-		echo "エラー: シミュレータID $$SIM_ID はUIテストスキーム $(SCHEME_UI_TESTS) で有効ではありません。" >&2; \
-		exit 1; \
-	fi; \
-	echo $$SIM_ID
-
-_SIMULATOR_ID :=
-
-define find_simulator_id_once
-  $(if $(_SIMULATOR_ID),, \
-    $(eval _SIMULATOR_ID := $(shell $(FIND_SIM_CMD))))
-endef
-
-.PHONY: ensure-simulator-id
-ensure-simulator-id:
-	$(call find_simulator_id_once)
-	$(if $(_SIMULATOR_ID), \
-	    @echo "シミュレータIDを使用: $(_SIMULATOR_ID)", \
-	    $(error シミュレータIDが見つかりませんでした。FIND_SIM_CMD出力: $(shell $(FIND_SIM_CMD) 2>&1)))
-
-DESTINATION_SIMULATOR = "platform=watchOS Simulator,id=$(_SIMULATOR_ID)"
-
 .PHONY: all setup-mint codegen build-for-testing unit-test ui-test run-tests build-unsigned-archive verify-archive lint format-check code-quality-check clean clean-derived-data help release-archive setup-signing export-ipa validate-ipa upload-ipa github-release release clean-release
 
 help: ## ヘルプメッセージを表示
@@ -82,27 +46,36 @@ codegen:
 $(DERIVED_DATA_PATH):
 	mkdir -p $(DERIVED_DATA_PATH)
 
-build-for-testing: $(DERIVED_DATA_PATH) ensure-simulator-id ## シミュレータでのテスト用にアプリをビルド
-	@echo ">>> テスト用にビルド中 (シミュレータID: $(_SIMULATOR_ID))"
+build-for-testing: $(DERIVED_DATA_PATH) ## シミュレータでのテスト用にアプリをビルド (環境変数 SIMULATOR_ID が必要)
+	@echo ">>> テスト用にビルド中 (シミュレータID: $$SIMULATOR_ID)"
+	@if [ -z "$$SIMULATOR_ID" ]; then \
+		echo "エラー: 環境変数 SIMULATOR_ID が設定されていません。例: make build-for-testing SIMULATOR_ID=YOUR_ID" >&2; \
+		exit 1; \
+	fi
 	set -o pipefail && $(XCODEBUILD) build-for-testing \
 		-project "$(PROJECT)" \
 		-scheme $(SCHEME_WATCH_APP) \
-		-destination $(DESTINATION_SIMULATOR) \
+		-destination platform=watchOS Simulator,id=$$SIMULATOR_ID \
 		-derivedDataPath "$(DERIVED_DATA_PATH)" \
 		-configuration $(CONFIGURATION_DEBUG) \
 		-skipMacroValidation \
 		CODE_SIGNING_ALLOWED=NO \
 	| $(XCBEAUTIFY)
+	$(MAKE) verify-archive
 
 $(UNIT_TEST_RESULTS_DIR):
 	mkdir -p $(UNIT_TEST_RESULTS_DIR)
 
-unit-test: build-for-testing ensure-simulator-id ## Unitテストを実行
-	@echo ">>> Unitテストを実行中 (シミュレータID: $(_SIMULATOR_ID))"
+unit-test: build-for-testing $(UNIT_TEST_RESULTS_DIR) ## Unitテストを実行 (環境変数 SIMULATOR_ID が必要)
+	@echo ">>> Unitテストを実行中 (シミュレータID: $$SIMULATOR_ID)"
+	@if [ -z "$$SIMULATOR_ID" ]; then \
+		echo "エラー: 環境変数 SIMULATOR_ID が設定されていません。例: make unit-test SIMULATOR_ID=YOUR_ID" >&2; \
+		exit 1; \
+	fi
 	set -o pipefail && $(XCODEBUILD) test-without-building \
 		-project "$(PROJECT)" \
 		-scheme $(SCHEME_UNIT_TESTS) \
-		-destination $(DESTINATION_SIMULATOR) \
+		-destination platform=watchOS Simulator,id=$$SIMULATOR_ID \
 		-derivedDataPath "$(DERIVED_DATA_PATH)" \
 		-enableCodeCoverage NO \
 		-resultBundlePath "$(UNIT_TEST_RESULTS_DIR)/TestResults.xcresult" \
@@ -117,12 +90,16 @@ unit-test: build-for-testing ensure-simulator-id ## Unitテストを実行
 $(UI_TEST_RESULTS_DIR):
 	mkdir -p $(UI_TEST_RESULTS_DIR)
 
-ui-test: build-for-testing ensure-simulator-id ## UIテストを実行
-	@echo ">>> UIテストを実行中 (シミュレータID: $(_SIMULATOR_ID))"
+ui-test: build-for-testing $(UI_TEST_RESULTS_DIR) ## UIテストを実行 (環境変数 SIMULATOR_ID が必要)
+	@echo ">>> UIテストを実行中 (シミュレータID: $$SIMULATOR_ID)"
+	@if [ -z "$$SIMULATOR_ID" ]; then \
+		echo "エラー: 環境変数 SIMULATOR_ID が設定されていません。例: make ui-test SIMULATOR_ID=YOUR_ID" >&2; \
+		exit 1; \
+	fi
 	set -o pipefail && $(XCODEBUILD) test-without-building \
 		-project "$(PROJECT)" \
 		-scheme $(SCHEME_UI_TESTS) \
-		-destination $(DESTINATION_SIMULATOR) \
+		-destination platform=watchOS Simulator,id=$$SIMULATOR_ID \
 		-derivedDataPath "$(DERIVED_DATA_PATH)" \
 		-enableCodeCoverage NO \
 		-resultBundlePath "$(UI_TEST_RESULTS_DIR)/TestResults.xcresult" \
