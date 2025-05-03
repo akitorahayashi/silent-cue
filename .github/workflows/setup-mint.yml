@@ -6,8 +6,6 @@ on:
 jobs:
   setup:
     runs-on: macos-latest
-    env:
-      MINT_PATH: ${{ github.workspace }}/.mint
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,7 +20,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-mint-packages
         with:
-          path: ${{ env.MINT_PATH }}
+          path: ~/.mint
           key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
           restore-keys: |
             ${{ runner.os }}-mint-

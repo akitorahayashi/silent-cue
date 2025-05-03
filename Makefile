@@ -49,14 +49,21 @@ _SIMULATOR_ID :=
 # Target to find and cache the simulator ID if not already found
 .PHONY: ensure-simulator-id
 ensure-simulator-id:
-	$(if $(_SIMULATOR_ID),,\
-		@echo "Finding simulator ID..."; \
-		export _SIMULATOR_ID := $(shell $(FIND_SIM_CMD)); \
-		$(if $(_SIMULATOR_ID),@echo "Using Simulator ID: $(_SIMULATOR_ID)",$(error Could not find simulator ID. FIND_SIM_CMD output: $(shell $(FIND_SIM_CMD) 2>&1)))
-	)
+ifndef _SIMULATOR_ID
+	@echo "Finding simulator ID..."
+	@export FOUND_SIM_ID=$(shell $(FIND_SIM_CMD)); \
+	if [ -z "$$FOUND_SIM_ID" ]; then \
+		echo "Error: Could not find simulator ID. FIND_SIM_CMD output: $(shell $(FIND_SIM_CMD) 2>&1)" >&2; \
+		exit 1; \
+	else \
+		echo "Using Simulator ID: $$FOUND_SIM_ID"; \
+		$(eval _SIMULATOR_ID := $$FOUND_SIM_ID); \
+	fi
+endif
 
 # Define destination using the potentially cached simulator ID
-DESTINATION_SIMULATOR := "platform=watchOS Simulator,id=$(_SIMULATOR_ID)"
+# Use recursive assignment (=) here so it gets the value of _SIMULATOR_ID *when used*
+DESTINATION_SIMULATOR = "platform=watchOS Simulator,id=$(_SIMULATOR_ID)"
 
 .PHONY: all setup-mint codegen build-for-testing unit-test ui-test run-tests build-unsigned-archive verify-archive lint format-check code-quality-check clean clean-derived-data help release-archive setup-signing export-ipa validate-ipa upload-ipa github-release release clean-release
 
