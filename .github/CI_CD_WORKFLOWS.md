@@ -3,11 +3,10 @@
 ## ファイル構成
 
 - **`Makefile`**: ビルド、テスト、アーカイブ、コード品質チェックなど、主要なCI/CDステップのコマンドを定義・集約します。ワークフローやローカル環境から `make <ターゲット名>` 形式で呼び出されます
-- **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインで、Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行します
-- **`run-tests.yml`**: `Makefile` のテスト関連ターゲット (`make test` など) を呼び出し、アプリのビルドとテスト（ユニット・UI）を実行します
+- **`ci-cd-pipeline.yml`**: メインとなる統合CI/CDパイプラインで、Pull Request作成時やmainブランチへのプッシュ時にトリガーされ、後述の他のワークフローを順次実行したり、一部ステップを直接実行します
+- **`run-tests.yml`**: `Makefile` のテスト関連ターゲット (`make unit-test`, `make ui-test`) を呼び出し、アプリのビルドとテスト（ユニット・UI）を実行します
 - **`setup-mint.yml`**: Mintをセットアップし、キャッシュします
-- **`build-unsigned-archive.yml`**: `make archive`を呼び出し、署名なしのアーカイブ（.xcarchive）を作成します
-- **`code-quality.yml`**: `make quality` を呼び出し、SwiftFormat, SwiftLintを実行します
+- **`build-unsigned-archive.yml`**: `make build-unsigned-archive`を呼び出し、署名なしのアーカイブ（.xcarchive）を作成します
 - **`test-reporter.yml`**: テスト結果のレポートを作成し、PRにコメントします
 - **`copilot-review.yml`**: GitHub CopilotによるPRレビューを自動化します
 - **`release.yml`**: vX.Y.Z 形式のタグプッシュ時にトリガーされ、アプリのビルド、署名、App Store Connectへのアップロード、GitHub Releaseの作成とIPA添付を行います
@@ -15,21 +14,22 @@
 ## CIの特徴
 
 ### ワークフローの分割とMakefileによる集約
-メインの`ci-cd-pipeline.yml`が、テスト、コード品質チェック、アーカイブビルドなどの個別の再利用可能ワークフローを呼び出す構造は維持されます。
-コアなビルド・テスト・アーカイブ処理の**コマンド自体**は `Makefile` にターゲットとして集約され、各ワークフロー (`run-tests.yml`, `build-unsigned-archive.yml` など) は対応する `make <ターゲット名>` コマンドを呼び出すシンプルな形になりました。
+メインの`ci-cd-pipeline.yml`が、テスト (`run-tests.yml`) やアーカイブビルド (`build-unsigned-archive.yml`) など、比較的複雑な処理をまとめた個別の再利用可能ワークフローを呼び出す構造になっています。
+一方で、コード品質チェックのようなシンプルな処理は `ci-cd-pipeline.yml` 内で直接 `make code-quality-check` を実行します。
+コアなビルド・テスト・アーカイブ処理の**コマンド自体**は `Makefile` にターゲットとして集約され、ワークフローは対応する `make <ターゲット名>` コマンドを呼び出す形になっています。
 
 ### 包括的なビルドプロセスの検証
 Pull Requestや`main`ブランチへのプッシュ時に、以下の自動チェックを実行します (実処理は `make` 経由で実行):
-- コードフォーマット (SwiftFormat) と静的解析 (SwiftLint) (`make quality`)
-- UnitテストとUIテスト、およびそれらの結果（xcresult）の検証 (`make test`)
-- リリース設定でのアーカイブビルドと結果の検証 (`make archive`) (`main`ブランチプッシュ時)
+- コードフォーマット (SwiftFormat) と静的解析 (SwiftLint) (`make code-quality-check`)
+- UnitテストとUIテスト、およびそれらの結果（xcresult）の検証 (`make run-tests` または個別の `make unit-test`, `make ui-test`)
+- リリース設定でのアーカイブビルドと結果の検証 (`make build-unsigned-archive`)
 
 ### Pull Request に自動でレビュー
 Pull Requestに対して、テスト結果のレポート、GitHub Copilotによる自動レビューリクエスト、パイプライン全体の完了ステータス通知を行います。
 
 ### 成果物管理
 - 成果物管理: ビルドやテストの成果物はGitHub Artifactsとしてアップロード・管理されます。
-- 出力先を統一: 全てのビルド・テスト関連の成果物は、一貫して `ci-outputs/` ディレクトリ以下に出力されます 
+- 出力先を統一: 全てのビルド・テスト関連の成果物は、一貫して `ci-outputs/` ディレクトリ以下に出力されます
 
 ### リリース機能
 `vX.Y.Z`形式のタグがプッシュされると、`release.yml`ワークフローが自動的にトリガーされ、以下の処理を実行します
@@ -48,11 +48,11 @@ CIで実行される主要なステップは `Makefile` にターゲットとし
 - **トリガー**: `main`/`master`へのPush、`main`/`master`ターゲットのPR、手動実行
 - **処理**:
     1.  Mint依存関係セットアップ (`setup-mint.yml`)
-    2.  コード品質チェック (`code-quality.yml` -> `make quality`)
-    3.  ビルドとテスト実行 (`run-tests.yml` -> `make test`)
+    2.  コード品質チェック (直接 `make code-quality-check` を実行)
+    3.  ビルドとテスト実行 (`run-tests.yml` -> `make unit-test`, `make ui-test`)
     4.  テスト結果レポート (PR時, `test-reporter.yml`)
     5.  Copilotレビュー依頼 (PR時, `copilot-review.yml`)
-    6.  アーカイブビルド検証 (`main` Push時, `build-unsigned-archive.yml` -> `make archive`)
+    6.  アーカイブビルド検証 (`build-unsigned-archive.yml` -> `make build-unsigned-archive`)
     7.  パイプライン完了ステータス通知 (PR時)
 
 ### `setup-mint.yml` (Mint依存関係セットアップ)
@@ -69,7 +69,7 @@ CIで実行される主要なステップは `Makefile` にターゲットとし
 
 - **トリガー**: `ci-cd-pipeline.yml` から `workflow_call` で呼び出し
 - **処理**:
-    1.  Mintセットアップ、プロジェクト生成 (`make setup-mint codegen`)
+    1.  プロジェクト生成 (`make codegen`)
     2.  Xcodeセットアップ
     3.  Unitテスト実行 (`make unit-test`)
     4.  UIテスト実行 (`make ui-test`)
@@ -79,17 +79,10 @@ CIで実行される主要なステップは `Makefile` にターゲットとし
 
 - **トリガー**: `ci-cd-pipeline.yml` から `workflow_call` で呼び出し
 - **処理**:
-    1.  Mintセットアップ、プロジェクト生成 (`make setup-mint codegen`)
+    1.  プロジェクト生成 (`make codegen`)
     2.  Xcodeセットアップ
-    3.  アーカイブビルドと検証 (`make archive`)
+    3.  アーカイブビルドと検証 (`make build-unsigned-archive`)
     4.  `.xcarchive` をアーティファクト (`unsigned-archive`) としてアップロード
-
-### `code-quality.yml` (コード品質チェック)
-
-- **トリガー**: `ci-cd-pipeline.yml` から `workflow_call` で呼び出し
-- **処理**:
-    1.  Mintセットアップ (`brew install mint`)
-    2.  コード品質チェック実行 (`make quality`)
 
 ### `test-reporter.yml` (テスト結果レポート)
 
@@ -140,10 +133,10 @@ CIで実行される主要なステップは `Makefile` にターゲットとし
 $ make help
 
 # コード品質チェック (SwiftLint + SwiftFormat --lint)
-$ make quality
+$ make code-quality-check
 
 # UnitテストとUIテストを実行 (必要ならビルドも実行される)
-$ make test
+$ make run-tests
 
 # Unitテストのみ実行
 $ make unit-test
@@ -152,7 +145,7 @@ $ make unit-test
 $ make ui-test
 
 # 署名なしアーカイブを作成して検証
-$ make archive
+$ make build-unsigned-archive
 
 # Xcodeプロジェクト生成
 $ make codegen
@@ -165,7 +158,7 @@ $ make clean
 ```
 特定のシミュレータでテストを実行したい場合は、`SIMULATOR_ID` を指定できます。
 ```shell
-$ make test SIMULATOR_ID=YOUR_SIMULATOR_UDID
+$ make run-tests SIMULATOR_ID=YOUR_SIMULATOR_UDID
 ```
 
 ### 検証用ラッパースクリプトの利用
@@ -178,10 +171,10 @@ $ chmod +x .github/scripts/run-local-ci.sh
 ```
 
 ```shell
-# デフォルト: Unitテスト、UIテスト、アーカイブを実行 (make test && make archive 相当)
+# デフォルト: Unitテスト、UIテスト、アーカイブを実行 (make unit-test && make ui-test && make build-unsigned-archive 相当)
 $ ./.github/scripts/run-local-ci.sh
 
-# UnitテストとUIテストを実行 (make test 相当)
+# UnitテストとUIテストを実行 (make run-tests 相当)
 $ ./.github/scripts/run-local-ci.sh --all-tests
 
 # Unitテストのみを実行 (make unit-test 相当)
@@ -190,7 +183,7 @@ $ ./.github/scripts/run-local-ci.sh --unit-test
 # UIテストのみを実行 (make ui-test 相当)
 $ ./.github/scripts/run-local-ci.sh --ui-test
 
-# アーカイブのみを実行 (make archive 相当)
+# アーカイブのみを実行 (make build-unsigned-archive 相当)
 $ ./.github/scripts/run-local-ci.sh --archive-only
 ```
 **注意:** `--test-without-building` オプションは廃止されました。`Makefile` が自動的に依存関係を解決します。
@@ -198,12 +191,12 @@ $ ./.github/scripts/run-local-ci.sh --archive-only
 ## 技術仕様
 
 - **コマンド管理:** `Makefile`
-- Xcodeバージョン: 16.2 (Makefile内で指定)
+- Xcodeバージョン: 16.2 (Makefile内で指定, 各ワークフローで `setup-xcode` アクション使用)
 - テスト環境: watchOS シミュレータ (Makefile内で自動選択 or `SIMULATOR_ID` 指定)
-- 依存ツール管理: Mint (SwiftFormat, SwiftLint), Homebrew (xcbeautify, mint)
-- アーティファクト保持期間: ビルド関連 = 1日、テスト結果/アーカイブビルド = 7日
+- 依存ツール管理: Mint (SwiftFormat, SwiftLint, XCBeautify), Homebrew (mint)
+- アーティファクト保持期間: 7日 (`ci-cd-pipeline.yml`, `run-tests.yml`, `build-unsigned-archive.yml` 内で設定)
 - 出力先ディレクトリ: `ci-outputs/` (`Makefile` 内で定義)
   - `test-results/`: テストの結果 (`.xcresult`, `.xml`)
-  - `production/`: リリース用（署名なし）のアーカイブの結果
+  - `production/archives/`: 署名なしアーカイブの結果 (.xcarchive)
 
 

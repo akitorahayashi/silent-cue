@@ -117,9 +117,9 @@ if [ "$run_ui_tests" = true ]; then
 fi
 
 if [ "$run_archive" = true ]; then
-  step "Building Archive (make archive)"
-  make archive || fail "make archive failed."
-  success "Archive build completed."
+  step "Building Unsigned Archive (make build-unsigned-archive)"
+  make build-unsigned-archive || fail "make build-unsigned-archive failed."
+  success "Unsigned archive build completed."
 fi
 
 step "Local CI Check Completed Successfully!" 

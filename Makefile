@@ -55,7 +55,7 @@ help: ## ヘルプメッセージを表示
 	@echo "Targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
-all: quality test archive ## 品質チェック、テスト、アーカイブを実行
+all: code-quality-check run-tests build-unsigned-archive ## 品質チェック、テスト、アーカイブを実行
 
 # === Setup ===
 setup-mint: ## Mintをインストールし、依存関係をブートストラップ
@@ -123,14 +123,14 @@ ui-test: build-for-testing $(UI_TEST_RESULTS_DIR) ## UIテストを実行
 	@echo "✅ UI test result bundle found."
 
 
-test: unit-test ui-test ## 全てのテストを実行 (Unit と UI)
+run-tests: unit-test ui-test ## 全てのテストを実行 (Unit と UI)
 
 # === Archive ===
 
 $(ARCHIVE_OUTPUT_DIR):
 	mkdir -p $(ARCHIVE_OUTPUT_DIR)
 
-archive: $(ARCHIVE_OUTPUT_DIR) ## 署名なしのリリースアーカイブをビルド
+build-unsigned-archive: $(ARCHIVE_OUTPUT_DIR) ## 署名なしのリリースアーカイブをビルド (ci-outputs/production/archives)
 	@echo ">>> Building Unsigned Release Archive"
 	set -o pipefail && $(XCODEBUILD) archive \
 		-project "$(PROJECT)" \
@@ -177,7 +177,7 @@ format: ## SwiftFormatでフォーマットを適用
 	@echo ">>> Applying formatting with SwiftFormat"
 	$(MINT) run swiftformat .
 
-quality: lint format-check ## 全てのコード品質チェックを実行
+code-quality-check: lint format-check ## 全てのコード品質チェックを実行 (lint と format-check)
 
 # === Clean ===
 clean-derived-data: ## DerivedDataディレクトリを削除

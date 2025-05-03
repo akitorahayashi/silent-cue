@@ -17,9 +17,12 @@ jobs:
   code-quality:
     name: Code Quality Check
     needs: setup
-    uses: ./.github/workflows/code-quality.yml
-    permissions:
-      contents: read
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run Code Quality Checks
+        run: make code-quality-check
 
   build-and-test:
     name: Run Tests

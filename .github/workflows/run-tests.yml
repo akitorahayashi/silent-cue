@@ -18,20 +18,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Needed for format check diff
 
-      - name: Cache Mint packages # Keep cache for faster setup
-        uses: actions/cache@v4
-        id: cache-mint-packages
-        with:
-          path: ${{ github.workspace }}/.mint
-          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
-          restore-keys: |
-            ${{ runner.os }}-mint-
-
-      - name: Setup Mint and Generate Project
-        run: make setup-mint codegen
+      - name: Generate Project
+        run: make codegen
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1

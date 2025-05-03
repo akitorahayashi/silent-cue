@@ -10,17 +10,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Cache Mint packages
-        uses: actions/cache@v4
-        id: cache-mint-packages
-        with:
-          path: ${{ github.workspace }}/.mint
-          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
-          restore-keys: |
-            ${{ runner.os }}-mint-
-
-      - name: Setup Mint and Generate Project
-        run: make setup-mint codegen
+      - name: Generate Project
+        run: make codegen
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -28,7 +19,7 @@ jobs:
           xcode-version: '16.2'
 
       - name: Build Unsigned Archive
-        run: make archive
+        run: make build-unsigned-archive
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
