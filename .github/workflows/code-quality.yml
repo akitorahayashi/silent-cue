@@ -1,42 +1,35 @@
-name: Format and Lint
+name: Code Quality Checks
 
 on:
   workflow_call:
     outputs:
       result:
         description: "Check Result"
-        value: ${{ jobs.format-and-lint.outputs.result }}
+        value: ${{ jobs.check.outputs.result }}
 
 jobs:
-  format-and-lint:
+  check:
     runs-on: macos-latest
-    env:
-      MINT_PATH: ${{ github.workspace }}/.mint
-    outputs:
-      result: ${{ job.status }}
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Cache Mint packages
-      uses: actions/cache@v4
-      id: cache-mint-packages
-      with:
-        path: ${{ env.MINT_PATH }}
-        key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
-        restore-keys: |
-          ${{ runner.os }}-mint-
-    
-    - name: Install Mint
-      run: brew install mint
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Run SwiftFormat
-      run: mint run swiftformat .
+      - name: Cache Mint packages
+        uses: actions/cache@v4
+        id: cache-mint-packages
+        with:
+          path: ${{ github.workspace }}/.mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
 
-    - name: Run SwiftLint
-      run: mint run swiftlint --strict
+      - name: Setup Mint
+        run: brew install mint
 
-    - name: Check for formatting changes
-      id: check
-      run: git diff --exit-code
+      - name: Run Code Quality Checks
+        run: make quality
 
-    # Removed the Set result step, job status determines success/failure 
+    outputs:
+      result: ${{ job.status }} 
